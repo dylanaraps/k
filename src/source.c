@@ -8,6 +8,8 @@
 
 #include "find.h"
 #include "util.h"
+#include "mkdir.h"
+#include "kiss.h"
 #include "source.h"
 
 static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) {
@@ -42,6 +44,8 @@ int source_download(char *url) {
 
 int parse_sources(char *pkg) {
    char *sources = find_file(pkg, "sources");
+   char *src_dir = strjoin(SRC_DIR, pkg, "/");
+   char *dest, *source;
    FILE *file;
    size_t  lsiz=0;
    char*   lbuf=0;
@@ -60,16 +64,26 @@ int parse_sources(char *pkg) {
 
    while ((llen=getline(&lbuf, &lsiz, file)) > 0) {
        // Drop newlines.
-       if ((lbuf)[llen - 1] == '\n')
+       if ((lbuf)[llen - 1] == '\n') {
            (lbuf)[llen - 1] = '\0';
+       }
 
        // Skip comments and blank lines.
-       if ((lbuf)[0] == '#' || (lbuf)[0] == '\n')
+       if ((lbuf)[0] == '#' || (lbuf)[0] == '\n') {
            continue;
+       }
 
-       char *source = strtok(lbuf, " 	"); 
+       if (mkpath(src_dir) != 0) {
+           exit(1);
+       }
 
-       if (strncmp(source, "https://", 8) == 0 ||
+       source = strtok(lbuf, " 	"); 
+       dest   = strjoin(src_dir, basename(source), "/");
+
+       if (access(dest, F_OK) != -1) {
+           printf("Found cached source %s\n", dest);
+        
+       } else if (strncmp(source, "https://", 8) == 0 ||
            strncmp(source, "http://",  7) == 0) {
            printf("Downloading %s\n", source);
            source_download(source);

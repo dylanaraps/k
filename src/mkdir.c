@@ -28,20 +28,27 @@
  */
 #include <string.h>
 #include <sys/stat.h>
-#include <stdio.h>
 
 /*
  * mkpath -- create directories.
  *	path     - path
- *	mode     - file mode of terminal directory
- *	dir_mode - file mode of intermediate directories
  */
-int mkpath(char *path, mode_t mode, mode_t dir_mode) {
+int mkpath(char *path) {
+    mode_t mode, dir_mode; 
 	struct stat sb;
 	char *slash;
 	int done;
 
 	slash = path;
+
+    /*
+     * The default file mode is a=rwx (0777) with selected permissions
+     * removed in accordance with the file mode creation mask.  For
+     * intermediate path name components, the mode is the default modified
+     * by u+wx so that the subdirectories can always be created.
+     */
+	mode     = 0777 & ~umask(0);
+	dir_mode = mode | S_IWUSR | S_IXUSR;
 
 	for (;;) {
 		slash += strspn(slash, "/");
@@ -49,7 +56,6 @@ int mkpath(char *path, mode_t mode, mode_t dir_mode) {
 
 		done = (*slash == '\0');
 		*slash = '\0';
-        printf("%s\n", path);
 
 		if (mkdir(path, done ? mode : dir_mode) == 0) {
 			if (mode > 0777 && chmod(path, mode) == -1)
