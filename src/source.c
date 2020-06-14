@@ -43,9 +43,10 @@ int source_download(char *url) {
 }
 
 int parse_sources(char *pkg) {
-   char *sources = find_file(pkg, "sources");
-   char *src_dir = strjoin(SRC_DIR, pkg, "/");
-   char *dest, *source;
+   char *repo_dir = find_path(pkg); 
+   char *sources  = strjoin(repo_dir, "sources", "/");
+   char *src_dir  = strjoin(SRC_DIR, pkg, "/");
+   char *dest, *source, *local;
    FILE *file;
    size_t  lsiz=0;
    char*   lbuf=0;
@@ -79,6 +80,7 @@ int parse_sources(char *pkg) {
 
        source = strtok(lbuf, " 	"); 
        dest   = strjoin(src_dir, basename(source), "/");
+       local  = strjoin(repo_dir, source, "/");
 
        if (access(dest, F_OK) != -1) {
            printf("Found cached source %s\n", dest);
@@ -87,12 +89,24 @@ int parse_sources(char *pkg) {
            strncmp(source, "http://",  7) == 0) {
            printf("Downloading %s\n", source);
            source_download(source);
+
+       } else if (access(local, F_OK) != -1) {
+           printf("Found local source %s\n", local);
+
+       } else {
+           printf("No local file %s\n", local);
+           exit(1);
        }
 
        free(lbuf);
+       free(local);
+       free(dest);
        lbuf=NULL;
    }
 
+   free(src_dir);
+   free(repo_dir);
+   free(sources);
    fclose(file);
    return 0; 
 }

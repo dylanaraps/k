@@ -36,16 +36,3 @@ char *find_path(const char *pkg) {
 
     return NULL;
 }
-
-char *find_file(const char *pkg, char *file) {
-   char *repo_dir = find_path(pkg); 
-   char *path     = strjoin(repo_dir, file, "/");
-
-   if (access(path, F_OK) != -1) {
-       return path;
-   } else {
-       free(path);
-       return NULL;
-   }
-   
-}
