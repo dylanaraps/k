@@ -8,12 +8,14 @@ OBJ=\
 	src/find.o \
 	src/source.o \
 	src/util.o \
+	src/mkdir.o \
 	src/kiss.o
 
 HDR=\
 	src/find.h \
 	src/source.h \
 	src/util.h \
+	src/mkdir.h \
 	src/kiss.h
 
 .c.o:

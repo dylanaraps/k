@@ -6,8 +6,12 @@
 
 #include "find.h"
 #include "source.h"
+#include "util.h"
+#include "kiss.h"
 
 #define msg(...) fprintf(stderr, __VA_ARGS__);
+
+char *HOME, *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *LOG_DIR, *BIN_DIR;
 
 void args(int argc, char *argv[]) {
     if (argc == 1) {
@@ -41,6 +45,7 @@ void args(int argc, char *argv[]) {
 }
 
 int main (int argc, char *argv[]) {
+    cache_init();
     curl_global_init(CURL_GLOBAL_ALL);
     args(argc, argv);
 
