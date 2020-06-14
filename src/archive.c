@@ -1,4 +1,5 @@
 #include <archive.h>
+#include <archive_entry.h>
 #include <stdlib.h>
 
 #include "archive.h"

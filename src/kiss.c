@@ -4,7 +4,7 @@
 #include <string.h>
 #include <curl/curl.h>
 
-#include "find.h"
+#include "path.h"
 #include "source.h"
 #include "util.h"
 #include "kiss.h"
@@ -12,6 +12,7 @@
 #define msg(...) fprintf(stderr, __VA_ARGS__);
 
 char *HOME, *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *LOG_DIR, *BIN_DIR;
+char **KISS_PATH;
 
 void args(int argc, char *argv[]) {
     if (argc == 1) {
@@ -36,17 +37,22 @@ void args(int argc, char *argv[]) {
     }
 
     if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
-        parse_sources(argv[2]);
+        for (int i = 2; i < argc; i++) {
+            parse_sources(argv[i]);
+        }
     }
 
     if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
-        msg("%s\n", find_path(argv[2]));
+        /* msg("%s\n", find_path(argv[2])); */
     }
 }
 
 int main (int argc, char *argv[]) {
+    KISS_PATH = path_load();
+
     cache_init();
     curl_global_init(CURL_GLOBAL_ALL);
+
     args(argc, argv);
 
     return 0;

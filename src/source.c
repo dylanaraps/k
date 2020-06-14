@@ -6,7 +6,7 @@
 #include <string.h>
 #include <curl/curl.h>
 
-#include "find.h"
+#include "path.h"
 #include "util.h"
 #include "mkdir.h"
 #include "kiss.h"
@@ -43,7 +43,7 @@ int source_download(char *url) {
 }
 
 int parse_sources(char *pkg) {
-   char *repo_dir = find_path(pkg); 
+   char *repo_dir = path_find(pkg); 
    char *sources  = strjoin(repo_dir, "sources", "/");
    char *src_dir  = strjoin(SRC_DIR, pkg, "/");
    char *dest, *source, *local;

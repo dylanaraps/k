@@ -9,8 +9,12 @@
 #include "util.h"
 #include "kiss.h"
 
-char *strjoin(char *str, char *str2, char *delim) {
+char *strjoin(char *str, const char *str2, const char *delim) {
     char *join = malloc(strlen(str) + strlen(str2) + strlen(delim) + 1);
+
+    if (!join) {
+        return 0;
+    }
 
     strcpy(join, str);
     strcat(join, delim);
