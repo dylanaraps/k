@@ -15,15 +15,12 @@ static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) {
     return written;
 }
 
-int source_download(char *url, char *path) {
+int source_download(char *url) {
     CURL *curl = curl_easy_init();
     char *name = basename(url);
     FILE *file = fopen(name, "wb");
-    char *dest = strjoin(path, name, "/");
-    printf("%s\n", dest);
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, file_write);
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
@@ -62,10 +59,22 @@ int parse_sources(char *pkg) {
    }
 
    while ((llen=getline(&lbuf, &lsiz, file)) > 0) {
+       // Drop newlines.
+       if ((lbuf)[llen - 1] == '\n')
+           (lbuf)[llen - 1] = '\0';
+
+       // Skip comments and blank lines.
+       if ((lbuf)[0] == '#' || (lbuf)[0] == '\n')
+           continue;
+
        char *source = strtok(lbuf, " 	"); 
-       char *target = strtok(NULL, " 	"); 
-       printf("Downloading %s\n", source);
-       source_download(source, target);
+
+       if (strncmp(source, "https://", 8) == 0 ||
+           strncmp(source, "http://",  7) == 0) {
+           printf("Downloading %s\n", source);
+           source_download(source);
+       }
+
        free(lbuf);
        lbuf=NULL;
    }
