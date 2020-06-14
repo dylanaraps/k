@@ -1,7 +1,8 @@
 .POSIX:
 
 PREFIX=/usr/local
-ALL_CFLAGS=$(CFLAGS) -std=c99 -Wall -Wextra -Wpedantic
+ALL_CFLAGS=$(CFLAGS) -std=c99 -static -Wall -Wextra -Wpedantic
+ALL_LDFLAGS=$(LDFLAGS) -lcurl -lssl -lcrypto -lssl -lcrypto -lz
 
 OBJ=\
 	src/find.o \
@@ -14,10 +15,10 @@ HDR=\
 	src/kiss.c
 
 .c.o:
-	$(CC) $(ALL_CFLAGS) -c -o $@ $< -lcurl
+	$(CC) $(ALL_CFLAGS) -c -o $@ $< 
 
 kiss: $(OBJ)
-	$(CC) $(LDFLAGS) -o $@ $(OBJ) -lcurl
+	$(CC) -DCURL_STATICLIB $(ALL_CFLAGS) -o $@ $(OBJ) $(ALL_LDFLAGS) 
 
 $(OBJ): $(HDR)
 
