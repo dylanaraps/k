@@ -7,12 +7,14 @@ ALL_LDFLAGS=$(LDFLAGS) -lcurl -lssl -lcrypto -lssl -lcrypto -lz
 OBJ=\
 	src/find.o \
 	src/source.o \
+	src/util.o \
 	src/kiss.o
 
 HDR=\
 	src/find.h \
 	src/source.h \
-	src/kiss.c
+	src/util.h \
+	src/kiss.h
 
 .c.o:
 	$(CC) $(ALL_CFLAGS) -c -o $@ $< 

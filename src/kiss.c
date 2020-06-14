@@ -32,11 +32,11 @@ void args(int argc, char *argv[]) {
     }
 
     if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
-        source_download("https://zlib.net/zlib-1.2.11.tar.gz");
+        parse_sources(argv[2]);
     }
 
     if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
-        msg("%s\n", path_query(argv[2]));
+        msg("%s\n", find_path(argv[2]));
     }
 }
 

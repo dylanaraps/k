@@ -3,12 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
+#include "util.h"
 #include "find.h"
 
-char *path_query(const char *pkg) {
+char *find_path(const char *pkg) {
     char *path = getenv("KISS_PATH");
     char *repo = strtok(path, ":"); 
+    char *match;
     DIR  *d;
     struct dirent *dir;
 
@@ -20,10 +23,7 @@ char *path_query(const char *pkg) {
         while ((dir = readdir(d)) != NULL) {
             if (strcmp(pkg, dir->d_name) != 0) continue;
 
-            char *match = malloc(strlen(repo) + strlen(dir->d_name) + 2);
-            strcpy(match, repo);
-            strcat(match, "/");
-            strcat(match, dir->d_name);
+            match = strjoin(repo, dir->d_name, "/");
             closedir(d);
 
             // Remember to free this later.
@@ -35,4 +35,17 @@ char *path_query(const char *pkg) {
     }
 
     return NULL;
+}
+
+char *find_file(const char *pkg, char *file) {
+   char *repo_dir = find_path(pkg); 
+   char *path     = strjoin(repo_dir, file, "/");
+
+   if (access(path, F_OK) != -1) {
+       return path;
+   } else {
+       free(path);
+       return NULL;
+   }
+   
 }
