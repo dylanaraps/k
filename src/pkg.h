@@ -33,3 +33,4 @@ struct version pkg_version(char *repo_dir);
 void pkg_list(char *pkg_name);
 void pkg_sources(struct package pkg);
 void cache_init(void);
+void pkg_list_all(void);

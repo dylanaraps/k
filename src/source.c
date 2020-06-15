@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <curl/curl.h>
 
-#include "util.h"
 #include "source.h"
 
 static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) {
@@ -35,4 +34,3 @@ void source_download(char *url) {
     fclose(file);
     curl_easy_cleanup(curl);
 }
-

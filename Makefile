@@ -8,13 +8,11 @@ OBJ=\
 	src/pkg.o \
 	src/repo.o \
 	src/source.o \
-	src/util.o \
 	src/kiss.o
 
 HDR=\
 	src/repo.h \
 	src/source.h \
-	src/util.h \
 	src/pkg.h
 
 .c.o:

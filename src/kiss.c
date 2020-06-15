@@ -44,12 +44,15 @@ void args(int argc, char *argv[]) {
         }
 
     } else if (!strcmp(argv[1], "l") || !strcmp(argv[1], "list")) {
-        if (head) {
+        if (argc == 2) {
+           pkg_list_all(); 
+
+        } else {
             while (head) {
                 pkg_list(head->name);
                 head = head->next;
             }
-        } 
+        }
 
     } else if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
         while (head) {
