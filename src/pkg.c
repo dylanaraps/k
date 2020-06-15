@@ -133,3 +133,59 @@ void pkg_list(char *pkg_name) {
 
     chdir(PWD);
 }
+
+int pkg_sources(package pkg) {
+   char **repos = pkg_find(pkg.name); 
+   char *dest, *source;
+   FILE *file;
+   size_t  lsiz=0;
+   char*   lbuf=0;
+   ssize_t llen=0;
+
+   chdir(*repos);
+   file = fopen("sources", "r");
+
+   if (!file) {
+       printf("error: Sources file invalid\n");
+       exit(1);
+   }
+
+   while ((llen = getline(&lbuf, &lsiz, file)) > 0) {
+       // Skip comments and blank lines.
+       if ((lbuf)[0] == '#' || (lbuf)[0] == '\n') {
+           continue;
+       }
+
+       source = strtok(lbuf, " 	\n");
+       dest   = strtok(NULL, " 	\n");
+
+       /* if (mkpath(src_dir) != 0) { */
+       /*     printf("%s (%s)\n", pkg, "Couldn't create source directory"); */
+       /*     exit(1); */
+       /* } */
+
+       /* source = strtok(lbuf, " 	"); */ 
+       /* dest   = strjoin(src_dir, basename(source), "/"); */
+       /* local  = strjoin(repo_dir, source, "/"); */
+
+       printf("%s -> %s\n", source, dest);
+       /* if (access(dest, F_OK) != -1) { */
+       /*     printf("%s (Found cached source %s)\n", pkg, dest); */
+        
+       /* } else if (strncmp(source, "https://", 8) == 0 || */
+       /*            strncmp(source, "http://",  7) == 0) { */
+       /*     printf("%s (Downloading %s)\n", pkg, source); */
+       /*     source_download(source); */
+
+       /* } else if (access(local, F_OK) != -1) { */
+       /*     printf("%s (Found local source %s)\n", pkg, local); */
+
+       /* } else { */
+       /*     printf("%s (No local file %s)\n", local); */
+       /*     exit(1); */
+       /* } */
+   }
+
+   fclose(file);
+   return 0; 
+}

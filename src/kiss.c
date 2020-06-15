@@ -35,7 +35,10 @@ void args(int argc, char *argv[]) {
     }
 
     if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
-        //
+        while (head) {
+            pkg_sources(*head);
+            head = head->next;
+        }
 
     } else if (!strcmp(argv[1], "l") || !strcmp(argv[1], "list")) {
         if (head) {
