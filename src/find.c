@@ -9,10 +9,18 @@
 #include "pkg.h"
 
 char **pkg_find(char *pkg_name) {
-   char **paths = NULL;
-   int  n = 0;
-   char cwd[PATH_MAX];
    char **repos = REPOS;
+   char **paths;
+   char *pwd;
+   char cwd[PATH_MAX];
+   int n = 0;
+
+   paths = (char **) malloc(sizeof(char*) * 1);
+
+   if (*paths == NULL) {
+       printf("Failed to allocate memory\n");
+       exit(1);
+   }
 
    while (*repos) {
        if (chdir(*repos) != 0) {
@@ -21,21 +29,21 @@ char **pkg_find(char *pkg_name) {
        }
 
        if (chdir(pkg_name) == 0) {
-           paths = realloc(paths, sizeof(char*) * ++n);
+           pwd = getcwd(cwd, sizeof(cwd));
+           paths[n] = malloc(sizeof(char) * ((strlen(pwd) + 1)));
 
-           if (paths == NULL) {
+           if (paths[n] == NULL) {
                printf("Failed to allocate memory\n");
                exit(1);
            }
 
-           paths[n - 1] =  strdup(getcwd(cwd, sizeof(cwd)));
+           strcpy(paths[++n - 1], pwd);
        }
 
        ++repos;
    }
 
    chdir(PWD);
-   paths = realloc(paths, sizeof(char*) * (n + 1));
    paths[n] = 0;
 
    if (*paths) {
