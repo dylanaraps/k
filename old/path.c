@@ -10,32 +10,16 @@
 #include "kiss.h"
 
 char **path_load(void) {
-    char *path, *repo, **res;
-    int  n = 0;
+    char *path = getenv("KISS_PATH");
 
-    path = getenv("KISS_PATH");
-    path = strjoin(path, "/var/db/kiss/installed", ":");
-
-    if (!path || path[0] == '\0')
+    if (!path || path[0] == '\0') {
+        printf("KISS_PATH must be set.\n");
         exit(1);
-
-    res  = NULL;
-    repo = strtok(path, ":"); 
-
-    while (repo) {
-        res = realloc(res, sizeof(char*) * ++n);
-        
-        if (res == NULL)
-            exit(1);
-
-        res[n - 1] = repo;
-        repo = strtok(NULL, ":");
     }
 
-    res = realloc (res, sizeof(char*) * (n + 1));
-    res[n] = 0;
+    path = strjoin(path, "/var/db/kiss/installed", ":");
 
-    return res;
+    return str_to_array(path, ":");
 }
 
 char *path_find(char *pkg, int all) {
@@ -56,7 +40,6 @@ char *path_find(char *pkg, int all) {
                 printf("%s\n", match);
                 break;
             } else {
-
                 closedir(d);
                 return match;
             }
@@ -66,5 +49,10 @@ char *path_find(char *pkg, int all) {
         closedir(d);
     }
 
-    return *repo;
+    printf("%s (%s)\n", pkg, "Package not in any repository");
+
+    if (!all)
+        exit(1);
+
+    return NULL;
 }

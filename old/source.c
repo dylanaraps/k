@@ -73,6 +73,7 @@ int parse_sources(char *pkg) {
        }
 
        if (mkpath(src_dir) != 0) {
+           printf("%s (%s)\n", pkg, "Couldn't create source directory");
            exit(1);
        }
 
@@ -81,18 +82,18 @@ int parse_sources(char *pkg) {
        local  = strjoin(repo_dir, source, "/");
 
        if (access(dest, F_OK) != -1) {
-           printf("Found cached source %s\n", dest);
+           printf("%s (Found cached source %s)\n", pkg, dest);
         
        } else if (strncmp(source, "https://", 8) == 0 ||
            strncmp(source, "http://",  7) == 0) {
-           printf("Downloading %s\n", source);
+           printf("%s (Downloading %s)\n", pkg, source);
            source_download(source);
 
        } else if (access(local, F_OK) != -1) {
-           printf("Found local source %s\n", local);
+           printf("%s (Found local source %s)\n", pkg, local);
 
        } else {
-           printf("No local file %s\n", local);
+           printf("%s (No local file %s)\n", pkg, local);
            exit(1);
        }
 
