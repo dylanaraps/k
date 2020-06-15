@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,23 +17,18 @@ char **repo_load(void) {
     }
 
     tok = strtok(path, ":"); 
+    res = calloc(strlen(path) + 24, sizeof (char *));
 
-    while (tok) {
-        res = realloc(res, sizeof(char*) * ++n);
-        
-        if (res == NULL) {
-            printf("Failed to allocate memory\n");
-            exit(1);
-        }
-
-        res[n - 1] = tok;
-        tok = strtok(NULL, ":");
+    if (res == NULL) {
+        printf("Failed to allocate memory\n");
+        exit(1);
     }
 
-    res = realloc (res, sizeof(char*) * ++n);
-    res[n - 1] = "/var/db/kiss/installed";
-    res = realloc (res, sizeof(char*) * (n + 1));
-    res[n] = 0;
+    while (tok) {
+        res[++n - 1] = tok;
+        tok = strtok(NULL, ":");
+    }
+    res[n] = "/var/db/kiss/installed";
 
     return res;
 }

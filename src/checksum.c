@@ -91,7 +91,7 @@ char **pkg_checksums(package pkg) {
            source_file
        );
 
-       printf("%s\n", sbuf);
+       fprintf(stderr, "%s\n", sbuf);
 
        fclose(src);
        chdir(SRC_DIR);
