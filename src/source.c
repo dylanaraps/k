@@ -71,6 +71,7 @@ void pkg_sources(struct package pkg) {
        chdir(SRC_DIR);
    }
 
+   free(lbuf);
    fclose(file);
 }
 
