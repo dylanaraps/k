@@ -8,12 +8,14 @@
 #include <sys/stat.h>
 
 #include "sha.h"
+#include "checksum.h"
 #include "pkg.h"
 
-void pkg_checksums(package pkg) {
+char **pkg_checksums(package pkg) {
    char **repos = pkg_find(pkg.name); 
    FILE *file;
    char *lbuf = 0;
+   char **res = NULL;
    char *source;
    char *source_file;
    FILE *src;
@@ -21,7 +23,6 @@ void pkg_checksums(package pkg) {
    unsigned char shasum[32];
    sha256_context ctx;
    int i;
-   int j;
 
    chdir(*repos);
    file = fopen("sources", "r");
@@ -68,20 +69,34 @@ void pkg_checksums(package pkg) {
        }
 
        sha256_starts(&ctx);
-
        while ((i = fread(buf, 1, sizeof(buf), src)) > 0) {
            sha256_update(&ctx, buf, i );
        }
-
        sha256_finish(&ctx, shasum);
 
-       for(j = 0; j < 32; j++) {
-           printf("%02x", shasum[j] );
-       }
-       printf("  %s\n", source_file);
+       int buf_size = 65 * sizeof(int);
+       char buf[buf_size];
 
+       snprintf(buf, buf_size, "%02x%02x%02x%02x%02x%02x%02x\
+%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
+%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x  %s", 
+           shasum[0],  shasum[1],  shasum[2],  shasum[3],
+           shasum[4],  shasum[5],  shasum[6],  shasum[7],
+           shasum[8],  shasum[9],  shasum[10], shasum[11],
+           shasum[12], shasum[13], shasum[14], shasum[15],
+           shasum[16], shasum[17], shasum[18], shasum[19],
+           shasum[20], shasum[21], shasum[22], shasum[23],
+           shasum[24], shasum[25], shasum[26], shasum[27],
+           shasum[28], shasum[29], shasum[30], shasum[31],
+           source_file
+       );
+
+       printf("%s\n", buf);
+
+       fclose(src);
        chdir(SRC_DIR);
    }
 
    fclose(file);
+   return res;
 }
