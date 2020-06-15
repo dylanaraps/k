@@ -1,3 +1,6 @@
+#ifndef ARRAY_H_
+#define ARRAY_H_
+
 #include <limits.h>
 
 extern char **REPOS;
@@ -32,3 +35,5 @@ char **pkg_find(char *pkg_name);
 struct version pkg_version(char *repo_dir);
 void pkg_sources(struct package pkg);
 void cache_init(void);
+
+#endif
