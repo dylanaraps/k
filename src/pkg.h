@@ -8,7 +8,6 @@ struct version {
 
 struct source {
     char *url;
-    char *file;
     char *dest;
 };
 

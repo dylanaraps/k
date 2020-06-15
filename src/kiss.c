@@ -33,25 +33,17 @@ void args(int argc, char *argv[]) {
 
     if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
         while (head) {
-            while (*head->path != NULL) {
+            for (char *c = *head->path; c; c=*++head->path) {
                 printf("%s\n", *head->path);
-                ++head->path;
             }
 
             head = head->next;
         }
-    }
-    /* while (head) { */
-    /*     printf("%s\n", head->name); */
-    /*     printf("------------------------\n"); */
-    /*     printf("version: %s\n", head->version.version); */
-    /*     printf("release: %s\n", head->version.release); */
-    /*     printf("repository: %s\n", head->repository); */
-    /*     printf("path: %s\n", head->path); */
-    /*     printf("\n"); */
+        free(head);
 
-    /*     head = head->next; */
-    /* } */
+    } else if (!strcmp(argv[1], "v") || !strcmp(argv[1], "version")) {
+        printf("0.0.1\n");
+    }
 }
 
 int main (int argc, char *argv[]) {

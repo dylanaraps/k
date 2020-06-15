@@ -12,8 +12,7 @@ char **repo_load(void) {
         exit(1);
     }
 
-    // TODO: Append installed db.
-    /* path = strjoin(path, "/var/db/kiss/installed", ":"); */
+    path = join_string(path, "/var/db/kiss/installed", ":");
 
     return split_string(path, ":");
 }
