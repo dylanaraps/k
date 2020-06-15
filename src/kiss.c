@@ -33,7 +33,11 @@ void args(int argc, char *argv[]) {
 
     if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
         while (head) {
-            printf("%s\n", head->path);
+            while (*head->path != NULL) {
+                printf("%s\n", *head->path);
+                ++head->path;
+            }
+
             head = head->next;
         }
     }

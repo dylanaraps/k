@@ -19,9 +19,8 @@ void pkg_load(package **head, char *pkg_name) {
 
     new_pkg->next = NULL;
     new_pkg->name = pkg_name;
-    new_pkg->repository = pkg_find(pkg_name, REPOS);
-    new_pkg->path       = join_string(new_pkg->repository, pkg_name, "/");
-    new_pkg->version    = pkg_version(pkg_name, new_pkg->repository);
+    new_pkg->path = pkg_find(pkg_name, REPOS);
+    new_pkg->version = pkg_version(pkg_name, *new_pkg->path);
 
     if (*head == NULL) {
         new_pkg->prev = NULL;
@@ -40,15 +39,14 @@ void pkg_load(package **head, char *pkg_name) {
 
 struct version pkg_version(char *pkg_name, char *repo) {
     struct version version;
-    char *path;
+    char *path = NULL;
     char **split;
     FILE *file;
     size_t  lsiz=0;
     char*   lbuf=0;
     ssize_t llen=0;
         
-    path = join_string(repo, pkg_name, "/");
-    path = join_string(path, "version", "/");
+    path = join_string(repo, "version", "/");
     file = fopen(path, "r");
 
     if (file == NULL) {
@@ -86,7 +84,10 @@ struct version pkg_version(char *pkg_name, char *repo) {
     return version;    
 }
 
-char *pkg_find(char *pkg_name, char **repos) {
+char **pkg_find(char *pkg_name, char **repos) {
+   char **paths = NULL;
+   char *repo;
+   int  n = 0;
    DIR  *d;
    struct dirent *dir;
 
@@ -99,8 +100,15 @@ char *pkg_find(char *pkg_name, char **repos) {
 
        while ((dir = readdir(d)) != NULL) {
             if (strcmp(pkg_name, dir->d_name) == 0) {
-                closedir(d);
-                return *repos;
+                repo  = join_string(*repos, pkg_name, "/");
+                paths = realloc(paths, sizeof(char*) * ++n);
+
+                if (paths == NULL) {
+                    printf("Failed to allocate memory\n");
+                    exit(1);
+                }
+
+                paths[n - 1] = repo;
             }
        }
 
@@ -108,6 +116,14 @@ char *pkg_find(char *pkg_name, char **repos) {
        closedir(d);
    }
 
-   printf("error: %s not in any repository\n", pkg_name);
-   exit(1);
+   paths = realloc(paths, sizeof(char*) * (n + 1));
+   paths[n] = 0;
+
+   if (*paths) {
+       return paths;
+
+   } else {
+       printf("error: %s not in any repository\n", pkg_name);
+       exit(1);
+   }
 }
