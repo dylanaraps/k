@@ -97,6 +97,7 @@ char **pkg_checksums(package pkg) {
        chdir(SRC_DIR);
    }
 
+   free(lbuf);
    fclose(file);
    return res;
 }
