@@ -20,7 +20,7 @@ void pkg_load(package **head, char *pkg_name) {
 
     new_pkg->next = NULL;
     new_pkg->name = pkg_name;
-    new_pkg->path = pkg_find(pkg_name, REPOS);
+    new_pkg->path = pkg_find(pkg_name);
 
     if (!*head) {
         new_pkg->prev = NULL;
@@ -71,10 +71,11 @@ struct version pkg_version(char *repo_dir) {
     return version;
 }
 
-char **pkg_find(char *pkg_name, char **repos) {
+char **pkg_find(char *pkg_name) {
    char **paths = NULL;
    int  n = 0;
    char cwd[PATH_MAX];
+   char **repos = REPOS;
 
    while (*repos) {
        if (chdir(*repos) != 0) {

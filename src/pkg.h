@@ -25,6 +25,6 @@ typedef struct package {
 } package;
 
 void pkg_load(package **head, char *pkg_name);
-char **pkg_find(char *pkg_name, char **repos);
+char **pkg_find(char *pkg_name);
 struct version pkg_version(char *repo_dir);
 void pkg_list(char *pkg_name);
