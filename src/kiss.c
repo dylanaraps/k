@@ -43,9 +43,7 @@ void args(int argc, char *argv[]) {
                 pkg_list(head->name);
                 head = head->next;
             }
-        } else {
-
-        }
+        } 
 
     } else if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
         while (head) {

@@ -86,35 +86,26 @@ struct version pkg_version(char *repo_dir) {
 char **pkg_find(char *pkg_name, char **repos) {
    char **paths = NULL;
    int  n = 0;
-   DIR  *d;
-   struct dirent *dir;
    char cwd[PATH_MAX];
 
    while (*repos) {
-       d = opendir(*repos);
-       chdir(*repos);
-
-       if (!d) {
-           continue;
+       if (chdir(*repos) != 0) {
+           printf("error: Repository not accessible\n");       
+           exit(1);
        }
 
-       while ((dir = readdir(d)) != NULL) {
-            if (strcmp(pkg_name, dir->d_name) == 0) {
-                chdir(pkg_name);
-                paths = realloc(paths, sizeof(char*) * ++n);
+       if (chdir(pkg_name) == 0) {
+           paths = realloc(paths, sizeof(char*) * ++n);
 
-                if (paths == NULL) {
-                    printf("Failed to allocate memory\n");
-                    exit(1);
-                }
+           if (paths == NULL) {
+               printf("Failed to allocate memory\n");
+               exit(1);
+           }
 
-                paths[n - 1] = getcwd(cwd, sizeof(cwd));
-                chdir("..");
-            }
+           paths[n - 1] =  strdup(getcwd(cwd, sizeof(cwd)));
        }
 
        ++repos;
-       closedir(d);
    }
 
    chdir(PWD);
@@ -134,25 +125,22 @@ void pkg_list(char *pkg_name) {
     struct version version;
     char *db = "/var/db/kiss/installed"; 
     char *path;
-    DIR  *d;
-    struct dirent *dir;
+    char cwd[PATH_MAX];
 
-    d = opendir(db);
-
-    if (!d) {
-        printf("error: No packages installed\n");
+    if (chdir(db) != 0) {
+        printf("error: Package db not accessible\n");
         exit(1);
     }
 
-    while ((dir = readdir(d))) {
-        if (pkg_name != NULL && strcmp(pkg_name, dir->d_name) == 0) {
-            path = join_string(db, pkg_name, "/");
-            version = pkg_version(path);
-            printf("%s %s %s\n", pkg_name, version.version, version.release);
-            goto done;
-        }
+    if (chdir(pkg_name) != 0) {
+        printf("error: Package %s not installed\n", pkg_name);
+        exit(1);
+
+    } else {
+        path = getcwd(cwd, sizeof(cwd)); 
+        version = pkg_version(path);
+        printf("%s %s %s\n", pkg_name, version.version, version.release);
     }
 
-done:
-    closedir(d);
+    chdir(PWD);
 }
