@@ -15,7 +15,7 @@ static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) {
 }
 
 void pkg_sources(struct package pkg) {
-   char **repos = pkg_find(pkg.name); 
+   char **repos = pkg.path; 
    FILE *file;
    char *lbuf = 0;
    char *source;

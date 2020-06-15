@@ -12,7 +12,7 @@
 #include "pkg.h"
 
 char **pkg_checksums(package pkg) {
-   char **repos = pkg_find(pkg.name); 
+   char **repos = pkg.path; 
    FILE *file;
    char *lbuf = 0;
    char **res = NULL;

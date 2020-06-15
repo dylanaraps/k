@@ -17,11 +17,6 @@ char **pkg_find(char *pkg_name) {
 
    paths = (char **) malloc(sizeof(char*) * 1);
 
-   if (*paths == NULL) {
-       printf("Failed to allocate memory\n");
-       exit(1);
-   }
-
    while (*repos) {
        if (chdir(*repos) != 0) {
            printf("error: Repository not accessible\n");       
