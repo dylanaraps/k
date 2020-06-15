@@ -31,24 +31,22 @@ void args(int argc, char *argv[]) {
         pkg_load(&head, argv[i]);
     }
 
-    while (head) {
-        printf("%s\n", head->repository);
-        head = head->next;
+    if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
+        while (head) {
+            printf("%s\n", head->path);
+            head = head->next;
+        }
     }
+    /* while (head) { */
+    /*     printf("%s\n", head->name); */
+    /*     printf("------------------------\n"); */
+    /*     printf("version: %s\n", head->version.version); */
+    /*     printf("release: %s\n", head->version.release); */
+    /*     printf("repository: %s\n", head->repository); */
+    /*     printf("path: %s\n", head->path); */
+    /*     printf("\n"); */
 
-    /* if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) { */
-
-
-    /* } else if (!strcmp(argv[1], "l") || !strcmp(argv[1], "list")) { */
-
-
-    /* } else if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) { */
-    /*     for (int i = 2; i < argc; i++) { */
-    /*         /1* path_find(argv[i], 1); *1/ */
-    /*     } */
-
-    /* } else if (!strcmp(argv[1], "v") || !strcmp(argv[1], "version")) { */
-    /*     printf("3.0.3\n"); */
+    /*     head = head->next; */
     /* } */
 }
 
