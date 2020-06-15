@@ -38,10 +38,9 @@ void pkg_load(package **head, char *pkg_name) {
 
 
 struct version pkg_version(char *repo_dir) {
-    char **split;
+    struct version version = {0};
     FILE *file;
-    char*   lbuf=0;
-    ssize_t llen=0;
+    char *buf = 0;
 
     chdir(repo_dir);
     file = fopen("version", "r");
@@ -51,36 +50,25 @@ struct version pkg_version(char *repo_dir) {
         exit(1);
     }
 
-    llen = getline(&lbuf, &(size_t){0}, file);
+    getline(&buf, &(size_t){0}, file);
     fclose(file);
 
-    if (!lbuf) {
-        printf("error: version file is empty\n");
+    if (!buf) {
+        printf("error: version file is incorrect\n");
         exit(1);
     }
 
-    if ((lbuf)[llen - 1] == '\n') {
-        (lbuf)[llen - 1] = '\0';
-    }
+    version.version = strtok(buf,    " 	\n");
+    version.release = strtok(NULL,   " 	\n");
 
-    split = split_string(lbuf, " ");
-
-    if (!split[0]) {
-        printf("error: version file empty\n");
-        exit(1);
-    }
-
-    if (!split[1]) {
+    if (!version.release) {
         printf("error: release field missing\n");
         exit(1);
     }
 
     chdir(PWD);
 
-    return (struct version) {
-        .version = split[0],
-        .release = split[1],
-    };
+    return version;
 }
 
 char **pkg_find(char *pkg_name, char **repos) {
