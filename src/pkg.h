@@ -2,6 +2,9 @@
 
 extern char **REPOS;
 extern char PWD[PATH_MAX];
+extern char *HOME;
+extern char *XDG_CACHE_HOME;
+extern char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *LOG_DIR, *BIN_DIR;
 
 struct version {
     char *version;
@@ -29,3 +32,4 @@ char **pkg_find(char *pkg_name);
 struct version pkg_version(char *repo_dir);
 void pkg_list(char *pkg_name);
 int pkg_sources(struct package pkg);
+void cache_init(void);

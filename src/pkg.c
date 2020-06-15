@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
+#include <sys/stat.h>
 
 #include "util.h"
 #include "pkg.h"
@@ -138,9 +139,7 @@ int pkg_sources(package pkg) {
    char **repos = pkg_find(pkg.name); 
    char *dest, *source;
    FILE *file;
-   size_t  lsiz=0;
    char*   lbuf=0;
-   ssize_t llen=0;
 
    chdir(*repos);
    file = fopen("sources", "r");
@@ -150,7 +149,7 @@ int pkg_sources(package pkg) {
        exit(1);
    }
 
-   while ((llen = getline(&lbuf, &lsiz, file)) > 0) {
+   while ((getline(&lbuf, &(size_t){0}, file)) > 0) {
        // Skip comments and blank lines.
        if ((lbuf)[0] == '#' || (lbuf)[0] == '\n') {
            continue;
@@ -188,4 +187,84 @@ int pkg_sources(package pkg) {
 
    fclose(file);
    return 0; 
+}
+
+void cache_init(void) {
+    HOME      = getenv("HOME");
+    CAC_DIR   = getenv("XDG_CACHE_HOME");
+    char cwd[PATH_MAX];
+
+    if (!HOME || HOME[0] == '\0') {
+        printf("HOME directory is NULL\n");
+        exit(1);
+    }
+
+    if (!CAC_DIR || CAC_DIR[0] == '\0') {
+        chdir(HOME);
+
+        mkdir(".cache", 0777);
+
+        if (chdir(".cache") != 0) {
+            goto err;
+        }
+        
+        CAC_DIR = strdup(getcwd(cwd, sizeof(cwd)));
+    }
+
+    mkdir(CAC_DIR, 0777);
+
+    if (chdir(CAC_DIR) != 0) {
+        goto err;
+    }
+
+    mkdir("kiss", 0777);
+
+    if (chdir("kiss") != 0) {
+        goto err;
+    }
+
+    CAC_DIR = strdup(getcwd(cwd, sizeof(cwd)));
+
+    mkdir("build", 0777);
+    mkdir("pkg", 0777);
+    mkdir("extract", 0777);
+    mkdir("sources", 0777);
+    mkdir("logs", 0777);  
+
+    if (chdir("build") != 0) {
+        goto err;
+    }
+    MAK_DIR = strdup(getcwd(cwd, sizeof(cwd)));
+
+    if (chdir("../pkg") != 0) {
+        goto err;
+    }
+    PKG_DIR = strdup(getcwd(cwd, sizeof(cwd)));
+
+    if (chdir("../extract") != 0) {
+        goto err;
+    }
+    TAR_DIR = strdup(getcwd(cwd, sizeof(cwd)));
+
+    if (chdir("../sources") != 0) {
+        goto err;
+    }
+    SRC_DIR = strdup(getcwd(cwd, sizeof(cwd)));
+
+    if (chdir("../logs") != 0) {
+        goto err;
+    }
+    LOG_DIR = strdup(getcwd(cwd, sizeof(cwd)));
+
+    if (chdir("../bin") != 0) {
+        goto err;
+    }
+    BIN_DIR = strdup(getcwd(cwd, sizeof(cwd)));
+
+    chdir(PWD);
+    return;
+
+err:
+    printf("%s\n", "Failed to create cache directory\n");
+    exit(1);
 }

@@ -5,14 +5,12 @@ ALL_CFLAGS=$(CFLAGS) -std=c99 -static -Wall -Wextra -Wpedantic
 # ALL_LDFLAGS=$(LDFLAGS) -larchive -llzma -lbz2 -lcurl -lssl -lcrypto -lcrypto -lz
 
 OBJ=\
-	src/mkdir.o \
 	src/pkg.o \
 	src/repo.o \
 	src/util.o \
 	src/kiss.o
 
 HDR=\
-	src/mkdir.h \
 	src/repo.h \
 	src/util.h \
 	src/pkg.h

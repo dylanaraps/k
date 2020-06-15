@@ -10,6 +10,9 @@
 
 char **REPOS = NULL;
 char PWD[PATH_MAX];
+char *HOME;
+char *XDG_CACHE_HOME;
+char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *LOG_DIR, *BIN_DIR;
 
 void args(int argc, char *argv[]) {
     package *head = NULL;
@@ -66,6 +69,7 @@ void args(int argc, char *argv[]) {
 
 int main (int argc, char *argv[]) {
     getcwd(PWD, sizeof(PWD));
+    cache_init();
     REPOS = repo_load();
     args(argc, argv);
     return 0;
