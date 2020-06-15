@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <unistd.h>
 
+#include "checksum.h"
 #include "repo.h"
 #include "list.h"
 #include "pkg.h"
@@ -41,6 +42,7 @@ void args(int argc, char *argv[]) {
     if (!strcmp(argv[1], "c") || !strcmp(argv[1], "checksum")) {
         while (head) {
             pkg_sources(*head);
+            pkg_checksums(*head);
             head = head->next;
         }
 

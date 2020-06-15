@@ -5,18 +5,22 @@ ALL_CFLAGS=$(CFLAGS) -std=c99 -static -Wall -Wextra -Wpedantic
 ALL_LDFLAGS=$(LDFLAGS) -larchive -llzma -lbz2 -lcurl -lssl -lcrypto -lcrypto -lz
 
 OBJ=\
+	src/checksum.o \
 	src/find.o \
 	src/list.o \
 	src/repo.o \
+	src/sha.o \
 	src/source.o \
 	src/version.o \
 	src/pkg.o \
 	src/kiss.o
 
 HDR=\
+	src/checksum.h \
 	src/find.h \
 	src/list.h \
 	src/repo.h \
+	src/sha.h \
 	src/source.h \
 	src/version.h \
 	src/pkg.h
