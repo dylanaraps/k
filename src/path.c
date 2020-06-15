@@ -14,6 +14,7 @@ char **path_load(void) {
     int  n = 0;
 
     path = getenv("KISS_PATH");
+    path = strjoin(path, "/var/db/kiss/installed", ":");
 
     if (!path || path[0] == '\0')
         exit(1);
@@ -57,4 +58,24 @@ char *path_find(char *pkg) {
     }
 
     return *repo;
+}
+
+void path_find_all(char *pkg) {
+   char **repo = KISS_PATH; 
+   DIR *d;
+   struct dirent *dir;
+
+   while (*repo != 0) {
+       if (!(d = opendir(*repo))) continue;
+
+       while ((dir = readdir(d)) != NULL) {
+           if (strcmp(pkg, dir->d_name) == 0) {
+               printf("%s\n", strjoin(*repo, dir->d_name, "/"));
+               break;
+           }
+       }
+
+       ++repo;
+       closedir(d);
+   }
 }

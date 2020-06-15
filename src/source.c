@@ -26,17 +26,15 @@ int source_download(char *url) {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, file_write);
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
-    if (file) {
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
-
-        if (curl_easy_perform(curl) != 0) {
-            remove(name);
-            fclose(file);
-            curl_easy_cleanup(curl);
-            return 1;
-        }
+    if (!file) {
+        goto done;
     }
 
+    if (curl_easy_setopt(curl, CURLOPT_WRITEDATA, file)) {
+        remove(name);
+    }
+
+done:
     fclose(file);
     curl_easy_cleanup(curl);
     return 0;
@@ -63,7 +61,7 @@ int parse_sources(char *pkg) {
        return 1;
    }
 
-   while ((llen=getline(&lbuf, &lsiz, file)) > 0) {
+   while ((llen = getline(&lbuf, &lsiz, file)) > 0) {
        // Drop newlines.
        if ((lbuf)[llen - 1] == '\n') {
            (lbuf)[llen - 1] = '\0';
@@ -98,15 +96,10 @@ int parse_sources(char *pkg) {
            exit(1);
        }
 
-       free(lbuf);
-       free(local);
        free(dest);
        lbuf=NULL;
    }
 
-   free(src_dir);
-   free(repo_dir);
-   free(sources);
    fclose(file);
    return 0; 
 }

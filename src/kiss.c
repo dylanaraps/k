@@ -43,7 +43,9 @@ void args(int argc, char *argv[]) {
     }
 
     if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
-        /* msg("%s\n", find_path(argv[2])); */
+        for (int i = 2; i < argc; i++) {
+            path_find_all(argv[i]);
+        }
     }
 }
 
