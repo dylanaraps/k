@@ -23,6 +23,7 @@ char **pkg_checksums(package pkg) {
    unsigned char shasum[32];
    sha256_context ctx;
    int i;
+   int sbuf_size;
 
    chdir(*repos);
    file = fopen("sources", "r");
@@ -74,10 +75,9 @@ char **pkg_checksums(package pkg) {
        }
        sha256_finish(&ctx, shasum);
 
-       int buf_size = 65 * sizeof(int);
-       char buf[buf_size];
-
-       snprintf(buf, buf_size, "%02x%02x%02x%02x%02x%02x%02x\
+       sbuf_size = 67 * sizeof(int) + strlen(source_file);
+       char sbuf[sbuf_size];
+       snprintf(sbuf, sbuf_size, "%02x%02x%02x%02x%02x%02x%02x\
 %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
 %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x  %s", 
            shasum[0],  shasum[1],  shasum[2],  shasum[3],
@@ -91,7 +91,7 @@ char **pkg_checksums(package pkg) {
            source_file
        );
 
-       printf("%s\n", buf);
+       printf("%s\n", sbuf);
 
        fclose(src);
        chdir(SRC_DIR);
