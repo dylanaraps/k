@@ -127,3 +127,30 @@ char **pkg_find(char *pkg_name, char **repos) {
        exit(1);
    }
 }
+
+void pkg_list(char *pkg_name) {
+    struct version version;
+    char *db = "/var/db/kiss/installed"; 
+    char *path;
+    DIR  *d;
+    struct dirent *dir;
+
+    d = opendir(db);
+
+    if (d == NULL) {
+        printf("error: No packages installed\n");
+        exit(1);
+    }
+
+    while ((dir = readdir(d)) != NULL) {
+        if (pkg_name != NULL && strcmp(pkg_name, dir->d_name) == 0) {
+            path = join_string(db, pkg_name, "/");
+            version = pkg_version(pkg_name, path);
+            printf("%s %s %s\n", pkg_name, version.version, version.release);
+            goto done;
+        }
+    }
+
+done:
+    closedir(d);
+}

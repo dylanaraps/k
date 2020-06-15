@@ -25,3 +25,4 @@ typedef struct package {
 void pkg_load(package **head, char *pkg_name);
 char **pkg_find(char *pkg_name, char **repos);
 struct version pkg_version(char *pkg_name, char *repo);
+void pkg_list(char *pkg_name);

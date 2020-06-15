@@ -31,7 +31,16 @@ void args(int argc, char *argv[]) {
         pkg_load(&head, argv[i]);
     }
 
-    if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
+    if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
+        //
+
+    } else if (!strcmp(argv[1], "l") || !strcmp(argv[1], "list")) {
+        while (head) {
+            pkg_list(head->name);
+            head = head->next;
+        }
+
+    } else if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
         while (head) {
             for (char *c = *head->path; c; c=*++head->path) {
                 printf("%s\n", *head->path);
@@ -39,11 +48,12 @@ void args(int argc, char *argv[]) {
 
             head = head->next;
         }
-        free(head);
 
     } else if (!strcmp(argv[1], "v") || !strcmp(argv[1], "version")) {
         printf("0.0.1\n");
     }
+
+    free(head);
 }
 
 int main (int argc, char *argv[]) {
