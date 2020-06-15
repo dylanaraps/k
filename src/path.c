@@ -38,8 +38,9 @@ char **path_load(void) {
     return res;
 }
 
-char *path_find(char *pkg) {
+char *path_find(char *pkg, int all) {
     char **repo = KISS_PATH;
+    char *match;
     DIR  *d;
     struct dirent *dir;
 
@@ -49,8 +50,16 @@ char *path_find(char *pkg) {
         while ((dir = readdir(d)) != NULL) {
             if (strcmp(pkg, dir->d_name) != 0) continue;
 
-            closedir(d);
-            return strjoin(*repo, dir->d_name, "/");
+            match = strjoin(*repo, dir->d_name, "/");
+
+            if (all) {
+                printf("%s\n", match);
+                break;
+            } else {
+
+                closedir(d);
+                return match;
+            }
         }
 
         ++repo;
@@ -58,24 +67,4 @@ char *path_find(char *pkg) {
     }
 
     return *repo;
-}
-
-void path_find_all(char *pkg) {
-   char **repo = KISS_PATH; 
-   DIR *d;
-   struct dirent *dir;
-
-   while (*repo != 0) {
-       if (!(d = opendir(*repo))) continue;
-
-       while ((dir = readdir(d)) != NULL) {
-           if (strcmp(pkg, dir->d_name) == 0) {
-               printf("%s\n", strjoin(*repo, dir->d_name, "/"));
-               break;
-           }
-       }
-
-       ++repo;
-       closedir(d);
-   }
 }

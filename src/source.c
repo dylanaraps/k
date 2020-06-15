@@ -41,7 +41,7 @@ done:
 }
 
 int parse_sources(char *pkg) {
-   char *repo_dir = path_find(pkg); 
+   char *repo_dir = path_find(pkg, 0); 
    char *sources  = strjoin(repo_dir, "sources", "/");
    char *src_dir  = strjoin(SRC_DIR, pkg, "/");
    char *dest, *source, *local;

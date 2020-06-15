@@ -31,21 +31,20 @@ void args(int argc, char *argv[]) {
         exit(0);
     }
 
-    if (argc == 2) {
-        msg("! kiss %s requires an argument\n", argv[1]);
-        exit(1);
-    }
-
     if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
         for (int i = 2; i < argc; i++) {
             parse_sources(argv[i]);
         }
-    }
 
-    if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
+    } else if (!strcmp(argv[1], "l") || !strcmp(argv[1], "list")) {
+
+    } else if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
         for (int i = 2; i < argc; i++) {
-            path_find_all(argv[i]);
+            path_find(argv[i], 1);
         }
+
+    } else if (!strcmp(argv[1], "v") || !strcmp(argv[1], "version")) {
+        msg("3.0.3\n");
     }
 }
 
