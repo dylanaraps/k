@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include "repo.h"
+#include "list.h"
 #include "pkg.h"
 
 char **REPOS = NULL;
@@ -37,7 +38,13 @@ void args(int argc, char *argv[]) {
         pkg_load(&head, argv[i]);
     }
 
-    if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
+    if (!strcmp(argv[1], "c") || !strcmp(argv[1], "checksum")) {
+        while (head) {
+            pkg_sources(*head);
+            head = head->next;
+        }
+
+    } else if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
         while (head) {
             pkg_sources(*head);
             head = head->next;

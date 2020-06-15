@@ -38,136 +38,67 @@ void pkg_load(package **head, char *pkg_name) {
     new_pkg->prev = last;
 }
 
+void pkg_sources(package pkg) {
+   char **repos = pkg_find(pkg.name); 
+   FILE *file;
+   char *lbuf = 0;
+   char *source;
+   char *source_file;
 
-struct version pkg_version(char *repo_dir) {
-    struct version version = {0};
-    FILE *file;
-    char *buf = 0;
+   chdir(*repos);
+   file = fopen("sources", "r");
+   
+   if (chdir(SRC_DIR) != 0) {
+       printf("error: Sources directory not accessible\n"); 
+       exit(1);
+   }
 
-    chdir(repo_dir);
-    file = fopen("version", "r");
+   if (!file) {
+       printf("error: Sources file invalid\n");
+       exit(1);
+   }
 
-    if (!file) {
-        printf("error: version file does not exist\n");
-        exit(1);
-    }
+   while ((getline(&lbuf, &(size_t){0}, file)) > 0) {
+       // Skip comments and blank lines.
+       if ((lbuf)[0] == '#' || (lbuf)[0] == '\n') {
+           continue;
+       }
 
-    getline(&buf, &(size_t){0}, file);
-    fclose(file);
+       source      = strtok(lbuf, " 	\n");
+       source_file = basename(source);
 
-    if (!buf) {
-        printf("error: version file is incorrect\n");
-        exit(1);
-    }
+       mkdir(pkg.name, 0777);
 
-    version.version = strtok(buf,    " 	\n");
-    version.release = strtok(NULL,   " 	\n");
-
-    if (!version.release) {
-        printf("error: release field missing\n");
-        exit(1);
-    }
-
-    chdir(PWD);
-
-    return version;
-}
-
-char **pkg_find(char *pkg_name) {
-   char **paths = NULL;
-   int  n = 0;
-   char cwd[PATH_MAX];
-   char **repos = REPOS;
-
-   while (*repos) {
-       if (chdir(*repos) != 0) {
-           printf("error: Repository not accessible\n");       
+       if (chdir(pkg.name) != 0) {
+           printf("error: Sources directory not accessible\n");
            exit(1);
        }
 
-       if (chdir(pkg_name) == 0) {
-           paths = realloc(paths, sizeof(char*) * ++n);
+       if (access(source_file, F_OK) != -1) {
+           printf("%s (Found cached source %s)\n", pkg.name, source_file);
+        
+       } else if (strncmp(source, "https://", 8) == 0 ||
+                  strncmp(source, "http://",  7) == 0) {
+           printf("%s (Downloading %s)\n", pkg.name, source);
+           source_download(source);
 
-           if (paths == NULL) {
-               printf("Failed to allocate memory\n");
-               exit(1);
-           }
+       } else if (chdir(*repos) == 0 && 
+                  chdir(dirname(source)) == 0 && 
+                  access(source_file, F_OK) != -1) {
+           printf("%s (Found local source %s)\n", pkg.name, source_file);
 
-           paths[n - 1] =  strdup(getcwd(cwd, sizeof(cwd)));
+       } else {
+           printf("error: No local file %s\n", source);
+           exit(1);
        }
 
-       ++repos;
+       chdir(SRC_DIR);
    }
 
-   chdir(PWD);
-   paths = realloc(paths, sizeof(char*) * (n + 1));
-   paths[n] = 0;
-
-   if (*paths) {
-       return paths;
-
-   } else {
-       printf("error: %s not in any repository\n", pkg_name);
-       exit(1);
-   }
+   fclose(file);
 }
 
-void pkg_list(char *pkg_name) {
-    struct version version;
-    char *db = "/var/db/kiss/installed"; 
-    char *path;
-    char cwd[PATH_MAX];
-
-    if (chdir(db) != 0) {
-        printf("error: Package db not accessible\n");
-        exit(1);
-    }
-
-    if (chdir(pkg_name) != 0) {
-        printf("error: Package %s not installed\n", pkg_name);
-        exit(1);
-
-    } else {
-        path = getcwd(cwd, sizeof(cwd)); 
-        version = pkg_version(path);
-        printf("%s %s %s\n", pkg_name, version.version, version.release);
-    }
-
-    chdir(PWD);
-}
-
-void pkg_list_all(void) {
-    struct version version;
-    struct dirent  **list;
-    int tot;
-    char db[] = "/var/db/kiss/installed";
-
-    if (chdir(db) != 0) {
-        printf("error: Failed to access package db\n");
-        exit(1);
-    }
-
-    tot = scandir(".", &list, NULL, alphasort);
-
-    if (tot == -1) {
-        printf("error: Failed to access package db\n");
-        exit(1);
-    }
-
-    // '2' skips '.'/'..'.
-    for (int i = 2; i < tot; i++) {
-        if (chdir(list[i]->d_name) == 0) {
-            version = pkg_version(list[i]->d_name);    
-
-            printf("%s %s %s\n", list[i]->d_name, \
-                    version.version, version.release);
-        }
-
-        chdir(db);
-    }
-}
-
-void pkg_sources(package pkg) {
+void pkg_checksums(package pkg) {
    char **repos = pkg_find(pkg.name); 
    FILE *file;
    char *lbuf = 0;
