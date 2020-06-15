@@ -4,6 +4,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include "util.h"
 #include "pkg.h"
@@ -12,7 +13,7 @@ void pkg_load(package **head, char *pkg_name) {
     package *new_pkg = (package*) malloc(sizeof(package));    
     package *last = *head;
 
-    if (new_pkg == NULL) {
+    if (!new_pkg) {
         printf("error: Failed to allocate memory\n");
         exit(1);
     }
@@ -20,15 +21,14 @@ void pkg_load(package **head, char *pkg_name) {
     new_pkg->next = NULL;
     new_pkg->name = pkg_name;
     new_pkg->path = pkg_find(pkg_name, REPOS);
-    new_pkg->version = pkg_version(pkg_name, *new_pkg->path);
 
-    if (*head == NULL) {
+    if (!*head) {
         new_pkg->prev = NULL;
         *head = new_pkg;
         return;
     }
 
-    while (last->next != NULL) {
+    while (last->next) {
         last = last->next;
     }
 
@@ -37,27 +37,24 @@ void pkg_load(package **head, char *pkg_name) {
 }
 
 
-struct version pkg_version(char *pkg_name, char *repo) {
-    struct version version;
-    char *path = NULL;
+struct version pkg_version(char *repo_dir) {
     char **split;
     FILE *file;
-    size_t  lsiz=0;
     char*   lbuf=0;
     ssize_t llen=0;
-        
-    path = join_string(repo, "version", "/");
-    file = fopen(path, "r");
 
-    if (file == NULL) {
+    chdir(repo_dir);
+    file = fopen("version", "r");
+
+    if (!file) {
         printf("error: version file does not exist\n");
         exit(1);
     }
 
-    llen = getline(&lbuf, &lsiz, file);
+    llen = getline(&lbuf, &(size_t){0}, file);
     fclose(file);
 
-    if (lbuf == NULL) {
+    if (!lbuf) {
         printf("error: version file is empty\n");
         exit(1);
     }
@@ -68,39 +65,42 @@ struct version pkg_version(char *pkg_name, char *repo) {
 
     split = split_string(lbuf, " ");
 
-    if (split[0] == NULL) {
+    if (!split[0]) {
         printf("error: version file empty\n");
         exit(1);
     }
 
-    if (split[1] == NULL) {
+    if (!split[1]) {
         printf("error: release field missing\n");
         exit(1);
     }
 
-    version.version = split[0];
-    version.release = split[1];
+    chdir(PWD);
 
-    return version;    
+    return (struct version) {
+        .version = split[0],
+        .release = split[1],
+    };
 }
 
 char **pkg_find(char *pkg_name, char **repos) {
    char **paths = NULL;
-   char *repo;
    int  n = 0;
    DIR  *d;
    struct dirent *dir;
+   char cwd[PATH_MAX];
 
-   while (*repos != NULL) {
+   while (*repos) {
        d = opendir(*repos);
+       chdir(*repos);
 
-       if (d == NULL) {
+       if (!d) {
            continue;
        }
 
        while ((dir = readdir(d)) != NULL) {
             if (strcmp(pkg_name, dir->d_name) == 0) {
-                repo  = join_string(*repos, pkg_name, "/");
+                chdir(pkg_name);
                 paths = realloc(paths, sizeof(char*) * ++n);
 
                 if (paths == NULL) {
@@ -108,7 +108,8 @@ char **pkg_find(char *pkg_name, char **repos) {
                     exit(1);
                 }
 
-                paths[n - 1] = repo;
+                paths[n - 1] = getcwd(cwd, sizeof(cwd));
+                chdir("..");
             }
        }
 
@@ -116,6 +117,7 @@ char **pkg_find(char *pkg_name, char **repos) {
        closedir(d);
    }
 
+   chdir(PWD);
    paths = realloc(paths, sizeof(char*) * (n + 1));
    paths[n] = 0;
 
@@ -137,15 +139,15 @@ void pkg_list(char *pkg_name) {
 
     d = opendir(db);
 
-    if (d == NULL) {
+    if (!d) {
         printf("error: No packages installed\n");
         exit(1);
     }
 
-    while ((dir = readdir(d)) != NULL) {
+    while ((dir = readdir(d))) {
         if (pkg_name != NULL && strcmp(pkg_name, dir->d_name) == 0) {
             path = join_string(db, pkg_name, "/");
-            version = pkg_version(pkg_name, path);
+            version = pkg_version(path);
             printf("%s %s %s\n", pkg_name, version.version, version.release);
             goto done;
         }

@@ -2,11 +2,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
+#include <unistd.h>
 
 #include "repo.h"
 #include "pkg.h"
 
 char **REPOS = NULL;
+char PWD[PATH_MAX];
 
 void args(int argc, char *argv[]) {
     package *head = NULL;
@@ -35,9 +38,13 @@ void args(int argc, char *argv[]) {
         //
 
     } else if (!strcmp(argv[1], "l") || !strcmp(argv[1], "list")) {
-        while (head) {
-            pkg_list(head->name);
-            head = head->next;
+        if (head) {
+            while (head) {
+                pkg_list(head->name);
+                head = head->next;
+            }
+        } else {
+
         }
 
     } else if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
@@ -57,6 +64,7 @@ void args(int argc, char *argv[]) {
 }
 
 int main (int argc, char *argv[]) {
+    getcwd(PWD, sizeof(PWD));
     REPOS = repo_load();
     args(argc, argv);
     return 0;

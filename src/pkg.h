@@ -1,5 +1,7 @@
+#include <limits.h>
 
 extern char **REPOS;
+extern char PWD[PATH_MAX];
 
 struct version {
     char *version;
@@ -24,5 +26,5 @@ typedef struct package {
 
 void pkg_load(package **head, char *pkg_name);
 char **pkg_find(char *pkg_name, char **repos);
-struct version pkg_version(char *pkg_name, char *repo);
+struct version pkg_version(char *repo_dir);
 void pkg_list(char *pkg_name);

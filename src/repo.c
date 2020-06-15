@@ -7,7 +7,7 @@
 char **repo_load(void) {
     char *path = getenv("KISS_PATH");
 
-    if (path == NULL || path[0] == '\0') {
+    if (!path || path[0] == '\0') {
         printf("error: KISS_PATH must be set\n");
         exit(1);
     }
