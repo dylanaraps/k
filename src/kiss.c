@@ -12,8 +12,8 @@
 
 char **REPOS = NULL;
 char PWD[PATH_MAX];
-char *HOME;
-char *XDG_CACHE_HOME;
+const char *HOME;
+const char *XDG_CACHE_HOME;
 char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *LOG_DIR, *BIN_DIR;
 
 void args(int argc, char *argv[]) {

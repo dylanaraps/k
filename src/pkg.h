@@ -5,8 +5,8 @@
 
 extern char **REPOS;
 extern char PWD[PATH_MAX];
-extern char *HOME;
-extern char *XDG_CACHE_HOME;
+extern const char *HOME;
+extern const char *XDG_CACHE_HOME;
 extern char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *LOG_DIR, *BIN_DIR;
 
 struct version {

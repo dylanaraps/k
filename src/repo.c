@@ -6,7 +6,7 @@
 #include "repo.h"
 
 char **repo_load(void) {
-    char *path = getenv("KISS_PATH");
+    char *path = strdup(getenv("KISS_PATH"));
     char *tok;
     char **res = NULL;
     int n = 0;
