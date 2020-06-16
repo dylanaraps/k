@@ -111,7 +111,6 @@ void checksum_to_file(package *pkg) {
     }
 
     file = fopen("checksums", "w");
-    printf("%s\n", *pkg->path);
 
     if (!file) {
         printf("error: Cannot write checksums\n");
