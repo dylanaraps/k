@@ -44,10 +44,13 @@ void args(int argc, char *argv[]) {
 
     if (!strcmp(argv[1], "c") || !strcmp(argv[1], "checksum")) {
         curl_global_init(CURL_GLOBAL_ALL);
-        while (head) {
-            pkg_sources(head);
-            pkg_checksums(head);
-            head = head->next;
+
+        for(package *tmp = head; tmp; tmp = tmp->next) {
+            pkg_sources(tmp);
+        }
+
+        for(package *tmp = head; tmp; tmp = tmp->next) {
+            pkg_checksums(tmp);
         }
 
     } else if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {

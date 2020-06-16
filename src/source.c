@@ -38,8 +38,8 @@ void pkg_sources(package *pkg) {
        exit(1);
    }
 
-   pkg->source.src  = malloc(sizeof(char*) * 1);
-   pkg->source.dest = malloc(sizeof(char*) * 1);
+   pkg->source.src  = malloc(sizeof(char*));
+   pkg->source.dest = malloc(sizeof(char*));
 
    while ((getline(&lbuf, &(size_t){0}, file)) > 0) {
        // Skip comments and blank lines.
@@ -69,6 +69,9 @@ void pkg_sources(package *pkg) {
                   strncmp(source, "http://",  7) == 0) {
            printf("%s (Downloading %s)\n", pkg->name, source);
            source_download(source);
+
+       } else if (strncmp(source, "git+", 4) == 0) {
+           printf("%s (Skipping git source.. %s)\n", pkg->name, source);
 
        } else if (chdir(*repos) == 0 && 
                   chdir(dirname(source)) == 0 && 
