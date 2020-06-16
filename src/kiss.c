@@ -48,16 +48,14 @@ void args(int argc, char *argv[]) {
         for(package *tmp = head; tmp; tmp = tmp->next) {
             pkg_sources(tmp);
         }
-
-        /* for(package *tmp = head; tmp; tmp = tmp->next) { */
-        /*     pkg_checksums(tmp); */
-        /* } */
+        for(package *tmp = head; tmp; tmp = tmp->next) {
+            pkg_checksums(tmp);
+        }
 
     } else if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
         curl_global_init(CURL_GLOBAL_ALL);
-        while (head) {
-            pkg_sources(head);
-            head = head->next;
+        for(package *tmp = head; tmp; tmp = tmp->next) {
+            pkg_sources(tmp);
         }
 
     } else if (!strcmp(argv[1], "l") || !strcmp(argv[1], "list")) {
