@@ -80,8 +80,8 @@ void pkg_checksums(package *pkg) {
        sbuf_size = 67 * sizeof(int) + strlen(source_file);
        pkg->sums[pkg->sum_len] = malloc(sbuf_size);
 
-       sprintf(pkg->sums[pkg->sum_len], "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
-%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
+       sprintf(pkg->sums[pkg->sum_len], "%02x%02x%02x%02x%02x%02x\
+%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
 %02x%02x%02x%02x%02x%02x%02x%02xx%02x%02x%02x  %s", sbuf_size, 
            shasum[0],  shasum[1],  shasum[2],  shasum[3],
            shasum[4],  shasum[5],  shasum[6],  shasum[7],

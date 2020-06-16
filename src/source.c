@@ -19,12 +19,13 @@ void pkg_sources(package *pkg) {
    FILE *file;
    char *lbuf = 0;
    char *source;
-   char *source_file;
+   char *name;
+   char *dest;
    char cwd[PATH_MAX];
    char *pwd;
 
    pkg->src_len = 0;
-   chdir(*repos);
+   chdir(repos[0]);
    file = fopen("sources", "r");
    
    if (chdir(SRC_DIR) != 0) {
@@ -37,7 +38,8 @@ void pkg_sources(package *pkg) {
        exit(1);
    }
 
-   pkg->srcs = (char **) malloc(sizeof(char*) * 1);
+   pkg->source.src  = malloc(sizeof(char*) * 1);
+   pkg->source.dest = malloc(sizeof(char*) * 1);
 
    while ((getline(&lbuf, &(size_t){0}, file)) > 0) {
        // Skip comments and blank lines.
@@ -45,8 +47,13 @@ void pkg_sources(package *pkg) {
            continue;
        }
 
-       source      = strtok(lbuf, " 	\n");
-       source_file = basename(source);
+       source = strtok(lbuf, " 	\n");
+       dest   = strtok(NULL, " 	\n");
+       name   = basename(source);
+
+       if (dest == NULL) {
+           dest = "";
+       }
 
        mkdir(pkg->name, 0777);
 
@@ -55,8 +62,8 @@ void pkg_sources(package *pkg) {
            exit(1);
        }
 
-       if (access(source_file, F_OK) != -1) {
-           printf("%s (Found cached source %s)\n", pkg->name, source_file);
+       if (access(name, F_OK) != -1) {
+           printf("%s (Found cached source %s)\n", pkg->name, name);
         
        } else if (strncmp(source, "https://", 8) == 0 ||
                   strncmp(source, "http://",  7) == 0) {
@@ -65,8 +72,8 @@ void pkg_sources(package *pkg) {
 
        } else if (chdir(*repos) == 0 && 
                   chdir(dirname(source)) == 0 && 
-                  access(source_file, F_OK) != -1) {
-           printf("%s (Found local source %s)\n", pkg->name, source_file);
+                  access(name, F_OK) != -1) {
+           printf("%s (Found local source %s)\n", pkg->name, name);
 
        } else {
            printf("error: No local file %s\n", source);
@@ -74,22 +81,26 @@ void pkg_sources(package *pkg) {
        }
 
        pwd = getcwd(cwd, sizeof(cwd));
-       pkg->srcs[pkg->src_len] = malloc(strlen(pwd) + strlen(source_file) + 2);
+       pkg->source.src[pkg->src_len]  = malloc(strlen(pwd) + strlen(name) + 2);
+       pkg->source.dest[pkg->src_len] = malloc(strlen(dest) + 1);
 
-       if (pkg->srcs[pkg->src_len] == NULL) {
+       if (pkg->source.src[pkg->src_len] == NULL ||
+           pkg->source.dest[pkg->src_len] == NULL) {
            printf("Failed to allocate memory\n");
            exit(1);
        }
 
-       strcpy(pkg->srcs[pkg->src_len], pwd);
-       strcat(pkg->srcs[pkg->src_len], "/");
-       strcat(pkg->srcs[pkg->src_len], source_file);
+       strcpy(pkg->source.src[pkg->src_len], pwd);
+       strcat(pkg->source.src[pkg->src_len], "/");
+       strcat(pkg->source.src[pkg->src_len], name);
+       strcpy(pkg->source.dest[pkg->src_len], dest);
        ++pkg->src_len;
 
        chdir(SRC_DIR);
    }
 
-   pkg->srcs[pkg->src_len] = 0;
+   pkg->source.src[pkg->src_len] = 0;
+   pkg->source.dest[pkg->src_len] = 0;
    free(lbuf);
    fclose(file);
 }

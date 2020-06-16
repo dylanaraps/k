@@ -21,7 +21,6 @@ char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *LOG_DIR, *BIN_DIR;
 
 void args(int argc, char *argv[]) {
     package *head = NULL;
-    package *root;
 
     if (argc == 1) {
         printf("kiss [a|b|c|i|l|r|s|u|v] [pkg]...\n");
@@ -42,7 +41,6 @@ void args(int argc, char *argv[]) {
     for (int i = 2; i < argc; i++) {
         pkg_load(&head, argv[i]);
     }
-    root = head;
 
     if (!strcmp(argv[1], "c") || !strcmp(argv[1], "checksum")) {
         curl_global_init(CURL_GLOBAL_ALL);
@@ -51,28 +49,6 @@ void args(int argc, char *argv[]) {
             pkg_checksums(head);
             head = head->next;
         }
-
-        while (root) {
-            printf("%s\n", root->name);
-            printf("-------------------\n");
-
-            printf("Sources:\n");
-            for (int i = 0; i < root->src_len; i++) {
-                printf("%d -> %s\n", i, root->srcs[i]);
-            }
-            printf("\nSums:\n");
-            for (int i = 0; i < root->sum_len; i++) {
-                printf("%d -> %s\n", i, root->sums[i]);
-            }
-
-            printf("Paths:\n");
-            for (int i = 0; i < root->path_len; i++) {
-                printf("%d -> %s\n", i, root->path[i]);
-            }
-
-            root = root->next;
-        }
-
 
     } else if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
         curl_global_init(CURL_GLOBAL_ALL);

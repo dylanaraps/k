@@ -15,8 +15,8 @@ struct version {
 };
 
 struct source {
-    char *url;
-    char *dest;
+    char **src;
+    char **dest;
 };
 
 typedef struct package {
@@ -28,11 +28,9 @@ typedef struct package {
     char **sums;
     int  sum_len;
 
-    char **srcs;
-    int  src_len;
-
-    struct source  source;
+    struct source source;
     struct version version;
+    int  src_len;
 
     struct package *next;
     struct package *prev;
