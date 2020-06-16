@@ -12,59 +12,20 @@
 #include "pkg.h"
 
 void pkg_checksums(package *pkg) {
-   char **repos = pkg->path; 
-   FILE *file;
-   char *lbuf = 0;
-   char *source;
-   char *source_file;
    FILE *src;
    unsigned char buf[1000];
    unsigned char shasum[32];
+   char *base;
    sha256_ctx ctx;
    int i;
+   int j;
    int sbuf_size;
 
-   pkg->sum_len = 0;
-   chdir(*repos);
-   file = fopen("sources", "r");
-   
-   if (chdir(SRC_DIR) != 0) {
-       printf("error: Sources directory not accessible\n"); 
-       exit(1);
-   }
+   pkg->sums = malloc(sizeof(char*) * 1);
 
-   if (!file) {
-       printf("error: Sources file invalid\n");
-       exit(1);
-   }
-
-   pkg->sums = (char **) malloc(sizeof(char*) * 1);
-
-   while ((getline(&lbuf, &(size_t){0}, file)) > 0) {
-       // Skip comments and blank lines.
-       if ((lbuf)[0] == '#' || (lbuf)[0] == '\n') {
-           continue;
-       }
-
-       source      = strtok(lbuf, " 	\n");
-       source_file = basename(source);
-
-       if (chdir(pkg->name) != 0) {
-           printf("error: Sources directory not accessible\n");
-           exit(1);
-       }
-
-       if (access(source_file, F_OK) == -1) {
-           chdir(*repos);
-           chdir(dirname(source));
-
-           if (access(source_file, F_OK) == -1) {
-               printf("error: Source not accessible %s\n", source_file);
-               exit(1);
-           }
-       }
-
-       src = fopen(source_file, "rb");
+   for (i = 0; i < pkg->src_len; i++) {
+       src  = fopen(pkg->source.src[i], "rb");
+       base = basename(pkg->source.src[i]);
 
        if (!src) {
            printf("error: Failed to generate checksums\n");
@@ -72,15 +33,15 @@ void pkg_checksums(package *pkg) {
        }
 
        sha256_init(&ctx);
-       while ((i = fread(buf, 1, sizeof(buf), src)) > 0) {
+       while ((j = fread(buf, 1, sizeof(buf), src)) > 0) {
            sha256_update(&ctx, buf, i );
        }
        sha256_final(&ctx, shasum);
 
-       sbuf_size = 67 * sizeof(int) + strlen(source_file);
-       pkg->sums[pkg->sum_len] = malloc(sbuf_size);
+       sbuf_size = 67 * sizeof(char*) + strlen(base);
+       pkg->sums[i] = malloc(sbuf_size);
 
-       sprintf(pkg->sums[pkg->sum_len], "%02x%02x%02x%02x%02x%02x\
+       sprintf(pkg->sums[i], "%02x%02x%02x%02x%02x%02x\
 %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
 %02x%02x%02x%02x%02x%02x%02x%02xx%02x%02x%02x  %s", sbuf_size, 
            shasum[0],  shasum[1],  shasum[2],  shasum[3],
@@ -91,18 +52,13 @@ void pkg_checksums(package *pkg) {
            shasum[20], shasum[21], shasum[22], shasum[23],
            shasum[24], shasum[25], shasum[26], shasum[27],
            shasum[28], shasum[29], shasum[30], shasum[31],
-           source_file
+           pkg->source.src[i]
        );
 
-       fprintf(stderr, "%s\n", pkg->sums[pkg->sum_len]);
-       /* strcpy(head[0]->sums[n], sbuf); */
-       ++pkg->sum_len;
-
+       fprintf(stderr, "%s\n", pkg->sums[i]);
        fclose(src);
        chdir(SRC_DIR);
    }
 
-   pkg->sums[pkg->sum_len] = 0;
-   free(lbuf);
-   fclose(file);
+   pkg->sums[i] = 0;
 }
