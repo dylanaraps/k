@@ -22,6 +22,7 @@ void pkg_sources(package *pkg) {
     char *base;
     char *src;
     char buf[LINE_MAX];
+    int len = 0;
 
     pkg->src_len = 0;
     chdir(repo);
@@ -37,8 +38,17 @@ void pkg_sources(package *pkg) {
         exit(1);
     }
 
-    pkg->source.src  = (char **) malloc(sizeof(char*) * 1);
-    pkg->source.dest = (char **) malloc(sizeof(char*) * 1);
+    // Guess at the length of resulting items based on non-
+    // blank lines in file.
+    while (fgets(buf, sizeof buf, file) != NULL) {
+        if (buf[0] != '#' && buf[0] != '\n') {
+            len++;
+        }
+    }
+    rewind(file);
+
+    pkg->source.src  = (char **) malloc(sizeof(char *) * len);
+    pkg->source.dest = (char **) malloc(sizeof(char *) * len);
 
     if (!pkg->source.src || !pkg->source.dest) {
         printf("error: Failed to allocate memory\n"); 
