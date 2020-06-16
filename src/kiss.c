@@ -8,6 +8,7 @@
 #include <curl/curl.h>
 
 #include "checksum.h"
+#include "extract.h"
 #include "source.h"
 #include "repo.h"
 #include "list.h"
@@ -50,9 +51,9 @@ void args(int argc, char *argv[]) {
         for(package *tmp = head; tmp; tmp = tmp->next) {
             pkg_verify(tmp);
         }
-        /* for(package *tmp = head; tmp; tmp = tmp->next) { */
-            /* pkg_extract(tmp); */
-        /* } */
+        for(package *tmp = head; tmp; tmp = tmp->next) {
+            pkg_extract(tmp);
+        }
 
     } else if (!strcmp(argv[1], "c") || !strcmp(argv[1], "checksum")) {
         for(package *tmp = head; tmp; tmp = tmp->next) {
