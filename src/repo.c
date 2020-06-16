@@ -13,7 +13,7 @@ char **repo_load(void) {
     int n = 0;
 
     if (!path || path[0] == '\0') {
-        printf("error: KISS_PATH must be set\n");
+        printf("error: %s must be set\n", path);
         exit(1);
     }
 

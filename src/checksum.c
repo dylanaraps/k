@@ -61,8 +61,45 @@ void pkg_checksums(package *pkg) {
         printf("%s\n", pkg->sums[i]);
         fclose(src);
     }
+}
 
-    pkg->sums[i + 1] = 0;
+void pkg_verify(package *pkg) {
+    FILE *file;
+    char buf[LINE_MAX];
+    int i = 0;
+
+    pkg_checksums(pkg);
+
+    if (pkg->src_len == 0) {
+        printf("error: No sources\n");
+        exit(1);
+    }
+
+    if (chdir(*pkg->path) != 0) {
+        printf("error: Repository not accessible\n");
+        exit(1);
+    }
+
+    file = fopen("checksums", "r");
+
+    if (!file) {
+        printf("error: Checksums file missing, run kiss c\n");
+        exit(1);
+    }
+
+    while (fgets(buf, sizeof buf, file) != NULL) {
+        buf[strcspn(buf, "\n")] = 0;
+
+        if (strcmp(pkg->sums[i], buf) != 0 || i > pkg->src_len) {
+            printf("error: Checksum mismatch\n");
+            exit(1);
+        }
+
+        i++;
+    }
+
+    fclose(file);
+    printf("Verified checksums\n");
 }
 
 void checksum_to_file(package *pkg) {
@@ -74,6 +111,7 @@ void checksum_to_file(package *pkg) {
     }
 
     file = fopen("checksums", "w");
+    printf("%s\n", *pkg->path);
 
     if (!file) {
         printf("error: Cannot write checksums\n");
@@ -83,6 +121,7 @@ void checksum_to_file(package *pkg) {
     for (int i = 0; i < pkg->src_len; i++) {
         fprintf(file, "%s\n", pkg->sums[i]);
     }
+    fclose(file);
 
     printf("Generated checksums\n");
 }

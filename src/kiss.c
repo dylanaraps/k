@@ -43,9 +43,18 @@ void args(int argc, char *argv[]) {
         pkg_load(&head, argv[i]);
     }
 
-    if (!strcmp(argv[1], "c") || !strcmp(argv[1], "checksum")) {
-        curl_global_init(CURL_GLOBAL_ALL);
+    if (!strcmp(argv[1], "b") || !strcmp(argv[1], "build")) {
+        for(package *tmp = head; tmp; tmp = tmp->next) {
+            pkg_sources(tmp);
+        }
+        for(package *tmp = head; tmp; tmp = tmp->next) {
+            pkg_verify(tmp);
+        }
+        /* for(package *tmp = head; tmp; tmp = tmp->next) { */
+            /* pkg_extract(tmp); */
+        /* } */
 
+    } else if (!strcmp(argv[1], "c") || !strcmp(argv[1], "checksum")) {
         for(package *tmp = head; tmp; tmp = tmp->next) {
             pkg_sources(tmp);
         }
@@ -55,7 +64,6 @@ void args(int argc, char *argv[]) {
         }
 
     } else if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
-        curl_global_init(CURL_GLOBAL_ALL);
         for(package *tmp = head; tmp; tmp = tmp->next) {
             pkg_sources(tmp);
         }
