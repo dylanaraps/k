@@ -58,7 +58,7 @@ void pkg_checksums(package *pkg) {
            base
        );
 
-       fprintf(stderr, "%s\n", pkg->sums[i]);
+       printf("%s\n", pkg->sums[i]);
        fclose(src);
    }
 
