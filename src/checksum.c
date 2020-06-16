@@ -21,7 +21,7 @@ char **pkg_checksums(package pkg) {
    FILE *src;
    unsigned char buf[1000];
    unsigned char shasum[32];
-   blk_SHA256_CTX ctx;
+   sha256_ctx ctx;
    int i;
    int sbuf_size;
 
@@ -69,11 +69,11 @@ char **pkg_checksums(package pkg) {
            exit(1);
        }
 
-       blk_SHA256_Init(&ctx);
+       sha256_init(&ctx);
        while ((i = fread(buf, 1, sizeof(buf), src)) > 0) {
-           blk_SHA256_Update(&ctx, buf, i );
+           sha256_update(&ctx, buf, i );
        }
-       blk_SHA256_Final(shasum, &ctx);
+       sha256_final(&ctx, shasum);
 
        sbuf_size = 67 * sizeof(int) + strlen(source_file);
        char sbuf[sbuf_size];
