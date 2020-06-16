@@ -5,6 +5,8 @@
 #include <limits.h>
 #include <unistd.h>
 
+#include <curl/curl.h>
+
 #include "checksum.h"
 #include "repo.h"
 #include "list.h"
@@ -40,6 +42,7 @@ void args(int argc, char *argv[]) {
     }
 
     if (!strcmp(argv[1], "c") || !strcmp(argv[1], "checksum")) {
+        curl_global_init(CURL_GLOBAL_ALL);
         while (head) {
             pkg_sources(*head);
             pkg_checksums(*head);
@@ -47,6 +50,7 @@ void args(int argc, char *argv[]) {
         }
 
     } else if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
+        curl_global_init(CURL_GLOBAL_ALL);
         while (head) {
             pkg_sources(*head);
             head = head->next;
