@@ -21,7 +21,7 @@ char **pkg_checksums(package pkg) {
    FILE *src;
    unsigned char buf[1000];
    unsigned char shasum[32];
-   sha256_ctx ctx;
+   blk_SHA256_CTX ctx;
    int i;
    int sbuf_size;
 
@@ -69,17 +69,18 @@ char **pkg_checksums(package pkg) {
            exit(1);
        }
 
-       sha256_init(&ctx);
+       blk_SHA256_Init(&ctx);
        while ((i = fread(buf, 1, sizeof(buf), src)) > 0) {
-           sha256_update(&ctx, buf, i );
+           blk_SHA256_Update(&ctx, buf, i );
        }
-       sha256_final(&ctx, shasum);
+       blk_SHA256_Final(shasum, &ctx);
 
        sbuf_size = 67 * sizeof(int) + strlen(source_file);
        char sbuf[sbuf_size];
-       snprintf(sbuf, sbuf_size, "%02x%02x%02x%02x%02x%02x%02x\
-%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
-%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x  %s", 
+
+       sprintf(sbuf, "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
+%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
+%02x%02x%02x%02x%02x%02x%02x%02xx%02x%02x%02x  %s", sbuf_size, 
            shasum[0],  shasum[1],  shasum[2],  shasum[3],
            shasum[4],  shasum[5],  shasum[6],  shasum[7],
            shasum[8],  shasum[9],  shasum[10], shasum[11],

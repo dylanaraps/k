@@ -1,207 +1,216 @@
-/*
- * FIPS 180-2 SHA-224/256/384/512 implementation
- * Last update: 02/02/2007
- * Issue date:  04/30/2005
- *
- * Copyright (C) 2013, Con Kolivas <kernel@kolivas.org>
- * Copyright (C) 2005, 2007 Olivier Gay <olivier.gay@a3.epfl.ch>
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the project nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- */
 #include <string.h>
+#include <arpa/inet.h>
 
 #include "sha.h"
 
-#define UNPACK32(x, str)                      \
-{                                             \
-    *((str) + 3) = (uint8_t) ((x)      );       \
-    *((str) + 2) = (uint8_t) ((x) >>  8);       \
-    *((str) + 1) = (uint8_t) ((x) >> 16);       \
-    *((str) + 0) = (uint8_t) ((x) >> 24);       \
-}
+#undef RND
+#undef BLKSIZE
 
-#define PACK32(str, x)                        \
-{                                             \
-    *(x) =   ((uint32_t) *((str) + 3)      )    \
-           | ((uint32_t) *((str) + 2) <<  8)    \
-           | ((uint32_t) *((str) + 1) << 16)    \
-           | ((uint32_t) *((str) + 0) << 24);   \
-}
+#define BLKSIZE blk_SHA256_BLKSIZE
 
-#define SHA256_SCR(i)                         \
-{                                             \
-    w[i] =  SHA256_F4(w[i -  2]) + w[i -  7]  \
-          + SHA256_F3(w[i - 15]) + w[i - 16]; \
-}
-
-uint32_t sha256_h0[8] =
-            {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-             0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
-
-uint32_t sha256_k[64] =
-            {0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
-             0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-             0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
-             0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-             0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
-             0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-             0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
-             0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-             0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
-             0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
-             0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,
-             0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-             0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
-             0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-             0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
-             0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2};
-
-/* SHA-256 functions */
-
-void sha256_transf(sha256_ctx *ctx, const unsigned char *message,
-                   unsigned int block_nb)
+static inline void put_be32(void *ptr, uint32_t value)
 {
-    uint32_t w[64];
-    uint32_t wv[8];
-    uint32_t t1, t2;
-    const unsigned char *sub_block;
-    int i;
-
-    int j;
-
-    for (i = 0; i < (int) block_nb; i++) {
-        sub_block = message + (i << 6);
-
-        for (j = 0; j < 16; j++) {
-            PACK32(&sub_block[j << 2], &w[j]);
-        }
-
-        for (j = 16; j < 64; j++) {
-            SHA256_SCR(j);
-        }
-
-        for (j = 0; j < 8; j++) {
-            wv[j] = ctx->h[j];
-        }
-
-        for (j = 0; j < 64; j++) {
-            t1 = wv[7] + SHA256_F2(wv[4]) + CH(wv[4], wv[5], wv[6])
-                + sha256_k[j] + w[j];
-            t2 = SHA256_F1(wv[0]) + MAJ(wv[0], wv[1], wv[2]);
-            wv[7] = wv[6];
-            wv[6] = wv[5];
-            wv[5] = wv[4];
-            wv[4] = wv[3] + t1;
-            wv[3] = wv[2];
-            wv[2] = wv[1];
-            wv[1] = wv[0];
-            wv[0] = t1 + t2;
-        }
-
-        for (j = 0; j < 8; j++) {
-            ctx->h[j] += wv[j];
-        }
-    }
+	unsigned char *p = ptr;
+	p[0] = value >> 24;
+	p[1] = value >> 16;
+	p[2] = value >>  8;
+	p[3] = value >>  0;
 }
 
-void sha256(const unsigned char *message, unsigned int len, unsigned char *digest)
+static inline uint32_t get_be32(const void *ptr)
 {
-    sha256_ctx ctx;
-
-    sha256_init(&ctx);
-    sha256_update(&ctx, message, len);
-    sha256_final(&ctx, digest);
+	const unsigned char *p = ptr;
+	return	(uint32_t)p[0] << 24 |
+		(uint32_t)p[1] << 16 |
+		(uint32_t)p[2] <<  8 |
+		(uint32_t)p[3] <<  0;
 }
 
-void sha256_init(sha256_ctx *ctx)
+void blk_SHA256_Init(blk_SHA256_CTX *ctx)
 {
-    int i;
-    for (i = 0; i < 8; i++) {
-        ctx->h[i] = sha256_h0[i];
-    }
-
-    ctx->len = 0;
-    ctx->tot_len = 0;
+	ctx->offset = 0;
+	ctx->size = 0;
+	ctx->state[0] = 0x6a09e667ul;
+	ctx->state[1] = 0xbb67ae85ul;
+	ctx->state[2] = 0x3c6ef372ul;
+	ctx->state[3] = 0xa54ff53aul;
+	ctx->state[4] = 0x510e527ful;
+	ctx->state[5] = 0x9b05688cul;
+	ctx->state[6] = 0x1f83d9abul;
+	ctx->state[7] = 0x5be0cd19ul;
 }
 
-void sha256_update(sha256_ctx *ctx, const unsigned char *message,
-                   unsigned int len)
+static inline uint32_t ror(uint32_t x, unsigned n)
 {
-    unsigned int block_nb;
-    unsigned int new_len, rem_len, tmp_len;
-    const unsigned char *shifted_message;
-
-    tmp_len = SHA256_BLOCK_SIZE - ctx->len;
-    rem_len = len < tmp_len ? len : tmp_len;
-
-    memcpy(&ctx->block[ctx->len], message, rem_len);
-
-    if (ctx->len + len < SHA256_BLOCK_SIZE) {
-        ctx->len += len;
-        return;
-    }
-
-    new_len = len - rem_len;
-    block_nb = new_len / SHA256_BLOCK_SIZE;
-
-    shifted_message = message + rem_len;
-
-    sha256_transf(ctx, ctx->block, 1);
-    sha256_transf(ctx, shifted_message, block_nb);
-
-    rem_len = new_len % SHA256_BLOCK_SIZE;
-
-    memcpy(ctx->block, &shifted_message[block_nb << 6],
-           rem_len);
-
-    ctx->len = rem_len;
-    ctx->tot_len += (block_nb + 1) << 6;
+	return (x >> n) | (x << (32 - n));
 }
 
-void sha256_final(sha256_ctx *ctx, unsigned char *digest)
+static inline uint32_t ch(uint32_t x, uint32_t y, uint32_t z)
 {
-    unsigned int block_nb;
-    unsigned int pm_len;
-    unsigned int len_b;
+	return z ^ (x & (y ^ z));
+}
 
-    int i;
+static inline uint32_t maj(uint32_t x, uint32_t y, uint32_t z)
+{
+	return ((x | y) & z) | (x & y);
+}
 
-    block_nb = (1 + ((SHA256_BLOCK_SIZE - 9)
-                     < (ctx->len % SHA256_BLOCK_SIZE)));
+static inline uint32_t sigma0(uint32_t x)
+{
+	return ror(x, 2) ^ ror(x, 13) ^ ror(x, 22);
+}
 
-    len_b = (ctx->tot_len + ctx->len) << 3;
-    pm_len = block_nb << 6;
+static inline uint32_t sigma1(uint32_t x)
+{
+	return ror(x, 6) ^ ror(x, 11) ^ ror(x, 25);
+}
 
-    memset(ctx->block + ctx->len, 0, pm_len - ctx->len);
-    ctx->block[ctx->len] = 0x80;
-    UNPACK32(len_b, ctx->block + pm_len - 4);
+static inline uint32_t gamma0(uint32_t x)
+{
+	return ror(x, 7) ^ ror(x, 18) ^ (x >> 3);
+}
 
-    sha256_transf(ctx, ctx->block, block_nb);
+static inline uint32_t gamma1(uint32_t x)
+{
+	return ror(x, 17) ^ ror(x, 19) ^ (x >> 10);
+}
 
-    for (i = 0 ; i < 8; i++) {
-        UNPACK32(ctx->h[i], &digest[i << 2]);
-    }
+static void blk_SHA256_Transform(blk_SHA256_CTX *ctx, const unsigned char *buf)
+{
+
+	uint32_t S[8], W[64], t0, t1;
+	int i;
+
+	/* copy state into S */
+	for (i = 0; i < 8; i++)
+		S[i] = ctx->state[i];
+
+	/* copy the state into 512-bits into W[0..15] */
+	for (i = 0; i < 16; i++, buf += sizeof(uint32_t))
+		W[i] = get_be32(buf);
+
+	/* fill W[16..63] */
+	for (i = 16; i < 64; i++)
+		W[i] = gamma1(W[i - 2]) + W[i - 7] + gamma0(W[i - 15]) + W[i - 16];
+
+#define RND(a,b,c,d,e,f,g,h,i,ki)                    \
+	t0 = h + sigma1(e) + ch(e, f, g) + ki + W[i];   \
+	t1 = sigma0(a) + maj(a, b, c);                  \
+	d += t0;                                        \
+	h  = t0 + t1;
+
+	RND(S[0],S[1],S[2],S[3],S[4],S[5],S[6],S[7],0,0x428a2f98);
+	RND(S[7],S[0],S[1],S[2],S[3],S[4],S[5],S[6],1,0x71374491);
+	RND(S[6],S[7],S[0],S[1],S[2],S[3],S[4],S[5],2,0xb5c0fbcf);
+	RND(S[5],S[6],S[7],S[0],S[1],S[2],S[3],S[4],3,0xe9b5dba5);
+	RND(S[4],S[5],S[6],S[7],S[0],S[1],S[2],S[3],4,0x3956c25b);
+	RND(S[3],S[4],S[5],S[6],S[7],S[0],S[1],S[2],5,0x59f111f1);
+	RND(S[2],S[3],S[4],S[5],S[6],S[7],S[0],S[1],6,0x923f82a4);
+	RND(S[1],S[2],S[3],S[4],S[5],S[6],S[7],S[0],7,0xab1c5ed5);
+	RND(S[0],S[1],S[2],S[3],S[4],S[5],S[6],S[7],8,0xd807aa98);
+	RND(S[7],S[0],S[1],S[2],S[3],S[4],S[5],S[6],9,0x12835b01);
+	RND(S[6],S[7],S[0],S[1],S[2],S[3],S[4],S[5],10,0x243185be);
+	RND(S[5],S[6],S[7],S[0],S[1],S[2],S[3],S[4],11,0x550c7dc3);
+	RND(S[4],S[5],S[6],S[7],S[0],S[1],S[2],S[3],12,0x72be5d74);
+	RND(S[3],S[4],S[5],S[6],S[7],S[0],S[1],S[2],13,0x80deb1fe);
+	RND(S[2],S[3],S[4],S[5],S[6],S[7],S[0],S[1],14,0x9bdc06a7);
+	RND(S[1],S[2],S[3],S[4],S[5],S[6],S[7],S[0],15,0xc19bf174);
+	RND(S[0],S[1],S[2],S[3],S[4],S[5],S[6],S[7],16,0xe49b69c1);
+	RND(S[7],S[0],S[1],S[2],S[3],S[4],S[5],S[6],17,0xefbe4786);
+	RND(S[6],S[7],S[0],S[1],S[2],S[3],S[4],S[5],18,0x0fc19dc6);
+	RND(S[5],S[6],S[7],S[0],S[1],S[2],S[3],S[4],19,0x240ca1cc);
+	RND(S[4],S[5],S[6],S[7],S[0],S[1],S[2],S[3],20,0x2de92c6f);
+	RND(S[3],S[4],S[5],S[6],S[7],S[0],S[1],S[2],21,0x4a7484aa);
+	RND(S[2],S[3],S[4],S[5],S[6],S[7],S[0],S[1],22,0x5cb0a9dc);
+	RND(S[1],S[2],S[3],S[4],S[5],S[6],S[7],S[0],23,0x76f988da);
+	RND(S[0],S[1],S[2],S[3],S[4],S[5],S[6],S[7],24,0x983e5152);
+	RND(S[7],S[0],S[1],S[2],S[3],S[4],S[5],S[6],25,0xa831c66d);
+	RND(S[6],S[7],S[0],S[1],S[2],S[3],S[4],S[5],26,0xb00327c8);
+	RND(S[5],S[6],S[7],S[0],S[1],S[2],S[3],S[4],27,0xbf597fc7);
+	RND(S[4],S[5],S[6],S[7],S[0],S[1],S[2],S[3],28,0xc6e00bf3);
+	RND(S[3],S[4],S[5],S[6],S[7],S[0],S[1],S[2],29,0xd5a79147);
+	RND(S[2],S[3],S[4],S[5],S[6],S[7],S[0],S[1],30,0x06ca6351);
+	RND(S[1],S[2],S[3],S[4],S[5],S[6],S[7],S[0],31,0x14292967);
+	RND(S[0],S[1],S[2],S[3],S[4],S[5],S[6],S[7],32,0x27b70a85);
+	RND(S[7],S[0],S[1],S[2],S[3],S[4],S[5],S[6],33,0x2e1b2138);
+	RND(S[6],S[7],S[0],S[1],S[2],S[3],S[4],S[5],34,0x4d2c6dfc);
+	RND(S[5],S[6],S[7],S[0],S[1],S[2],S[3],S[4],35,0x53380d13);
+	RND(S[4],S[5],S[6],S[7],S[0],S[1],S[2],S[3],36,0x650a7354);
+	RND(S[3],S[4],S[5],S[6],S[7],S[0],S[1],S[2],37,0x766a0abb);
+	RND(S[2],S[3],S[4],S[5],S[6],S[7],S[0],S[1],38,0x81c2c92e);
+	RND(S[1],S[2],S[3],S[4],S[5],S[6],S[7],S[0],39,0x92722c85);
+	RND(S[0],S[1],S[2],S[3],S[4],S[5],S[6],S[7],40,0xa2bfe8a1);
+	RND(S[7],S[0],S[1],S[2],S[3],S[4],S[5],S[6],41,0xa81a664b);
+	RND(S[6],S[7],S[0],S[1],S[2],S[3],S[4],S[5],42,0xc24b8b70);
+	RND(S[5],S[6],S[7],S[0],S[1],S[2],S[3],S[4],43,0xc76c51a3);
+	RND(S[4],S[5],S[6],S[7],S[0],S[1],S[2],S[3],44,0xd192e819);
+	RND(S[3],S[4],S[5],S[6],S[7],S[0],S[1],S[2],45,0xd6990624);
+	RND(S[2],S[3],S[4],S[5],S[6],S[7],S[0],S[1],46,0xf40e3585);
+	RND(S[1],S[2],S[3],S[4],S[5],S[6],S[7],S[0],47,0x106aa070);
+	RND(S[0],S[1],S[2],S[3],S[4],S[5],S[6],S[7],48,0x19a4c116);
+	RND(S[7],S[0],S[1],S[2],S[3],S[4],S[5],S[6],49,0x1e376c08);
+	RND(S[6],S[7],S[0],S[1],S[2],S[3],S[4],S[5],50,0x2748774c);
+	RND(S[5],S[6],S[7],S[0],S[1],S[2],S[3],S[4],51,0x34b0bcb5);
+	RND(S[4],S[5],S[6],S[7],S[0],S[1],S[2],S[3],52,0x391c0cb3);
+	RND(S[3],S[4],S[5],S[6],S[7],S[0],S[1],S[2],53,0x4ed8aa4a);
+	RND(S[2],S[3],S[4],S[5],S[6],S[7],S[0],S[1],54,0x5b9cca4f);
+	RND(S[1],S[2],S[3],S[4],S[5],S[6],S[7],S[0],55,0x682e6ff3);
+	RND(S[0],S[1],S[2],S[3],S[4],S[5],S[6],S[7],56,0x748f82ee);
+	RND(S[7],S[0],S[1],S[2],S[3],S[4],S[5],S[6],57,0x78a5636f);
+	RND(S[6],S[7],S[0],S[1],S[2],S[3],S[4],S[5],58,0x84c87814);
+	RND(S[5],S[6],S[7],S[0],S[1],S[2],S[3],S[4],59,0x8cc70208);
+	RND(S[4],S[5],S[6],S[7],S[0],S[1],S[2],S[3],60,0x90befffa);
+	RND(S[3],S[4],S[5],S[6],S[7],S[0],S[1],S[2],61,0xa4506ceb);
+	RND(S[2],S[3],S[4],S[5],S[6],S[7],S[0],S[1],62,0xbef9a3f7);
+	RND(S[1],S[2],S[3],S[4],S[5],S[6],S[7],S[0],63,0xc67178f2);
+
+	for (i = 0; i < 8; i++)
+		ctx->state[i] += S[i];
+}
+
+void blk_SHA256_Update(blk_SHA256_CTX *ctx, const void *data, size_t len)
+{
+	unsigned int len_buf = ctx->size & 63;
+
+	ctx->size += len;
+
+	/* Read the data into buf and process blocks as they get full */
+	if (len_buf) {
+		unsigned int left = 64 - len_buf;
+		if (len < left)
+			left = len;
+		memcpy(len_buf + ctx->buf, data, left);
+		len_buf = (len_buf + left) & 63;
+		len -= left;
+		data = ((const char *)data + left);
+		if (len_buf)
+			return;
+		blk_SHA256_Transform(ctx, ctx->buf);
+	}
+	while (len >= 64) {
+		blk_SHA256_Transform(ctx, data);
+		data = ((const char *)data + 64);
+		len -= 64;
+	}
+	if (len)
+		memcpy(ctx->buf, data, len);
+}
+
+void blk_SHA256_Final(unsigned char *digest, blk_SHA256_CTX *ctx)
+{
+	static const unsigned char pad[64] = { 0x80 };
+	unsigned int padlen[2];
+	int i;
+
+	/* Pad with a binary 1 (ie 0x80), then zeroes, then length */
+	padlen[0] = htonl((uint32_t)(ctx->size >> 29));
+	padlen[1] = htonl((uint32_t)(ctx->size << 3));
+
+	i = ctx->size & 63;
+	blk_SHA256_Update(ctx, pad, 1 + (63 & (55 - i)));
+	blk_SHA256_Update(ctx, padlen, 8);
+
+	/* copy output */
+	for (i = 0; i < 8; i++, digest += sizeof(uint32_t))
+		put_be32(digest, ctx->state[i]);
 }
