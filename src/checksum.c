@@ -26,7 +26,6 @@ void pkg_checksums(package *pkg) {
        src  = fopen(pkg->source.src[i], "rb");
        base = basename(pkg->source.src[i]);
 
-       printf("%s\n", pkg->source.src[i]);
        if (!src) {
            printf("error: Failed to generate checksums\n");
            exit(1);
@@ -59,7 +58,7 @@ void pkg_checksums(package *pkg) {
            base
        );
 
-       /* printf("%s\n", pkg->sums[i]); */
+       printf("%s\n", pkg->sums[i]);
        fclose(src);
    }
 
