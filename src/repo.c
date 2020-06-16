@@ -18,7 +18,7 @@ char **repo_load(void) {
 
     // 24 is below string + ":".
     tok = strtok(path, ":"); 
-    res = malloc(strlen(path) + 24 * sizeof(char *));
+    res = calloc(strlen(path) + 24, sizeof(char *));
 
     if (res == NULL) {
         printf("Failed to allocate memory\n");
