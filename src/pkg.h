@@ -22,6 +22,7 @@ struct source {
 typedef struct package {
     char *name;
     char **path;
+    char **sums;
 
     struct source  source;
     struct version version;
@@ -33,7 +34,6 @@ typedef struct package {
 void pkg_load(package **head, char *pkg_name);
 char **pkg_find(char *pkg_name);
 struct version pkg_version(char *repo_dir);
-void pkg_sources(struct package pkg);
 void cache_init(void);
 
 #endif

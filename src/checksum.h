@@ -1,3 +1,3 @@
 #include "pkg.h"
 
-char **pkg_checksums(package pkg);
+void pkg_checksums(package **head);

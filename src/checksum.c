@@ -11,11 +11,10 @@
 #include "checksum.h"
 #include "pkg.h"
 
-char **pkg_checksums(package pkg) {
-   char **repos = pkg.path; 
+void pkg_checksums(package **head) {
+   char **repos = head[0]->path; 
    FILE *file;
    char *lbuf = 0;
-   char **res = NULL;
    char *source;
    char *source_file;
    FILE *src;
@@ -23,6 +22,7 @@ char **pkg_checksums(package pkg) {
    unsigned char shasum[32];
    sha256_ctx ctx;
    int i;
+   int n = 0;
    int sbuf_size;
 
    chdir(*repos);
@@ -38,6 +38,8 @@ char **pkg_checksums(package pkg) {
        exit(1);
    }
 
+   head[0]->sums = (char **) malloc(sizeof(char*) * 1);
+
    while ((getline(&lbuf, &(size_t){0}, file)) > 0) {
        // Skip comments and blank lines.
        if ((lbuf)[0] == '#' || (lbuf)[0] == '\n') {
@@ -47,7 +49,7 @@ char **pkg_checksums(package pkg) {
        source      = strtok(lbuf, " 	\n");
        source_file = basename(source);
 
-       if (chdir(pkg.name) != 0) {
+       if (chdir(head[0]->name) != 0) {
            printf("error: Sources directory not accessible\n");
            exit(1);
        }
@@ -76,9 +78,9 @@ char **pkg_checksums(package pkg) {
        sha256_final(&ctx, shasum);
 
        sbuf_size = 67 * sizeof(int) + strlen(source_file);
-       char sbuf[sbuf_size];
+       head[0]->sums[n] = malloc(sbuf_size);
 
-       sprintf(sbuf, "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
+       sprintf(head[0]->sums[n], "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
 %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
 %02x%02x%02x%02x%02x%02x%02x%02xx%02x%02x%02x  %s", sbuf_size, 
            shasum[0],  shasum[1],  shasum[2],  shasum[3],
@@ -92,13 +94,15 @@ char **pkg_checksums(package pkg) {
            source_file
        );
 
-       fprintf(stderr, "%s\n", sbuf);
+       fprintf(stderr, "%s\n", head[0]->sums[n]);
+       /* strcpy(head[0]->sums[n], sbuf); */
+       ++n;
 
        fclose(src);
        chdir(SRC_DIR);
    }
 
+   head[0]->sums[n] = 0;
    free(lbuf);
    fclose(file);
-   return res;
 }

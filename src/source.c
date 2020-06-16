@@ -14,8 +14,8 @@ static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) {
     return written;
 }
 
-void pkg_sources(struct package pkg) {
-   char **repos = pkg.path; 
+void pkg_sources(package **head) {
+   char **repos = head[0]->path; 
    FILE *file;
    char *lbuf = 0;
    char *source;
@@ -43,25 +43,25 @@ void pkg_sources(struct package pkg) {
        source      = strtok(lbuf, " 	\n");
        source_file = basename(source);
 
-       mkdir(pkg.name, 0777);
+       mkdir(head[0]->name, 0777);
 
-       if (chdir(pkg.name) != 0) {
+       if (chdir(head[0]->name) != 0) {
            printf("error: Sources directory not accessible\n");
            exit(1);
        }
 
        if (access(source_file, F_OK) != -1) {
-           printf("%s (Found cached source %s)\n", pkg.name, source_file);
+           printf("%s (Found cached source %s)\n", head[0]->name, source_file);
         
        } else if (strncmp(source, "https://", 8) == 0 ||
                   strncmp(source, "http://",  7) == 0) {
-           printf("%s (Downloading %s)\n", pkg.name, source);
+           printf("%s (Downloading %s)\n", head[0]->name, source);
            source_download(source);
 
        } else if (chdir(*repos) == 0 && 
                   chdir(dirname(source)) == 0 && 
                   access(source_file, F_OK) != -1) {
-           printf("%s (Found local source %s)\n", pkg.name, source_file);
+           printf("%s (Found local source %s)\n", head[0]->name, source_file);
 
        } else {
            printf("error: No local file %s\n", source);
