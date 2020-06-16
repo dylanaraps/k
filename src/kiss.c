@@ -51,6 +51,7 @@ void args(int argc, char *argv[]) {
         }
         for(package *tmp = head; tmp; tmp = tmp->next) {
             pkg_checksums(tmp);
+            checksum_to_file(tmp);
         }
 
     } else if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
