@@ -21,12 +21,10 @@ struct source {
 
 typedef struct package {
     char *name;
+    char **sums;
 
     char **path;
     int  path_len;
-
-    char **sums;
-    int  sum_len;
 
     struct source source;
     struct version version;
