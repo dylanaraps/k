@@ -20,8 +20,11 @@ void pkg_sources(package *pkg) {
     char *p_src = 0;
     char *toke;
     char *base;
+    char *dest;
     char *src;
     char buf[LINE_MAX];
+    char cwd[PATH_MAX + 1];
+    char *pwd;
     int len = 0;
 
     pkg->src_len = 0;
@@ -70,7 +73,10 @@ void pkg_sources(package *pkg) {
         src  = strdup(toke);
         base = basename(src);
         toke = strtok_r(NULL, " 	\n", &p_src);
-        /* dest = toke ? strdup(toke) : ""; */
+        dest = toke ? strdup(toke) : "";
+
+        pkg->source.dest[pkg->src_len] = malloc(strlen(dest) + 1);
+        strcpy(pkg->source.dest[pkg->src_len], dest);
 
         mkdir(pkg->name, 0777);
 
@@ -100,11 +106,19 @@ void pkg_sources(package *pkg) {
             exit(1);
         }
 
+        pwd = getcwd(cwd, sizeof(cwd));
+        pkg->source.src[pkg->src_len] = malloc(strlen(pwd) + strlen(base) + 3);
+        strcpy(pkg->source.src[pkg->src_len], pwd);
+        strcat(pkg->source.src[pkg->src_len], "/");
+        strcat(pkg->source.src[pkg->src_len], base);
+
         ++pkg->src_len;
         chdir(SRC_DIR);
     }
 
    fclose(file);
+   pkg->source.src[pkg->src_len]  = 0;
+   pkg->source.dest[pkg->src_len] = 0;
 }
 
 void source_download(char *url) {
