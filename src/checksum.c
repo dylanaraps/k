@@ -11,8 +11,8 @@
 #include "checksum.h"
 #include "pkg.h"
 
-void pkg_checksums(package **head) {
-   char **repos = head[0]->path; 
+void pkg_checksums(package *pkg) {
+   char **repos = pkg->path; 
    FILE *file;
    char *lbuf = 0;
    char *source;
@@ -24,7 +24,7 @@ void pkg_checksums(package **head) {
    int i;
    int sbuf_size;
 
-   head[0]->sum_len = 0;
+   pkg->sum_len = 0;
    chdir(*repos);
    file = fopen("sources", "r");
    
@@ -38,7 +38,7 @@ void pkg_checksums(package **head) {
        exit(1);
    }
 
-   head[0]->sums = (char **) malloc(sizeof(char*) * 1);
+   pkg->sums = (char **) malloc(sizeof(char*) * 1);
 
    while ((getline(&lbuf, &(size_t){0}, file)) > 0) {
        // Skip comments and blank lines.
@@ -49,7 +49,7 @@ void pkg_checksums(package **head) {
        source      = strtok(lbuf, " 	\n");
        source_file = basename(source);
 
-       if (chdir(head[0]->name) != 0) {
+       if (chdir(pkg->name) != 0) {
            printf("error: Sources directory not accessible\n");
            exit(1);
        }
@@ -78,9 +78,9 @@ void pkg_checksums(package **head) {
        sha256_final(&ctx, shasum);
 
        sbuf_size = 67 * sizeof(int) + strlen(source_file);
-       head[0]->sums[head[0]->sum_len] = malloc(sbuf_size);
+       pkg->sums[pkg->sum_len] = malloc(sbuf_size);
 
-       sprintf(head[0]->sums[head[0]->sum_len], "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
+       sprintf(pkg->sums[pkg->sum_len], "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
 %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
 %02x%02x%02x%02x%02x%02x%02x%02xx%02x%02x%02x  %s", sbuf_size, 
            shasum[0],  shasum[1],  shasum[2],  shasum[3],
@@ -94,15 +94,15 @@ void pkg_checksums(package **head) {
            source_file
        );
 
-       fprintf(stderr, "%s\n", head[0]->sums[head[0]->sum_len]);
+       fprintf(stderr, "%s\n", pkg->sums[pkg->sum_len]);
        /* strcpy(head[0]->sums[n], sbuf); */
-       ++head[0]->sum_len;
+       ++pkg->sum_len;
 
        fclose(src);
        chdir(SRC_DIR);
    }
 
-   head[0]->sums[head[0]->sum_len] = 0;
+   pkg->sums[pkg->sum_len] = 0;
    free(lbuf);
    fclose(file);
 }

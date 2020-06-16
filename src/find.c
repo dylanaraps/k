@@ -8,13 +8,13 @@
 #include "find.h"
 #include "pkg.h"
 
-void pkg_find(package **head) {
+void pkg_find(package *pkg) {
    char **repos = REPOS;
    char *pwd;
    char cwd[PATH_MAX];
 
-   head[0]->path_len = 0;
-   head[0]->path = (char **) malloc(sizeof(char*) * 1);
+   pkg->path_len = 0;
+   pkg->path = (char **) malloc(sizeof(char*) * 1);
 
    while (*repos) {
        if (chdir(*repos) != 0) {
@@ -22,26 +22,26 @@ void pkg_find(package **head) {
            exit(1);
        }
 
-       if (chdir(head[0]->name) == 0) {
+       if (chdir(pkg->name) == 0) {
            pwd = getcwd(cwd, sizeof(cwd));
-           head[0]->path[head[0]->path_len] = malloc(sizeof(char) * ((strlen(pwd) + 1)));
+           pkg->path[pkg->path_len] = malloc(sizeof(char) * ((strlen(pwd) + 1)));
 
-           if (head[0]->path[head[0]->path_len] == NULL) {
+           if (pkg->path[pkg->path_len] == NULL) {
                printf("Failed to allocate memory\n");
                exit(1);
            }
 
-           strcpy(head[0]->path[++head[0]->path_len - 1], pwd);
+           strcpy(pkg->path[++pkg->path_len - 1], pwd);
        }
 
        ++repos;
    }
 
    chdir(PWD);
-   head[0]->path[head[0]->path_len] = 0;
+   pkg->path[pkg->path_len] = 0;
 
-   if (head[0]->path_len == 0) {
-       printf("error: %s not in any repository\n", head[0]->name);
+   if (pkg->path_len == 0) {
+       printf("error: %s not in any repository\n", pkg->name);
        exit(1);
    }
 }

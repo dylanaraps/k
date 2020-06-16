@@ -23,7 +23,7 @@ void pkg_load(package **head, char *pkg_name) {
     new_pkg->next = NULL;
     new_pkg->name = pkg_name;
 
-    pkg_find(&new_pkg);
+    pkg_find(new_pkg);
 
     if (!*head) {
         new_pkg->prev = NULL;
