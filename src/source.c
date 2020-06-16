@@ -20,7 +20,10 @@ void pkg_sources(package **head) {
    char *lbuf = 0;
    char *source;
    char *source_file;
+   char cwd[PATH_MAX];
+   char *pwd;
 
+   head[0]->src_len = 0;
    chdir(*repos);
    file = fopen("sources", "r");
    
@@ -33,6 +36,8 @@ void pkg_sources(package **head) {
        printf("error: Sources file invalid\n");
        exit(1);
    }
+
+   head[0]->srcs = (char **) malloc(sizeof(char*) * 1);
 
    while ((getline(&lbuf, &(size_t){0}, file)) > 0) {
        // Skip comments and blank lines.
@@ -68,9 +73,23 @@ void pkg_sources(package **head) {
            exit(1);
        }
 
+       pwd = getcwd(cwd, sizeof(cwd));
+       head[0]->srcs[head[0]->src_len] = malloc(strlen(pwd) + strlen(source_file) + 2);
+
+       if (head[0]->srcs[head[0]->src_len] == NULL) {
+           printf("Failed to allocate memory\n");
+           exit(1);
+       }
+
+       strcpy(head[0]->srcs[head[0]->src_len], pwd);
+       strcat(head[0]->srcs[head[0]->src_len], "/");
+       strcat(head[0]->srcs[head[0]->src_len], source_file);
+       ++head[0]->src_len;
+
        chdir(SRC_DIR);
    }
 
+   head[0]->srcs[head[0]->src_len] = 0;
    free(lbuf);
    fclose(file);
 }

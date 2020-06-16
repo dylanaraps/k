@@ -57,20 +57,41 @@ void args(int argc, char *argv[]) {
             printf("-------------------\n");
 
             printf("Sources:\n");
+            printf("%d\n", src_len);
+            exit(0);
             for (int i = 0; i < root->src_len; i++) {
-                printf("%d -> %s\n", i, root->srcs[i]);
+                printf("%s\n", root->srcs[i]);
             }
-            printf("\nSums:\n");
-            for (int i = 0; i < root->sum_len; i++) {
-                printf("%d -> %s\n", i, root->sums[i]);
-            }
+            /* printf("Paths:\n"); */
+            /* while(root->path) { */
+            /*     printf("%s\n", *root->path); */
+            /*     ++root->path; */
+            /* } */
 
-            printf("Paths:\n");
-            for (int i = 0; i < root->path_len; i++) {
-                printf("%d -> %s\n", i, root->path[i]);
-            }
+            /* printf("Sums:\n"); */
+            /* while(root->sums) { */
+            /*     printf("%s\n", *root->sums); */
+            /*     ++root->sums; */
+            /* } */
 
-            root = root->next;
+            /* printf("Sources:\n"); */
+            /* while(root->srcs) { */
+            /*     printf("%s\n", *root->srcs); */
+            /*     ++root->srcs; */
+            /* } */
+
+/* typedef struct package { */
+/*     char *name; */
+/*     char **path; */
+/*     char **sums; */
+/*     char **srcs; */
+
+/*     struct source  source; */
+/*     struct version version; */
+
+/*     struct package *next; */
+/*     struct package *prev; */
+/* } package; */
         }
 
 

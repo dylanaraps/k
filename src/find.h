@@ -1,1 +1,3 @@
-char **pkg_find(char *pkg_name);
+#include "pkg.h"
+
+void pkg_find(package **head);

@@ -22,9 +22,9 @@ void pkg_checksums(package **head) {
    unsigned char shasum[32];
    sha256_ctx ctx;
    int i;
-   int n = 0;
    int sbuf_size;
 
+   head[0]->sum_len = 0;
    chdir(*repos);
    file = fopen("sources", "r");
    
@@ -78,9 +78,9 @@ void pkg_checksums(package **head) {
        sha256_final(&ctx, shasum);
 
        sbuf_size = 67 * sizeof(int) + strlen(source_file);
-       head[0]->sums[n] = malloc(sbuf_size);
+       head[0]->sums[head[0]->sum_len] = malloc(sbuf_size);
 
-       sprintf(head[0]->sums[n], "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
+       sprintf(head[0]->sums[head[0]->sum_len], "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
 %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
 %02x%02x%02x%02x%02x%02x%02x%02xx%02x%02x%02x  %s", sbuf_size, 
            shasum[0],  shasum[1],  shasum[2],  shasum[3],
@@ -94,15 +94,15 @@ void pkg_checksums(package **head) {
            source_file
        );
 
-       fprintf(stderr, "%s\n", head[0]->sums[n]);
+       fprintf(stderr, "%s\n", head[0]->sums[head[0]->sum_len]);
        /* strcpy(head[0]->sums[n], sbuf); */
-       ++n;
+       ++head[0]->sum_len;
 
        fclose(src);
        chdir(SRC_DIR);
    }
 
-   head[0]->sums[n] = 0;
+   head[0]->sums[head[0]->sum_len] = 0;
    free(lbuf);
    fclose(file);
 }
