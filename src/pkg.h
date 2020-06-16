@@ -3,6 +3,8 @@
 
 #include <limits.h>
 
+#define PKG_DB "/var/db/kiss/installed/"
+
 extern char **REPOS;
 extern int  REPO_LEN;
 extern char PWD[PATH_MAX];

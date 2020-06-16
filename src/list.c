@@ -10,11 +10,10 @@
 
 void pkg_list(char *pkg_name) {
     struct version version;
-    char *db = "/var/db/kiss/installed"; 
     char *path;
     char cwd[PATH_MAX];
 
-    if (chdir(db) != 0) {
+    if (chdir(PKG_DB) != 0) {
         printf("error: Package db not accessible\n");
         exit(1);
     }
@@ -36,9 +35,8 @@ void pkg_list_all(void) {
     struct version version;
     struct dirent  **list;
     int tot;
-    char db[] = "/var/db/kiss/installed";
 
-    if (chdir(db) != 0) {
+    if (chdir(PKG_DB) != 0) {
         printf("error: Failed to access package db\n");
         exit(1);
     }
@@ -59,7 +57,7 @@ void pkg_list_all(void) {
                     version.version, version.release);
         }
 
-        chdir(db);
+        chdir(PKG_DB);
     }
 }
 
