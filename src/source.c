@@ -38,8 +38,8 @@ void pkg_sources(package *pkg) {
        exit(1);
    }
 
-   pkg->source.src  = malloc(sizeof(char*));
-   pkg->source.dest = malloc(sizeof(char*));
+   pkg->source.src  = (char **) malloc(sizeof(char*));
+   pkg->source.dest = (char **) malloc(sizeof(char*));
 
    while ((getline(&lbuf, &(size_t){0}, file)) > 0) {
        // Skip comments and blank lines.
@@ -84,7 +84,7 @@ void pkg_sources(package *pkg) {
        }
 
        pwd = getcwd(cwd, sizeof(cwd));
-       pkg->source.src[pkg->src_len]  = malloc(strlen(pwd) + strlen(name) + 2);
+       pkg->source.src[pkg->src_len]  = malloc(strlen(pwd) + strlen(name) + 3);
        pkg->source.dest[pkg->src_len] = malloc(strlen(dest) + 1);
 
        if (pkg->source.src[pkg->src_len] == NULL ||
@@ -102,8 +102,8 @@ void pkg_sources(package *pkg) {
        chdir(SRC_DIR);
    }
 
-   pkg->source.src[pkg->src_len] = 0;
-   pkg->source.dest[pkg->src_len] = 0;
+   pkg->source.src[pkg->src_len + 1] = 0;
+   pkg->source.dest[pkg->src_len + 1] = 0;
    free(lbuf);
    fclose(file);
 }
