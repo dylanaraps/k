@@ -49,9 +49,9 @@ void args(int argc, char *argv[]) {
             pkg_sources(tmp);
         }
 
-        for(package *tmp = head; tmp; tmp = tmp->next) {
-            pkg_checksums(tmp);
-        }
+        /* for(package *tmp = head; tmp; tmp = tmp->next) { */
+        /*     pkg_checksums(tmp); */
+        /* } */
 
     } else if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
         curl_global_init(CURL_GLOBAL_ALL);

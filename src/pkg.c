@@ -20,8 +20,14 @@ void pkg_load(package **head, char *pkg_name) {
         exit(1);
     }
 
-    new_pkg->next = NULL;
-    new_pkg->name = pkg_name;
+    new_pkg->next        = NULL;
+    new_pkg->name        = pkg_name;
+    new_pkg->sums        = 0;
+    new_pkg->path        = 0;
+    new_pkg->source.src  = 0;
+    new_pkg->source.dest = 0;
+    new_pkg->src_len     = 0;
+    new_pkg->path_len    = 0;
 
     pkg_find(new_pkg);
 

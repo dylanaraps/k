@@ -15,96 +15,85 @@ static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) {
 }
 
 void pkg_sources(package *pkg) {
-   char **repos = pkg->path; 
-   FILE *file;
-   char *lbuf = 0;
-   char *source;
-   char *name;
-   char *dest;
-   char cwd[PATH_MAX];
-   char *pwd;
+    char *repo = pkg->path[0]; 
+    FILE *file;
+    char *p_src = 0;
+    char *toke;
+    char *base;
+    char *src;
+    char buf[LINE_MAX];
 
-   pkg->src_len = 0;
-   chdir(repos[0]);
-   file = fopen("sources", "r");
-   
-   if (chdir(SRC_DIR) != 0) {
-       printf("error: Sources directory not accessible\n"); 
-       exit(1);
-   }
+    pkg->src_len = 0;
+    chdir(repo);
+    file = fopen("sources", "r");
 
-   if (!file) {
-       printf("error: Sources file invalid\n");
-       exit(1);
-   }
+    if (chdir(SRC_DIR) != 0) {
+        printf("error: Sources directory not accessible\n"); 
+        exit(1);
+    }
 
-   pkg->source.src  = (char **) malloc(sizeof(char*));
-   pkg->source.dest = (char **) malloc(sizeof(char*));
+    if (!file) {
+        printf("error: Sources file invalid\n");
+        exit(1);
+    }
 
-   while ((getline(&lbuf, &(size_t){0}, file)) > 0) {
-       // Skip comments and blank lines.
-       if ((lbuf)[0] == '#' || (lbuf)[0] == '\n') {
-           continue;
-       }
+    pkg->source.src  = (char **) malloc(sizeof(char*) * 1);
+    pkg->source.dest = (char **) malloc(sizeof(char*) * 1);
 
-       source = strtok(lbuf, " 	\n");
-       dest   = strtok(NULL, " 	\n");
-       name   = basename(source);
+    if (!pkg->source.src || !pkg->source.dest) {
+        printf("error: Failed to allocate memory\n"); 
+        exit(1);
+    }
 
-       if (dest == NULL) {
-           dest = "";
-       }
+    while (fgets(buf, sizeof buf, file) != NULL) {
+        if (buf[0] == '#' || buf[0] == '\n') {
+            continue;
+        }
 
-       mkdir(pkg->name, 0777);
+        toke = strtok_r(buf,  " 	\n", &p_src);
 
-       if (chdir(pkg->name) != 0) {
-           printf("error: Sources directory not accessible\n");
-           exit(1);
-       }
+        if (!toke) {
+            printf("error: Sources file invalid\n");
+            exit(1);
+        }
 
-       if (access(name, F_OK) != -1) {
-           printf("%s (Found cached source %s)\n", pkg->name, name);
-        
-       } else if (strncmp(source, "https://", 8) == 0 ||
-                  strncmp(source, "http://",  7) == 0) {
-           printf("%s (Downloading %s)\n", pkg->name, source);
-           source_download(source);
+        src  = strdup(toke);
+        base = basename(src);
+        toke = strtok_r(NULL, " 	\n", &p_src);
+        /* dest = toke ? strdup(toke) : ""; */
 
-       } else if (strncmp(source, "git+", 4) == 0) {
-           printf("%s (Skipping git source.. %s)\n", pkg->name, source);
+        mkdir(pkg->name, 0777);
 
-       } else if (chdir(*repos) == 0 && 
-                  chdir(dirname(source)) == 0 && 
-                  access(name, F_OK) != -1) {
-           printf("%s (Found local source %s)\n", pkg->name, name);
+        if (chdir(pkg->name) != 0) {
+            printf("error: Sources directory not accessible\n");
+            exit(1);
+        }
 
-       } else {
-           printf("error: No local file %s\n", source);
-           exit(1);
-       }
+        if (access(base, F_OK) != -1) {
+            printf("%s (Found cached source %s)\n", pkg->name, base);
 
-       pwd = getcwd(cwd, sizeof(cwd));
-       pkg->source.src[pkg->src_len]  = malloc(strlen(pwd) + strlen(name) + 3);
-       pkg->source.dest[pkg->src_len] = malloc(strlen(dest) + 1);
+        } else if (strncmp(src, "https://", 8) == 0 ||
+                   strncmp(src, "http://",  7) == 0) {
+            printf("%s (Downloading %s)\n", pkg->name, src);
+            source_download(src);
 
-       if (pkg->source.src[pkg->src_len] == NULL ||
-           pkg->source.dest[pkg->src_len] == NULL) {
-           printf("Failed to allocate memory\n");
-           exit(1);
-       }
+        } else if (strncmp(src, "git+", 4) == 0) {
+            printf("%s (Skipping git source.. %s)\n", pkg->name, src);
 
-       strcpy(pkg->source.src[pkg->src_len], pwd);
-       strcat(pkg->source.src[pkg->src_len], "/");
-       strcat(pkg->source.src[pkg->src_len], name);
-       strcpy(pkg->source.dest[pkg->src_len], dest);
-       ++pkg->src_len;
+        } else if (chdir(repo) == 0 && 
+                   chdir(dirname(src)) == 0 && 
+                   access(base, F_OK) != -1) {
+            printf("%s (Found local source %s)\n", pkg->name, base);
 
-       chdir(SRC_DIR);
-   }
+        } else {
+            printf("error: No local file %s\n", src);
+            exit(1);
+        }
 
-   pkg->source.src[pkg->src_len + 1] = 0;
-   pkg->source.dest[pkg->src_len + 1] = 0;
-   free(lbuf);
+        ++pkg->src_len;
+        chdir(SRC_DIR);
+    }
+
    fclose(file);
 }
 
