@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "repo.h"
+#include "pkg.h"
 
 char **repo_load(void) {
     char *path = strdup(getenv("KISS_PATH"));
@@ -20,7 +21,7 @@ char **repo_load(void) {
     tok = strtok(path, ":"); 
     res = calloc(strlen(path) + 24, sizeof(char *));
 
-    if (res == NULL) {
+    if (!res) {
         printf("Failed to allocate memory\n");
         exit(1);
     }
@@ -30,6 +31,7 @@ char **repo_load(void) {
         tok = strtok(NULL, ":");
     }
     res[n] = "/var/db/kiss/installed";
+    REPO_LEN = n + 1;
 
     return res;
 }

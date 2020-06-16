@@ -9,15 +9,15 @@
 #include "pkg.h"
 
 void pkg_find(package *pkg) {
-   char **repos = REPOS;
    char *pwd;
    char cwd[PATH_MAX];
+   int i;
 
    pkg->path_len = 0;
    pkg->path = (char **) malloc(sizeof(char*) * 1);
 
-   while (*repos) {
-       if (chdir(*repos) != 0) {
+   for (i =0; i < REPO_LEN; i++) {
+       if (chdir(REPOS[i]) != 0) {
            printf("error: Repository not accessible\n");       
            exit(1);
        }
@@ -33,8 +33,6 @@ void pkg_find(package *pkg) {
 
            strcpy(pkg->path[++pkg->path_len - 1], pwd);
        }
-
-       ++repos;
    }
 
    chdir(PWD);

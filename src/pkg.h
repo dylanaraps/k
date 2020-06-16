@@ -4,6 +4,7 @@
 #include <limits.h>
 
 extern char **REPOS;
+extern int  REPO_LEN;
 extern char PWD[PATH_MAX];
 extern const char *HOME;
 extern const char *XDG_CACHE_HOME;

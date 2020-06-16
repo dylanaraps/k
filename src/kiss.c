@@ -14,6 +14,7 @@
 #include "pkg.h"
 
 char **REPOS = NULL;
+int  REPO_LEN = 0;
 char PWD[PATH_MAX];
 const char *HOME;
 const char *XDG_CACHE_HOME;
