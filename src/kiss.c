@@ -13,13 +13,15 @@
 #include "list.h"
 #include "pkg.h"
 
+char *OLD_CWD = NULL;
 char **REPOS = NULL;
 char *PKG = NULL;
 int  REPO_LEN = 0;
-char PWD[PATH_MAX];
 const char *HOME;
 const char *XDG_CACHE_HOME;
 char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *LOG_DIR, *BIN_DIR;
+char *OLD_PWD;
+char old_cwd_buf[PATH_MAX+1];
 
 void args(int argc, char *argv[]) {
     package *head = NULL;
@@ -101,7 +103,6 @@ void args(int argc, char *argv[]) {
 }
 
 int main (int argc, char *argv[]) {
-    getcwd(PWD, sizeof(PWD));
     cache_init();
     atexit(cache_destroy);
     REPOS = repo_load();

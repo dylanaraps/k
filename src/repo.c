@@ -17,7 +17,7 @@ char **repo_load(void) {
         log_error("KISS_PATH must be set");
     }
 
-    // 24 is below string + ":".
+    // 24 is "/var/db/kiss/installed" (22) + ":" + "\0".
     tok = strtok(path, ":"); 
     res = calloc(strlen(path) + 24, sizeof(char *));
 

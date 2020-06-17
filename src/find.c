@@ -11,9 +11,10 @@
 
 void pkg_find(package *pkg) {
    char *pwd;
-   char cwd[PATH_MAX];
+   char pwd_buf[PATH_MAX + 1];
    int i;
 
+   SAVE_CWD;
    pkg->path_len = 0;
    pkg->path = (char **) malloc(sizeof(char*) * 1);
 
@@ -23,7 +24,7 @@ void pkg_find(package *pkg) {
        }
 
        if (chdir(pkg->name) == 0) {
-           pwd = getcwd(cwd, sizeof(cwd));
+           pwd = getcwd(pwd_buf, sizeof(pwd_buf));
            pkg->path[pkg->path_len] = malloc(sizeof(char) * ((strlen(pwd) + 1)));
 
            if (pkg->path[pkg->path_len] == NULL) {
@@ -34,7 +35,7 @@ void pkg_find(package *pkg) {
        }
    }
 
-   chdir(PWD);
+   LOAD_CWD;
    pkg->path[pkg->path_len] = 0;
 
    if (pkg->path_len == 0) {

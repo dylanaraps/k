@@ -14,6 +14,8 @@ void pkg_list(char *pkg_name) {
     char *path;
     char cwd[PATH_MAX];
 
+    SAVE_CWD;
+
     if (chdir(PKG_DB) != 0) {
         log_error("Package DB not accessible");
     }
@@ -28,7 +30,7 @@ void pkg_list(char *pkg_name) {
         printf("%s %s %s\n", pkg_name, version.version, version.release);
     }
 
-    chdir(PWD);
+    LOAD_CWD;
 }
 
 void pkg_list_all(void) {

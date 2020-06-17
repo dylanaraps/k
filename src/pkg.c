@@ -62,6 +62,8 @@ void cache_init(void) {
         log_error("HOME is NULL");
     }
 
+    SAVE_CWD;
+
     if (!CAC_DIR || CAC_DIR[0] == '\0') {
         chdir(HOME);
 
@@ -128,7 +130,7 @@ void cache_init(void) {
     }
     BIN_DIR = strdup(getcwd(cwd, sizeof(cwd)));
 
-    chdir(PWD);
+    LOAD_CWD;
     return;
 
 err:
