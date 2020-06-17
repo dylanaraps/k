@@ -27,11 +27,11 @@ void pkg_checksums(package *pkg) {
 
     for (i = 0; i < pkg->src_len; i++) {
         src  = fopen(pkg->source.src[i], "rb");
-        base = basename(pkg->source.src[i]);
 
         if (!src)
             log_error("Failed to generate checksums");
 
+        base = basename(pkg->source.src[i]);
         buf_len = 67 * sizeof(char) + strlen(base);
         pkg->sums[i] = xmalloc(buf_len);
 
