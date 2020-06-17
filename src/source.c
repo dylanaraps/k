@@ -78,7 +78,7 @@ void pkg_sources(package *pkg) {
             source_download(src);
 
         } else if (strncmp(src, "git+", 4) == 0) {
-            log_warn("Skipping git source (not yet supported) %s", src);
+            log_error("Skipping git source (not yet supported) %s", src);
 
         } else if (chdir(repo) == 0 && 
                    chdir(dirname(src)) == 0 && 

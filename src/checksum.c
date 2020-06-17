@@ -28,16 +28,14 @@ void pkg_checksums(package *pkg) {
         src  = fopen(pkg->source.src[i], "rb");
         base = basename(pkg->source.src[i]);
 
-        if (!src) {
+        if (!src)
             log_error("Failed to generate checksums");
-        }
 
         pkg->sums[i] = xmalloc(67 * sizeof(char) + strlen(base));
 
         sha256_init(&ctx);
-        while ((j = fread(buf, 1, sizeof(buf), src)) > 0) {
+        while ((j = fread(buf, 1, sizeof(buf), src)) > 0)
             sha256_update(&ctx, buf, j);
-        }
         sha256_final(&ctx, shasum);
 
         sprintf(pkg->sums[i], "%02x%02x%02x%02x%02x%02x\
@@ -61,58 +59,46 @@ void pkg_checksums(package *pkg) {
 
 void pkg_verify(package *pkg) {
     FILE *file;
-    char buf[LINE_MAX];
+    char *buf = 0;
     int i = 0;
 
     log_info("Verifying checksums...");
     pkg_checksums(pkg);
 
-    if (pkg->src_len == 0) {
+    if (pkg->src_len == 0)
         log_error("Sources file does not exist");
-    }
 
-    if (chdir(*pkg->path) != 0) {
-        log_error("Repository not accessible");
-    }
-
+    xchdir(*pkg->path);
     file = fopen("checksums", "r");
 
-    if (!file) {
+    if (!file)
         log_error("Checksums file missing, run 'kiss c pkg'");
-    }
 
-    // TODO FILE SIZE MISMATCHES
-    while (fgets(buf, sizeof buf, file) != NULL) {
+    while ((getline(&buf, &(size_t){0}, file) != -1)) {
         buf[strcspn(buf, "\n")] = 0;
 
-        if (strcmp(pkg->sums[i], buf) != 0 || i > pkg->src_len) {
+        if (strcmp(pkg->sums[i], buf) != 0 || i > pkg->src_len)
             log_error("Checksums mismatch'");
-            exit(1);
-        }
 
         i++;
     }
 
     fclose(file);
+    free(buf);
     log_info("Verified checksums");
 }
 
 void checksum_to_file(package *pkg) {
     FILE *file;
 
-    if (chdir(*pkg->path) != 0) {
-        log_error("Repository not accessible");
-    }
-
+    xchdir(*pkg->path);
     file = fopen("checksums", "w");
 
-    if (!file) {
+    if (!file)
         log_error("Cannot write checksums");
-    }
 
-    for (int i = 0; i < pkg->src_len; i++) {
+    for (int i = 0; i < pkg->src_len; i++)
         fprintf(file, "%s\n", pkg->sums[i]);
-    }
 
     fclose(file);
     log_info("Generated checksums");

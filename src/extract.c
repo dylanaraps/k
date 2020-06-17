@@ -17,10 +17,11 @@
 
 
 void pkg_extract(package *pkg) {
-    int in_fd;
-    int out_fd;
+    FILE *in;
+    FILE *out;
     int err;
-    unsigned char buffer[4096];
+    int buf_len = 4096;
+    unsigned char buffer[buf_len];
     char *src;
     char *dest;
     int i;
@@ -65,37 +66,36 @@ void pkg_extract(package *pkg) {
             );
 
         } else if (access(pkg->source.src[i], F_OK) != -1) {
-            dest = basename(pkg->source.src[i]);
-
             log_info("Copying    %s", pkg->source.src[i]);
-            in_fd = open(pkg->source.src[i], O_RDONLY);
 
-            if (in_fd == -1)
+            dest = basename(pkg->source.src[i]);
+            in   = fopen(pkg->source.src[i], "r");
+
+            if (!in)
                 log_error("File not accessible %s\n", pkg->source.src[i]);
 
-            out_fd = open(dest, O_CREAT | O_WRONLY, 0666);
+            out = fopen(dest, "w");
 
-            if (out_fd == -1)
+            if (!out)
                 log_error("Cannot copy file %s\n", pkg->source.src[i]);
 
             while (1) {
-                err = read(in_fd, buffer, 4096); 
+                err = fread(buffer, buf_len, buf_len, in); 
 
-                if (err == -1) {
+                if (err == -1)
                     log_error("File not accessible %s\n", pkg->source.src[i]);
 
-                } else if (err == 0) {
+                if (err == 0)
                     break;
-                }
 
-                err = write(out_fd, buffer, err);
+                err = fwrite(buffer, buf_len, buf_len, out);
 
                 if (err == -1)
                     log_error("Cannot copy file %s\n", pkg->source.src[i]);
             }
 
-            close(in_fd);
-            close(out_fd);
+            fclose(in);
+            fclose(out);
 
         } else {
             log_error("Source not found %s", pkg->source.src[i]);
