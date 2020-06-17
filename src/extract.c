@@ -66,7 +66,9 @@ void pkg_extract(package *pkg) {
             strcmp(src, ".txz")  == 0 ||
             strcmp(src, ".lz")   == 0) {
             printf("Extracting %s...\n", pkg->source.src[i]);
-            extract(pkg->source.src[i], 1, ARCHIVE_EXTRACT_PERM);
+            extract(pkg->source.src[i], 1, ARCHIVE_EXTRACT_PERM | 
+                                           ARCHIVE_MATCH_MTIME | 
+                                           ARCHIVE_MATCH_CTIME);
 
         } else if (access(pkg->source.src[i], F_OK) != -1) {
             dest = basename(pkg->source.src[i]);
