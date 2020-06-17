@@ -16,95 +16,7 @@ static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) {
     return written;
 }
 
-void pkg_sources(package *pkg) {
-    char *repo = pkg->path[0]; 
-    FILE *file;
-    char *p_src = 0;
-    char *toke;
-    char *base;
-    char *dest;
-    char *src;
-    char buf[LINE_MAX];
-    char cwd[PATH_MAX + 1];
-    char *pwd;
-    int len = 0;
-
-    pkg->src_len = 0;
-    xchdir(repo);
-    file = fopen("sources", "r");
-
-    if (!file)
-        log_error("Sources file invalid");
-
-    xchdir(SRC_DIR);
-
-    // Guess at the length of resulting items based on non-
-    // blank lines in file.
-    while (fgets(buf, sizeof buf, file) != NULL) {
-        if (buf[0] != '#' && buf[0] != '\n')
-            len++;
-    }
-    rewind(file);
-
-    pkg->source.src  = xmalloc(sizeof(char *) * (len + 1));
-    pkg->source.dest = xmalloc(sizeof(char *) * (len + 1));
-
-    while (fgets(buf, sizeof buf, file) != NULL) {
-        if (buf[0] == '#' || buf[0] == '\n')
-            continue;
-
-        toke = strtok_r(buf,  " 	\n", &p_src);
-
-        if (!toke)
-            log_error("Sources file invalid");
-
-        src  = strdup(toke);
-        base = basename(src);
-        toke = strtok_r(NULL, " 	\n", &p_src);
-        dest = toke ? strdup(toke) : "";
-
-        pkg->source.dest[pkg->src_len] = xmalloc(strlen(dest) + 1);
-        strcpy(pkg->source.dest[pkg->src_len], dest);
-
-        mkdir(pkg->name, 0777);
-        xchdir(pkg->name);
-
-        if (access(base, F_OK) != -1) {
-            log_info("Found cached source %s", base);
-
-        } else if (strncmp(src, "https://", 8) == 0 ||
-                   strncmp(src, "http://",  7) == 0) {
-            log_info("Downloading %s", src);
-            source_download(src);
-
-        } else if (strncmp(src, "git+", 4) == 0) {
-            log_error("Skipping git source (not yet supported) %s", src);
-
-        } else if (chdir(repo) == 0 && 
-                   chdir(dirname(src)) == 0 && 
-                   access(base, F_OK) != -1) {
-            log_info("Found  local source %s/%s", base);
-
-        } else {
-            log_error("No local file %s", base);
-        }
-
-        pwd = getcwd(cwd, sizeof(cwd));
-        pkg->source.src[pkg->src_len] = xmalloc(strlen(pwd) + strlen(base) + 3);
-        strcpy(pkg->source.src[pkg->src_len], pwd);
-        strcat(pkg->source.src[pkg->src_len], "/");
-        strcat(pkg->source.src[pkg->src_len], base);
-
-        ++pkg->src_len;
-        xchdir(SRC_DIR);
-    }
-
-   fclose(file);
-   pkg->source.src[pkg->src_len]  = 0;
-   pkg->source.dest[pkg->src_len] = 0;
-}
-
-void source_download(char *url) {
+static void download(char *url) {
     CURL *curl = curl_easy_init();
     char *name = basename(url);
     FILE *file = fopen(name, "wb");
@@ -121,4 +33,88 @@ void source_download(char *url) {
 
     fclose(file);
     curl_easy_cleanup(curl);
+}
+
+void pkg_sources(package *pkg) {
+    char *repo = pkg->path[0]; 
+    FILE *file;
+    char *toke;
+    char *base;
+    char *dest;
+    char *src;
+    char *buf = 0;
+    char cwd[PATH_MAX + 1];
+    char *pwd;
+    int len = 0;
+
+    pkg->src_len = 0;
+    xchdir(repo);
+    file = fopen("sources", "r");
+
+    if (!file)
+        log_error("Sources file invalid");
+
+    xchdir(SRC_DIR);
+
+    // Guess at the length of resulting items based on non-
+    // blank lines in file.
+    while (getline(&buf, &(size_t){0}, file) != -1)
+        if (buf[0] != '#' && buf[0] != '\n')
+            len++;
+    rewind(file);
+
+    pkg->source.src  = xmalloc(sizeof(char *) * (len + 1));
+    pkg->source.dest = xmalloc(sizeof(char *) * (len + 1));
+
+    while ((getline(&buf, &(size_t){0}, file) != -1)) {
+        if (buf[0] == '#' || buf[0] == '\n')
+            continue;
+
+        toke = strtok(buf,  " 	\n");
+
+        if (!toke)
+            log_error("Sources file invalid");
+
+        src  = strdup(toke);
+        base = basename(src);
+        toke = strtok(NULL, " 	\n");
+        dest = toke ? strdup(toke) : "";
+
+        pkg->source.dest[pkg->src_len] = xmalloc(strlen(dest) + 1);
+        strcpy(pkg->source.dest[pkg->src_len], dest);
+
+        mkdir(pkg->name, 0777);
+        xchdir(pkg->name);
+
+        if (access(base, F_OK) != -1) {
+            log_info("Found cached source %s", base);
+
+        } else if (strncmp(src, "https://", 8) == 0 ||
+                   strncmp(src, "http://",  7) == 0) {
+            log_info("Downloading %s", src);
+            download(src);
+
+        } else if (strncmp(src, "git+", 4) == 0) {
+            log_error("Skipping git source (not yet supported) %s", src);
+
+        } else if (chdir(repo) == 0 && 
+                   chdir(dirname(src)) == 0 && 
+                   access(base, F_OK) != -1) {
+            log_info("Found local source %s/%s", base);
+
+        } else {
+            log_error("No local file %s", base);
+        }
+
+        pwd = getcwd(cwd, sizeof(cwd));
+        pkg->source.src[pkg->src_len] = xmalloc(strlen(pwd) + strlen(base) + 5);
+        sprintf(pkg->source.src[pkg->src_len], "%s/%s", pwd, base);
+
+        ++pkg->src_len;
+        xchdir(SRC_DIR);
+    }
+
+   fclose(file);
+   pkg->source.src[pkg->src_len]  = 0;
+   pkg->source.dest[pkg->src_len] = 0;
 }
