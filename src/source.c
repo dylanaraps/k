@@ -68,7 +68,7 @@ void pkg_sources(package *pkg) {
         }
 
         src  = strdup(toke);
-        base = strchr(src, '/');
+        base = basename(src);
         toke = strtok_r(NULL, " 	\n", &p_src);
         dest = toke ? strdup(toke) : "";
 
@@ -118,7 +118,7 @@ void pkg_sources(package *pkg) {
 
 void source_download(char *url) {
     CURL *curl = curl_easy_init();
-    char *name = strchr(url, '/');
+    char *name = basename(url);
     FILE *file = fopen(name, "wb");
 
     curl_easy_setopt(curl, CURLOPT_URL, url);

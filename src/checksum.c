@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <libgen.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "sha.h"
 #include "log.h"
@@ -24,7 +25,7 @@ void pkg_checksums(package *pkg) {
 
     for (i = 0; i < pkg->src_len; i++) {
         src  = fopen(pkg->source.src[i], "rb");
-        base = strchr(pkg->source.src[i], '/');
+        base = basename(pkg->source.src[i]);
 
         if (!src) {
             log_error("Failed to generate checksums");
