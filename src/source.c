@@ -30,39 +30,33 @@ void pkg_sources(package *pkg) {
     int len = 0;
 
     pkg->src_len = 0;
-    chdir(repo);
+    xchdir(repo);
     file = fopen("sources", "r");
 
-    if (chdir(SRC_DIR) != 0) {
-        log_error("Sources directory not accessible");
-    }
-
-    if (!file) {
+    if (!file)
         log_error("Sources file invalid");
-    }
+
+    xchdir(SRC_DIR);
 
     // Guess at the length of resulting items based on non-
     // blank lines in file.
     while (fgets(buf, sizeof buf, file) != NULL) {
-        if (buf[0] != '#' && buf[0] != '\n') {
+        if (buf[0] != '#' && buf[0] != '\n')
             len++;
-        }
     }
     rewind(file);
 
-    pkg->source.src  = xmalloc(sizeof(char *) * len + 1);
-    pkg->source.dest = xmalloc(sizeof(char *) * len + 1);
+    pkg->source.src  = xmalloc(sizeof(char *) * (len + 1));
+    pkg->source.dest = xmalloc(sizeof(char *) * (len + 1));
 
     while (fgets(buf, sizeof buf, file) != NULL) {
-        if (buf[0] == '#' || buf[0] == '\n') {
+        if (buf[0] == '#' || buf[0] == '\n')
             continue;
-        }
 
         toke = strtok_r(buf,  " 	\n", &p_src);
 
-        if (!toke) {
+        if (!toke)
             log_error("Sources file invalid");
-        }
 
         src  = strdup(toke);
         base = basename(src);
@@ -73,10 +67,7 @@ void pkg_sources(package *pkg) {
         strcpy(pkg->source.dest[pkg->src_len], dest);
 
         mkdir(pkg->name, 0777);
-
-        if (chdir(pkg->name) != 0) {
-            log_error("Sources directory not accessible");
-        }
+        xchdir(pkg->name);
 
         if (access(base, F_OK) != -1) {
             log_info("Found cached source %s", base);
@@ -105,7 +96,7 @@ void pkg_sources(package *pkg) {
         strcat(pkg->source.src[pkg->src_len], base);
 
         ++pkg->src_len;
-        chdir(SRC_DIR);
+        xchdir(SRC_DIR);
     }
 
    fclose(file);

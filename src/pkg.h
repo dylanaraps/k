@@ -9,7 +9,7 @@ extern char **REPOS;
 extern int  REPO_LEN;
 extern const char *HOME;
 extern const char *XDG_CACHE_HOME;
-extern char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *LOG_DIR, *BIN_DIR;
+extern char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *BIN_DIR;
 extern char *PKG;
 extern char *OLD_CWD;
 extern char old_cwd_buf[PATH_MAX+1];
@@ -49,7 +49,7 @@ void cache_destroy(void);
 }
 
 #define LOAD_CWD { \
-    chdir(OLD_CWD); \
+    xchdir(OLD_CWD); \
     free(OLD_CWD); \
 }
 

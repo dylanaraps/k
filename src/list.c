@@ -7,6 +7,7 @@
 
 #include "list.h"
 #include "log.h"
+#include "util.h"
 #include "pkg.h"
 
 void pkg_list(char *pkg_name) {
@@ -15,10 +16,7 @@ void pkg_list(char *pkg_name) {
     char cwd[PATH_MAX];
 
     SAVE_CWD;
-
-    if (chdir(PKG_DB) != 0) {
-        log_error("Package DB not accessible");
-    }
+    xchdir(PKG_DB);
 
     if (chdir(pkg_name) != 0) {
         PKG = pkg_name;
@@ -38,9 +36,7 @@ void pkg_list_all(void) {
     struct dirent  **list;
     int tot;
 
-    if (chdir(PKG_DB) != 0) {
-        log_error("Package DB not accessible");
-    }
+    xchdir(PKG_DB);
 
     tot = scandir(".", &list, NULL, alphasort);
 
@@ -57,7 +53,7 @@ void pkg_list_all(void) {
                     version.version, version.release);
         }
 
-        chdir(PKG_DB);
+        xchdir(PKG_DB);
     }
 }
 

@@ -10,6 +10,7 @@
 #include "pkg.h"
 #include "log.h"
 #include "version.h"
+#include "util.h"
 #include "build.h"
 
 void pkg_build(package *pkg) {
@@ -19,33 +20,17 @@ void pkg_build(package *pkg) {
 
     pkg->version = pkg_version(pkg->path[0]);
 
-    if (chdir(PKG_DIR) != 0) {
-        log_error("Package directory not accessible (%s)", PKG_DIR);
-    }
-
+    xchdir(PKG_DIR);
     mkdir(pkg->name, 0777);
+    xchdir(pkg->name);
+    xchdir(MAK_DIR);
+    xchdir(pkg->name);
 
-    if (chdir(pkg->name) != 0) {
-        log_error("Directory not accessible (%s/%s)", PKG_DIR, pkg->name);
-    }
+    sprintf(build_script, "%s/build",  pkg->path[0]);
+    sprintf(pkg_dir, "%s/%s",  PKG_DIR, pkg->name);
 
-    if (chdir(MAK_DIR) != 0) {
-        log_error("Cache not accessible (%s/%s)", MAK_DIR);
-    }
-
-    if (chdir(pkg->name) != 0) {
-        log_error("Cache not accessible (%s/%s)", MAK_DIR);
-    }
-
-    strcpy(build_script, pkg->path[0]);
-    strcat(build_script, "/build\0");
-    strcpy(pkg_dir, PKG_DIR);
-    strcat(pkg_dir, "/");
-    strcat(pkg_dir, pkg->name);
-
-    if (access(build_script, X_OK) == -1) {
+    if (access(build_script, X_OK) == -1)
         log_error("Build file not executable");
-    }
 
     child = fork();
 

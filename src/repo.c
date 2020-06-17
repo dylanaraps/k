@@ -5,6 +5,7 @@
 
 #include "repo.h"
 #include "log.h"
+#include "util.h"
 #include "pkg.h"
 
 char **repo_load(void) {
@@ -15,16 +16,10 @@ char **repo_load(void) {
 
     path = strdup(getenv("KISS_PATH"));
 
-    if (!path || path[0] == '\0') {
+    if (!path || path[0] == '\0')
         log_error("KISS_PATH must be set");
-    }
 
-    res = malloc(strlen(path) + 24);
-
-    if (!res) {
-        log_error("Failed to allocate memory");
-    }
-
+    res = xmalloc(strlen(path) + 24);
     tok = strtok(path, ":"); 
 
     while (tok) {
@@ -35,5 +30,6 @@ char **repo_load(void) {
     res[n] = "/var/db/kiss/installed";
     REPO_LEN = n + 1;
 
+    // Must be free()'d by caller.
     return res;
 }

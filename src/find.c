@@ -20,22 +20,18 @@ void pkg_find(package *pkg) {
    pkg->path = xmalloc(sizeof(char*) * 1);
 
    for (i = 0; i < REPO_LEN; i++) {
-       if (chdir(REPOS[i]) != 0) {
-           log_error("Repository %s not accessible", REPOS[i]);
-       }
+       xchdir(REPOS[i]);
+       xchdir(pkg->name);
 
-       if (chdir(pkg->name) == 0) {
-           pwd = getcwd(pwd_buf, sizeof(pwd_buf));
-           pkg->path[pkg->path_len] = xmalloc(strlen(pwd) + 1);
-           strcpy(pkg->path[++pkg->path_len - 1], pwd);
-       }
+       pwd = getcwd(pwd_buf, sizeof(pwd_buf));
+       pkg->path[pkg->path_len] = xmalloc(strlen(pwd) + 1);
+       strcpy(pkg->path[++pkg->path_len - 1], pwd);
    }
 
    LOAD_CWD;
    pkg->path[pkg->path_len] = 0;
+   PKG = pkg->name;
 
-   if (pkg->path_len == 0) {
-       PKG = pkg->name;
+   if (pkg->path_len == 0)
        log_error("not in any repository");
-   }
 }

@@ -14,22 +14,22 @@
 
 #include "find.h"
 #include "log.h"
+#include "util.h"
 #include "pkg.h"
 
 void pkg_load(package **head, char *pkg_name) {
-    package *new_pkg = (package*) malloc(sizeof(package));    
+    package *new_pkg = malloc(sizeof(package));    
     package *last = *head;
 
-    if (!new_pkg) {
+    if (!new_pkg)
         log_error("Failed to allocate memory");
-    }
 
     new_pkg->next        = NULL;
     new_pkg->name        = pkg_name;
-    new_pkg->sums        = 0;
-    new_pkg->path        = 0;
-    new_pkg->source.src  = 0;
-    new_pkg->source.dest = 0;
+    new_pkg->sums        = NULL;
+    new_pkg->path        = NULL;
+    new_pkg->source.src  = NULL;
+    new_pkg->source.dest = NULL;
     new_pkg->src_len     = 0;
     new_pkg->path_len    = 0;
 
@@ -41,119 +41,88 @@ void pkg_load(package **head, char *pkg_name) {
         return;
     }
 
-    while (last->next) {
+    while (last->next)
         last = last->next;
-    }
 
     last->next = new_pkg;
     new_pkg->prev = last;
 }
 
 void cache_init(void) {
-    HOME      = getenv("HOME");
-    CAC_DIR   = getenv("XDG_CACHE_HOME");
     char cwd[PATH_MAX];
-    char build_dir[PATH_MAX];
-    char extract_dir[PATH_MAX];
-    char pkg_dir[PATH_MAX];
+    char MAK_DIR[PATH_MAX + 1];
+    char PKG_DIR[PATH_MAX + 1];
+    char TAR_DIR[PATH_MAX + 1];
     pid_t pid = getpid();
 
-    if (!HOME || HOME[0] == '\0') {
+    HOME = strdup(getenv("HOME"));
+
+    if (!HOME || HOME[0] == '\0')
         log_error("HOME is NULL");
-    }
 
     SAVE_CWD
+    CAC_DIR = strdup(getenv("XDG_CACHE_HOME"));
 
     if (!CAC_DIR || CAC_DIR[0] == '\0') {
-        chdir(HOME);
-
+        xchdir(HOME);
         mkdir(".cache", 0777);
-
-        if (chdir(".cache") != 0) {
-            goto err;
-        }
+        xchdir(".cache");
         
+        free(CAC_DIR);
         CAC_DIR = strdup(getcwd(cwd, sizeof(cwd)));
     }
 
     mkdir(CAC_DIR, 0777);
-
-    if (chdir(CAC_DIR) != 0) {
-        goto err;
-    }
+    xchdir(CAC_DIR);
 
     mkdir("kiss", 0777);
+    xchdir("kiss");
 
-    if (chdir("kiss") != 0) {
-        goto err;
-    }
-
+    free(CAC_DIR);
     CAC_DIR = strdup(getcwd(cwd, sizeof(cwd)));
 
-    sprintf(build_dir,   "%s/build-%jd",   CAC_DIR, (intmax_t) pid);
-    sprintf(pkg_dir,     "%s/pkg-%jd",     CAC_DIR, (intmax_t) pid);
-    sprintf(extract_dir, "%s/extract-%jd", CAC_DIR, (intmax_t) pid);
+    sprintf(MAK_DIR, "%s/build-%jd",   CAC_DIR, (intmax_t) pid);
+    sprintf(PKG_DIR, "%s/pkg-%jd",     CAC_DIR, (intmax_t) pid);
+    sprintf(TAR_DIR, "%s/extract-%jd", CAC_DIR, (intmax_t) pid);
 
-    mkdir(build_dir,   0777);
-    mkdir(pkg_dir,     0777);
-    mkdir(extract_dir, 0777);
-    mkdir("sources",   0777);
-    mkdir("logs",      0777);  
+    mkdir(MAK_DIR, 0777);
+    xchdir(MAK_DIR);
 
-    if (chdir(build_dir) != 0) {
-        goto err;
-    }
-    MAK_DIR = strdup(getcwd(cwd, sizeof(cwd)));
+    mkdir(PKG_DIR, 0777);
+    xchdir(PKG_DIR);
 
-    if (chdir(pkg_dir) != 0) {
-        goto err;
-    }
-    PKG_DIR = strdup(getcwd(cwd, sizeof(cwd)));
+    mkdir(TAR_DIR, 0777);
+    xchdir(TAR_DIR);
 
-    if (chdir(extract_dir) != 0) {
-        goto err;
-    }
-    TAR_DIR = strdup(getcwd(cwd, sizeof(cwd)));
-
-    if (chdir("../sources") != 0) {
-        goto err;
-    }
+    mkdir("../sources", 0777);
+    xchdir("../sources");
     SRC_DIR = strdup(getcwd(cwd, sizeof(cwd)));
 
-    if (chdir("../logs") != 0) {
-        goto err;
-    }
-    LOG_DIR = strdup(getcwd(cwd, sizeof(cwd)));
-
-    if (chdir("../bin") != 0) {
-        goto err;
-    }
+    mkdir("../bin", 0777);  
+    xchdir("../bin");
     BIN_DIR = strdup(getcwd(cwd, sizeof(cwd)));
 
     LOAD_CWD;
-    return;
-
-err:
-    log_error("Failed to create cache directory");
 }
 
 static int rm(const char *fpath, const struct stat *sb, int tf, struct FTW *fb) {
+    int rv;
+
     // Unused.
     (void)(sb);
     (void)(tf);
     (void)(fb);
 
-    int rv = remove(fpath);
+    rv = remove(fpath);
 
-    if (rv) {
+    if (rv)
         log_warn("Failed to remove %s", fpath);
-    }
 
     return rv;
 }
 
 void cache_destroy(void) {
-    nftw(MAK_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
-    nftw(PKG_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
-    nftw(TAR_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
+     nftw(MAK_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
+     nftw(PKG_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
+     nftw(TAR_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
 }

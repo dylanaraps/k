@@ -12,6 +12,7 @@
 #include "pkg.h"
 #include "log.h"
 #include "tar.h"
+#include "util.h"
 #include "extract.h"
 
 
@@ -24,31 +25,20 @@ void pkg_extract(package *pkg) {
     char *dest;
     int i;
 
-    if (chdir(MAK_DIR) != 0) {
-        log_error("Cache directory not accessible");
-    }
-
+    xchdir(MAK_DIR);
     mkdir(pkg->name, 0777);
+    xchdir(pkg->name);
 
-    if (chdir(pkg->name) != 0) {
-        log_error("Cache directory not accessible");
-    }
-
-    if (pkg->src_len == 0) {
+    if (pkg->src_len == 0)
         log_error("Sources file does not exist");
-    }
 
     for (i = 0; i < pkg->src_len; i++) {
-        if (!pkg->source.src[i]) {
+        if (!pkg->source.src[i])
             log_error("Sources file does not exist");
-        }
 
         if (pkg->source.dest[i][0] != 0) {
             mkdir(pkg->source.dest[i], 0777);
-
-            if (chdir(pkg->source.dest[i]) != 0) {
-                log_error("Dest not accessible (%s)", pkg->source.dest[i]);
-            }
+            xchdir(pkg->source.dest[i]);
         }
 
         // TODO: match more than singular suffix.
@@ -80,15 +70,13 @@ void pkg_extract(package *pkg) {
             log_info("Copying    %s", pkg->source.src[i]);
             in_fd = open(pkg->source.src[i], O_RDONLY);
 
-            if (in_fd == -1) {
+            if (in_fd == -1)
                 log_error("File not accessible %s\n", pkg->source.src[i]);
-            }
 
             out_fd = open(dest, O_CREAT | O_WRONLY, 0666);
 
-            if (out_fd == -1) {
+            if (out_fd == -1)
                 log_error("Cannot copy file %s\n", pkg->source.src[i]);
-            }
 
             while (1) {
                 err = read(in_fd, buffer, 4096); 
@@ -102,9 +90,8 @@ void pkg_extract(package *pkg) {
 
                 err = write(out_fd, buffer, err);
 
-                if (err == -1) {
+                if (err == -1)
                     log_error("Cannot copy file %s\n", pkg->source.src[i]);
-                }
             }
 
             close(in_fd);
@@ -114,7 +101,7 @@ void pkg_extract(package *pkg) {
             log_error("Source not found %s", pkg->source.src[i]);
         }
 
-        chdir(MAK_DIR);
-        chdir(pkg->name);
+        xchdir(MAK_DIR);
+        xchdir(pkg->name);
     }
 }

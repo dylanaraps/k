@@ -19,7 +19,7 @@ char *PKG = NULL;
 int  REPO_LEN = 0;
 const char *HOME;
 const char *XDG_CACHE_HOME;
-char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *LOG_DIR, *BIN_DIR;
+char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *BIN_DIR;
 char *OLD_PWD;
 char old_cwd_buf[PATH_MAX+1];
 
