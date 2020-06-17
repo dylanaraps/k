@@ -29,11 +29,6 @@ char *OLD_CWD;
 char old_cwd_buf[PATH_MAX+1];
 
 int main (int argc, char *argv[]) {
-    cache_init();
-    atexit(cache_destroy);
-    REPOS = repo_load();
-    package *head = NULL;
-
     if (argc == 1) {
         printf("kiss [b|c|d|l|s|v] [pkg]...\n");
         printf("build:        Build a package\n");
@@ -46,39 +41,44 @@ int main (int argc, char *argv[]) {
         exit(0);
     }
 
+    cache_init();
+    atexit(cache_destroy);
+    package *head = NULL;
+    REPOS = repo_load();
+
     for (int i = 2; i < argc; i++) {
         pkg_load(&head, argv[i]);
         PKG = head->name;
     }
 
     if (!strcmp(argv[1], "b") || !strcmp(argv[1], "build")) {
-        for(package *tmp = head; tmp; tmp = tmp->next) {
+        for (package *tmp = head; tmp; tmp = tmp->next) {
             PKG = tmp->name;
             pkg_sources(tmp);
         }
-        for(package *tmp = head; tmp; tmp = tmp->next) {
+        for (package *tmp = head; tmp; tmp = tmp->next) {
             PKG = tmp->name;
             pkg_verify(tmp);
         }
-        for(package *tmp = head; tmp; tmp = tmp->next) {
+        for (package *tmp = head; tmp; tmp = tmp->next) {
             PKG = tmp->name;
             pkg_extract(tmp);
             pkg_build(tmp);
         }
 
     } else if (!strcmp(argv[1], "c") || !strcmp(argv[1], "checksum")) {
-        for(package *tmp = head; tmp; tmp = tmp->next) {
+        for (package *tmp = head; tmp; tmp = tmp->next) {
             PKG = tmp->name;
             pkg_sources(tmp);
         }
-        for(package *tmp = head; tmp; tmp = tmp->next) {
+        for (package *tmp = head; tmp; tmp = tmp->next) {
             PKG = tmp->name;
             pkg_checksums(tmp);
             checksum_to_file(tmp);
         }
 
     } else if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
-        for(package *tmp = head; tmp; tmp = tmp->next) {
+        for (package *tmp = head; tmp; tmp = tmp->next) {
             PKG = tmp->name;
             pkg_sources(tmp);
         }
@@ -88,14 +88,14 @@ int main (int argc, char *argv[]) {
            pkg_list_all(); 
 
         } else {
-            for(package *tmp = head; tmp; tmp = tmp->next) {
+            for (package *tmp = head; tmp; tmp = tmp->next) {
                 PKG = tmp->name;
                 pkg_list(tmp->name);
             }
         }
 
     } else if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
-        for(package *tmp = head; tmp; tmp = tmp->next) {
+        for (package *tmp = head; tmp; tmp = tmp->next) {
             PKG = tmp->name;
 
             for (char *c = *tmp->path; c; c=*++tmp->path) {
