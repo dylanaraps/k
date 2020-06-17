@@ -16,9 +16,9 @@ void pkg_find(package *pkg) {
 
    SAVE_CWD;
    pkg->path_len = 0;
-   pkg->path = (char **) malloc(sizeof(char*) * 1);
+   pkg->path = malloc(sizeof(char*) * 1);
 
-   for (i =0; i < REPO_LEN; i++) {
+   for (i = 0; i < REPO_LEN; i++) {
        if (chdir(REPOS[i]) != 0) {
            log_error("Repository %s not accessible", REPOS[i]);
        }

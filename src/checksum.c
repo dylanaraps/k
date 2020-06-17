@@ -21,7 +21,7 @@ void pkg_checksums(package *pkg) {
     int i;
     int j;
 
-    pkg->sums = (char **) malloc(sizeof(char *) * pkg->src_len + 1);
+    pkg->sums = malloc(sizeof(char *) * pkg->src_len + 1);
 
     for (i = 0; i < pkg->src_len; i++) {
         src  = fopen(pkg->source.src[i], "rb");

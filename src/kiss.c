@@ -23,7 +23,10 @@ char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *LOG_DIR, *BIN_DIR;
 char *OLD_PWD;
 char old_cwd_buf[PATH_MAX+1];
 
-void args(int argc, char *argv[]) {
+int main (int argc, char *argv[]) {
+    cache_init();
+    atexit(cache_destroy);
+    REPOS = repo_load();
     package *head = NULL;
 
     if (argc == 1) {
@@ -100,12 +103,5 @@ void args(int argc, char *argv[]) {
     }
 
     free(head);
-}
-
-int main (int argc, char *argv[]) {
-    cache_init();
-    atexit(cache_destroy);
-    REPOS = repo_load();
-    args(argc, argv);
     return 0;
 }
