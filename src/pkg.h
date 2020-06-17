@@ -4,9 +4,6 @@
 #include <limits.h>
 
 #define PKG_DB "/var/db/kiss/installed/"
-#define BUILD "build-"
-#define EXTRA "extract-"
-#define PKG "pkg-"
 
 extern char **REPOS;
 extern int  REPO_LEN;
@@ -14,6 +11,7 @@ extern char PWD[PATH_MAX];
 extern const char *HOME;
 extern const char *XDG_CACHE_HOME;
 extern char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *LOG_DIR, *BIN_DIR;
+extern char *PKG;
 
 struct version {
     char *version;

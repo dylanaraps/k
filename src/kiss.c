@@ -16,6 +16,7 @@
 #include "pkg.h"
 
 char **REPOS = NULL;
+char *PKG = NULL;
 int  REPO_LEN = 0;
 char PWD[PATH_MAX];
 const char *HOME;
@@ -26,16 +27,12 @@ void args(int argc, char *argv[]) {
     package *head = NULL;
 
     if (argc == 1) {
-        printf("kiss [a|b|c|i|l|r|s|u|v] [pkg]...\n");
-        printf("alternatives: List and swap to alternatives\n");
+        printf("kiss [b|c|d|l|s|v] [pkg]...\n");
         printf("build:        Build a package\n");
         printf("checksum:     Generate checksums\n");
         printf("download:     Pre-download all sources\n");
-        printf("install:      Install a package\n");
         printf("list:         List installed packages\n");
-        printf("remove:       Remove a package\n");
         printf("search:       Search for a package\n");
-        printf("update:       Check for updates\n");
         printf("version:      Package manager version\n");
 
         exit(0);
@@ -43,33 +40,41 @@ void args(int argc, char *argv[]) {
 
     for (int i = 2; i < argc; i++) {
         pkg_load(&head, argv[i]);
+        PKG = head->name;
     }
 
     if (!strcmp(argv[1], "b") || !strcmp(argv[1], "build")) {
         for(package *tmp = head; tmp; tmp = tmp->next) {
+            PKG = tmp->name;
             pkg_sources(tmp);
         }
         for(package *tmp = head; tmp; tmp = tmp->next) {
+            PKG = tmp->name;
             pkg_verify(tmp);
         }
         for(package *tmp = head; tmp; tmp = tmp->next) {
+            PKG = tmp->name;
             pkg_extract(tmp);
         }
         for(package *tmp = head; tmp; tmp = tmp->next) {
+            PKG = tmp->name;
             pkg_build(tmp);
         }
 
     } else if (!strcmp(argv[1], "c") || !strcmp(argv[1], "checksum")) {
         for(package *tmp = head; tmp; tmp = tmp->next) {
+            PKG = tmp->name;
             pkg_sources(tmp);
         }
         for(package *tmp = head; tmp; tmp = tmp->next) {
+            PKG = tmp->name;
             pkg_checksums(tmp);
             checksum_to_file(tmp);
         }
 
     } else if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
         for(package *tmp = head; tmp; tmp = tmp->next) {
+            PKG = tmp->name;
             pkg_sources(tmp);
         }
 
@@ -78,19 +83,19 @@ void args(int argc, char *argv[]) {
            pkg_list_all(); 
 
         } else {
-            while (head) {
-                pkg_list(head->name);
-                head = head->next;
+            for(package *tmp = head; tmp; tmp = tmp->next) {
+                PKG = tmp->name;
+                pkg_list(tmp->name);
             }
         }
 
     } else if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
-        while (head) {
-            for (char *c = *head->path; c; c=*++head->path) {
-                printf("%s\n", *head->path);
-            }
+        for(package *tmp = head; tmp; tmp = tmp->next) {
+            PKG = tmp->name;
 
-            head = head->next;
+            for (char *c = *tmp->path; c; c=*++tmp->path) {
+                printf("%s\n", *tmp->path);
+            }
         }
 
     } else if (!strcmp(argv[1], "v") || !strcmp(argv[1], "version")) {
