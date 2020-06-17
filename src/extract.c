@@ -4,8 +4,13 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <archive.h>
+#include <archive_entry.h>
+
 #include "pkg.h"
+#include "tar.h"
 #include "extract.h"
+
 
 void pkg_extract(package *pkg) {
     char *src;
@@ -19,13 +24,14 @@ void pkg_extract(package *pkg) {
     }
 
     for (i = 0; i < pkg->src_len; i++) {
-        src = strrchr(pkg->source.src[i], '.');
-
-        if (!src) {
+        if (!pkg->source.src[i]) {
             printf("error: Source doesn't exist\n");
             exit(1);
+        }
 
-        } else if (strcmp(src, ".tar")      == 0 ||
+        src = strrchr(pkg->source.src[i], '.');
+
+        if (strcmp(src, ".tar")      == 0 ||
                    strcmp(src, ".gz")   == 0 ||
                    strcmp(src, ".xz")   == 0 ||
                    strcmp(src, ".bz2")  == 0 ||
@@ -33,8 +39,8 @@ void pkg_extract(package *pkg) {
                    strcmp(src, ".lzma") == 0 ||
                    strcmp(src, ".txz")  == 0 ||
                    strcmp(src, ".lz")   == 0) {
-            
+            printf("Extracting %s...\n", pkg->source.src[i]);
+            extract(pkg->source.src[i], 1, ARCHIVE_EXTRACT_PERM);
         }
     }
 }
-

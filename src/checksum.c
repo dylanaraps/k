@@ -87,6 +87,7 @@ void pkg_verify(package *pkg) {
         exit(1);
     }
 
+    // TODO FILE SIZE MISMATCHES
     while (fgets(buf, sizeof buf, file) != NULL) {
         buf[strcspn(buf, "\n")] = 0;
 

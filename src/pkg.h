@@ -4,6 +4,9 @@
 #include <limits.h>
 
 #define PKG_DB "/var/db/kiss/installed/"
+#define BUILD "build-"
+#define EXTRA "extract-"
+#define PKG "pkg-"
 
 extern char **REPOS;
 extern int  REPO_LEN;

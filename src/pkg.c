@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <libgen.h>
+#include <stdint.h>
 #include <sys/stat.h>
 
 #include "find.h"
@@ -49,6 +50,10 @@ void cache_init(void) {
     HOME      = getenv("HOME");
     CAC_DIR   = getenv("XDG_CACHE_HOME");
     char cwd[PATH_MAX];
+    char build_dir[PATH_MAX];
+    char extract_dir[PATH_MAX];
+    char pkg_dir[PATH_MAX];
+    pid_t pid = getpid();
 
     if (!HOME || HOME[0] == '\0') {
         printf("HOME directory is NULL\n");
@@ -81,23 +86,27 @@ void cache_init(void) {
 
     CAC_DIR = strdup(getcwd(cwd, sizeof(cwd)));
 
-    mkdir("build", 0777);
-    mkdir("pkg", 0777);
-    mkdir("extract", 0777);
-    mkdir("sources", 0777);
-    mkdir("logs", 0777);  
+    sprintf(build_dir,   "%s/build-%jd",   CAC_DIR, (intmax_t) pid);
+    sprintf(pkg_dir,     "%s/pkg-%jd",     CAC_DIR, (intmax_t) pid);
+    sprintf(extract_dir, "%s/extract-%jd", CAC_DIR, (intmax_t) pid);
 
-    if (chdir("build") != 0) {
+    mkdir(build_dir,   0777);
+    mkdir(pkg_dir,     0777);
+    mkdir(extract_dir, 0777);
+    mkdir("sources",   0777);
+    mkdir("logs",      0777);  
+
+    if (chdir(build_dir) != 0) {
         goto err;
     }
     MAK_DIR = strdup(getcwd(cwd, sizeof(cwd)));
 
-    if (chdir("../pkg") != 0) {
+    if (chdir(pkg_dir) != 0) {
         goto err;
     }
     PKG_DIR = strdup(getcwd(cwd, sizeof(cwd)));
 
-    if (chdir("../extract") != 0) {
+    if (chdir(extract_dir) != 0) {
         goto err;
     }
     TAR_DIR = strdup(getcwd(cwd, sizeof(cwd)));
