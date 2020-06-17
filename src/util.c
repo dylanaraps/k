@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <unistd.h>
+#include <libgen.h>
 
 #include "log.h"
 #include "util.h"
@@ -25,4 +26,40 @@ void xchdir(const char *path) {
     
     if (ret != 0)
         log_error("Directory %s not accessible", path);
+}
+
+void copy_file(char *src, char *dest) {
+    FILE *in;
+    FILE *out;
+    int err;
+    int buf_len = 4096;
+    char buffer[buf_len];
+
+    in = fopen(src, "r");
+
+    if (!in)
+        log_error("File not accessible %s\n", src);
+
+    out = fopen(dest, "w");
+
+    if (!out)
+        log_error("Cannot copy file %s\n", src);
+
+    while (1) {
+        err = fread(buffer, 1, buf_len, in); 
+
+        if (err == -1)
+            log_error("File not accessible %s\n", src);
+
+        if (err == 0)
+            break;
+
+        err = fwrite(buffer, 1, buf_len, out);
+
+        if (err == -1)
+            log_error("Cannot copy file %s\n", src);
+    }
+
+    fclose(in);
+    fclose(out);
 }

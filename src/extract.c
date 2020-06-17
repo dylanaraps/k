@@ -17,13 +17,7 @@
 
 
 void pkg_extract(package *pkg) {
-    FILE *in;
-    FILE *out;
-    int err;
-    int buf_len = 4096;
-    unsigned char buffer[buf_len];
     char *src;
-    char *dest;
     int i;
 
     xchdir(MAK_DIR);
@@ -67,35 +61,7 @@ void pkg_extract(package *pkg) {
 
         } else if (access(pkg->source.src[i], F_OK) != -1) {
             log_info("Copying    %s", pkg->source.src[i]);
-
-            dest = basename(pkg->source.src[i]);
-            in   = fopen(pkg->source.src[i], "r");
-
-            if (!in)
-                log_error("File not accessible %s\n", pkg->source.src[i]);
-
-            out = fopen(dest, "w");
-
-            if (!out)
-                log_error("Cannot copy file %s\n", pkg->source.src[i]);
-
-            while (1) {
-                err = fread(buffer, 1, buf_len, in); 
-
-                if (err == -1)
-                    log_error("File not accessible %s\n", pkg->source.src[i]);
-
-                if (err == 0)
-                    break;
-
-                err = fwrite(buffer, 1, buf_len, out);
-
-                if (err == -1)
-                    log_error("Cannot copy file %s\n", pkg->source.src[i]);
-            }
-
-            fclose(in);
-            fclose(out);
+            copy_file(pkg->source.src[i], basename(pkg->source.src[i]));
 
         } else {
             log_error("Source not found %s", pkg->source.src[i]);
