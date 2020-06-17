@@ -64,10 +64,11 @@ void pkg_extract(package *pkg) {
             strcmp(src, ".lz")   == 0) {
 
             log_info("Extracting %s", pkg->source.src[i]);
-            extract(pkg->source.src[i], 1, ARCHIVE_EXTRACT_PERM | 
-                                           ARCHIVE_MATCH_MTIME  | 
-                                           ARCHIVE_MATCH_CTIME  |
-                                           ARCHIVE_EXTRACT_FFLAGS);
+            extract(pkg->source.src[i], 1, ARCHIVE_EXTRACT_PERM  | 
+                                           ARCHIVE_MATCH_MTIME   | 
+                                           ARCHIVE_MATCH_CTIME   |
+                                           ARCHIVE_EXTRACT_SECURE_NODOTDOT |
+                                           ARCHIVE_EXTRACT_TIME);
 
         } else if (access(pkg->source.src[i], F_OK) != -1) {
             dest = basename(pkg->source.src[i]);
