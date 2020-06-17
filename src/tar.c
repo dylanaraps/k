@@ -180,8 +180,6 @@ create(const char *filename, int compress, const char **argv)
 		}
 
 		for (;;) {
-			int needcr = 0;
-
 			entry = archive_entry_new();
 
 			r = archive_read_next_header2(disk, entry);
@@ -196,13 +194,11 @@ create(const char *filename, int compress, const char **argv)
 			if (verbose) {
 				msg("a ");
 				msg(archive_entry_pathname(entry));
-				needcr = 1;
 			}
 			r = archive_write_header(a, entry);
 			if (r < ARCHIVE_OK) {
 				errmsg(": ");
 				errmsg(archive_error_string(a));
-				needcr = 1;
 			}
 			if (r == ARCHIVE_FATAL)
 				exit(1);
@@ -267,7 +263,6 @@ extract(const char *filename, int do_extract, int flags)
 		exit(r);
 	}
 	for (;;) {
-		int needcr = 0;
 		r = archive_read_next_header(a, &entry);
 
 		if (r == ARCHIVE_EOF)
@@ -282,7 +277,6 @@ extract(const char *filename, int do_extract, int flags)
 		if (verbose || !do_extract) {
 			msg(archive_entry_pathname(entry));
 			msg(" ");
-			needcr = 1;
 		}
 		if (do_extract) {
             // Strip components.
@@ -299,13 +293,8 @@ extract(const char *filename, int do_extract, int flags)
 
 			r = archive_write_header(ext, entry);
 
-			if (r != ARCHIVE_OK) {
-				needcr = 1;
-			}
-			else {
+			if (r == ARCHIVE_OK) {
 				r = copy_data(a, ext);
-				if (r != ARCHIVE_OK)
-					needcr = 1;
 			}
 		}
 	}
