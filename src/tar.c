@@ -253,24 +253,14 @@ extract(const char *filename, int do_extract, int flags)
 	a = archive_read_new();
 	ext = archive_write_disk_new();
 	archive_write_disk_set_options(ext, flags);
-#ifndef NO_BZIP2_EXTRACT
 	archive_read_support_filter_bzip2(a);
-#endif
-#ifndef NO_GZIP_EXTRACT
+	archive_read_support_filter_xz(a);
 	archive_read_support_filter_gzip(a);
-#endif
-#ifndef NO_COMPRESS_EXTRACT
 	archive_read_support_filter_compress(a);
-#endif
-#ifndef NO_TAR_EXTRACT
 	archive_read_support_format_tar(a);
-#endif
-#ifndef NO_CPIO_EXTRACT
 	archive_read_support_format_cpio(a);
-#endif
-#ifndef NO_LOOKUP
 	archive_write_disk_set_standard_lookup(ext);
-#endif
+
 	if (filename != NULL && strcmp(filename, "-") == 0)
 		filename = NULL;
 	if ((r = archive_read_open_filename(a, filename, 10240))) {
