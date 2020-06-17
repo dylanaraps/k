@@ -10,6 +10,7 @@
 #include <archive_entry.h>
 
 #include "pkg.h"
+#include "log.h"
 #include "tar.h"
 #include "extract.h"
 
@@ -24,34 +25,29 @@ void pkg_extract(package *pkg) {
     int i;
 
     if (chdir(MAK_DIR) != 0) {
-        printf("error: Cache directory not accessible\n");
-        exit(1);
+        log_error("Cache directory not accessible");
     }
 
     mkdir(pkg->name, 0777);
 
     if (chdir(pkg->name) != 0) {
-        printf("error: Cache directory not accessible\n");
-        exit(1);
+        log_error("Cache directory not accessible");
     }
 
     if (pkg->src_len == 0) {
-        printf("error: no sources\n");
-        exit(1);
+        log_error("Sources file does not exist");
     }
 
     for (i = 0; i < pkg->src_len; i++) {
         if (!pkg->source.src[i]) {
-            printf("error: Source doesn't exist\n");
-            exit(1);
+            log_error("Sources file does not exist");
         }
 
         if (pkg->source.dest[i][0] != 0) {
             mkdir(pkg->source.dest[i], 0777);
 
             if (chdir(pkg->source.dest[i]) != 0) {
-                printf("error: Dest not accessible\n");
-                exit(1);
+                log_error("Dest not accessible (%s)", pkg->source.dest[i]);
             }
         }
 
@@ -66,7 +62,8 @@ void pkg_extract(package *pkg) {
             strcmp(src, ".lzma") == 0 ||
             strcmp(src, ".txz")  == 0 ||
             strcmp(src, ".lz")   == 0) {
-            printf("Extracting %s...\n", pkg->source.src[i]);
+
+            log_info("Extracting %s", pkg->source.src[i]);
             extract(pkg->source.src[i], 1, ARCHIVE_EXTRACT_PERM | 
                                            ARCHIVE_MATCH_MTIME | 
                                            ARCHIVE_MATCH_CTIME);
@@ -74,27 +71,24 @@ void pkg_extract(package *pkg) {
         } else if (access(pkg->source.src[i], F_OK) != -1) {
             dest = basename(pkg->source.src[i]);
 
-            printf("Copying %s\n", pkg->source.src[i]);
+            log_info("Copying %s", pkg->source.src[i]);
             in_fd = open(pkg->source.src[i], O_RDONLY);
 
             if (in_fd == -1) {
-                printf("error: File not accessible %s\n", pkg->source.src[i]);
-                exit(1);
+                log_error("File not accessible %s\n", pkg->source.src[i]);
             }
 
             out_fd = open(dest, O_CREAT | O_WRONLY, 0666);
 
             if (out_fd == -1) {
-                printf("error: Cannot copy file %s\n", pkg->source.src[i]);
-                exit(1);
+                log_error("Cannot copy file %s\n", pkg->source.src[i]);
             }
 
             while (1) {
                 err = read(in_fd, buffer, 4096); 
 
                 if (err == -1) {
-                    printf("error: File not accessible\n");
-                    exit(1);
+                    log_error("File not accessible %s\n", pkg->source.src[i]);
 
                 } else if (err == 0) {
                     break;
@@ -103,8 +97,7 @@ void pkg_extract(package *pkg) {
                 err = write(out_fd, buffer, err);
 
                 if (err == -1) {
-                    printf("error: Cannot copy file\n");
-                    exit(1);
+                    log_error("Cannot copy file %s\n", pkg->source.src[i]);
                 }
             }
 
@@ -112,8 +105,7 @@ void pkg_extract(package *pkg) {
             close(out_fd);
 
         } else {
-            printf("error: Source not found %s\n", pkg->source.src[i]);
-            exit(1);
+            log_fatal("Source not found %s", pkg->source.src[i]);
         }
 
         chdir(MAK_DIR);

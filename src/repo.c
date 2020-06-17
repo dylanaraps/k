@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "repo.h"
+#include "log.h"
 #include "pkg.h"
 
 char **repo_load(void) {
@@ -13,8 +14,7 @@ char **repo_load(void) {
     int n = 0;
 
     if (!path || path[0] == '\0') {
-        printf("error: %s must be set\n", path);
-        exit(1);
+        log_fatal("KISS_PATH must be set");
     }
 
     // 24 is below string + ":".
@@ -22,7 +22,7 @@ char **repo_load(void) {
     res = calloc(strlen(path) + 24, sizeof(char *));
 
     if (!res) {
-        printf("Failed to allocate memory\n");
+        log_fatal("Failed to allocate memory");
         exit(1);
     }
 

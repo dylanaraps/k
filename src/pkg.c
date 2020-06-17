@@ -13,6 +13,7 @@
 #include <ftw.h>
 
 #include "find.h"
+#include "log.h"
 #include "pkg.h"
 
 void pkg_load(package **head, char *pkg_name) {
@@ -20,8 +21,7 @@ void pkg_load(package **head, char *pkg_name) {
     package *last = *head;
 
     if (!new_pkg) {
-        printf("error: Failed to allocate memory\n");
-        exit(1);
+        log_fatal("Failed to allocate memory");
     }
 
     new_pkg->next        = NULL;
@@ -59,8 +59,7 @@ void cache_init(void) {
     pid_t pid = getpid();
 
     if (!HOME || HOME[0] == '\0') {
-        printf("HOME directory is NULL\n");
-        exit(1);
+        log_fatal("HOME is NULL");
     }
 
     if (!CAC_DIR || CAC_DIR[0] == '\0') {
@@ -133,8 +132,7 @@ void cache_init(void) {
     return;
 
 err:
-    printf("%s\n", "Failed to create cache directory\n");
-    exit(1);
+    log_fatal("Failed to create cache directory");
 }
 
 static int rm(const char *fpath, const struct stat *sb, int tf, struct FTW *fb) {
@@ -146,7 +144,7 @@ static int rm(const char *fpath, const struct stat *sb, int tf, struct FTW *fb) 
     int rv = remove(fpath);
 
     if (rv) {
-        printf("warning: Failed to remove %s\n", fpath);
+        log_warn("Failed to remove %s", fpath);
     }
 
     return rv;

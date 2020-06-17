@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "version.h"
+#include "log.h"
 #include "pkg.h"
 
 struct version pkg_version(char *repo_dir) {
@@ -17,24 +18,21 @@ struct version pkg_version(char *repo_dir) {
     file = fopen("version", "r");
 
     if (!file) {
-        printf("error: version file does not exist\n");
-        exit(1);
+        log_error("version file does not exist");
     }
 
     getline(&buf, &(size_t){0}, file);
     fclose(file);
 
     if (!buf) {
-        printf("error: version file is incorrect\n");
-        exit(1);
+        log_error("version file does is invalid");
     }
 
     version.version = strtok(buf,    " 	\n");
     version.release = strtok(NULL,   " 	\n");
 
     if (!version.release) {
-        printf("error: release field missing\n");
-        exit(1);
+        log_error("release field empty");
     }
 
     chdir(PWD);

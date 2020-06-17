@@ -7,6 +7,7 @@
 #include <curl/curl.h>
 
 #include "source.h"
+#include "log.h"
 #include "pkg.h"
 
 static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) {
@@ -32,13 +33,11 @@ void pkg_sources(package *pkg) {
     file = fopen("sources", "r");
 
     if (chdir(SRC_DIR) != 0) {
-        printf("error: Sources directory not accessible\n"); 
-        exit(1);
+        log_fatal("Sources directory not accessible");
     }
 
     if (!file) {
-        printf("error: Sources file invalid\n");
-        exit(1);
+        log_fatal("Sources file invalid");
     }
 
     // Guess at the length of resulting items based on non-
@@ -54,8 +53,7 @@ void pkg_sources(package *pkg) {
     pkg->source.dest = (char **) malloc(sizeof(char *) * len + 1);
 
     if (!pkg->source.src || !pkg->source.dest) {
-        printf("error: Failed to allocate memory\n"); 
-        exit(1);
+        log_fatal("Failed to allocate memory");
     }
 
     while (fgets(buf, sizeof buf, file) != NULL) {
@@ -66,8 +64,7 @@ void pkg_sources(package *pkg) {
         toke = strtok_r(buf,  " 	\n", &p_src);
 
         if (!toke) {
-            printf("error: Sources file invalid\n");
-            exit(1);
+            log_fatal("Sources file invalid");
         }
 
         src  = strdup(toke);
@@ -81,29 +78,27 @@ void pkg_sources(package *pkg) {
         mkdir(pkg->name, 0777);
 
         if (chdir(pkg->name) != 0) {
-            printf("error: Sources directory not accessible\n");
-            exit(1);
+            log_fatal("Sources directory not accessible");
         }
 
         if (access(base, F_OK) != -1) {
-            printf("%s (Found cached source %s)\n", pkg->name, base);
+            log_info("Found cached source %s", base);
 
         } else if (strncmp(src, "https://", 8) == 0 ||
                    strncmp(src, "http://",  7) == 0) {
-            printf("%s (Downloading %s)\n", pkg->name, src);
+            log_info("Downloading %s", src);
             source_download(src);
 
         } else if (strncmp(src, "git+", 4) == 0) {
-            printf("%s (Skipping git source.. %s)\n", pkg->name, src);
+            log_warn("Skipping git source (not yet supported) %s", src);
 
         } else if (chdir(repo) == 0 && 
                    chdir(dirname(src)) == 0 && 
                    access(base, F_OK) != -1) {
-            printf("%s (Found local source %s)\n", pkg->name, base);
+            log_info("Found local source %s", src);
 
         } else {
-            printf("error: No local file %s\n", src);
-            exit(1);
+            log_error("No local file %s", src);
         }
 
         pwd = getcwd(cwd, sizeof(cwd));
@@ -125,9 +120,6 @@ void source_download(char *url) {
     CURL *curl = curl_easy_init();
     char *name = basename(url);
     FILE *file = fopen(name, "wb");
-    char cwd[PATH_MAX];
-
-    printf("%s\n", strdup(getcwd(cwd, sizeof(cwd))));
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, file_write);
@@ -136,8 +128,7 @@ void source_download(char *url) {
 
     if (curl_easy_perform(curl) != 0) {
         remove(name);
-        printf("error: failed to download source\n");
-        exit(1);
+        log_fatal("Failed to download source %s", url);
     }
 
     fclose(file);

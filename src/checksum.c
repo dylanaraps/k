@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 
 #include "sha.h"
+#include "log.h"
 #include "checksum.h"
 #include "pkg.h"
 
@@ -27,15 +28,13 @@ void pkg_checksums(package *pkg) {
         base = basename(pkg->source.src[i]);
 
         if (!src) {
-            printf("error: Failed to generate checksums\n");
-            exit(1);
+            log_error("Failed to generate checksums");
         }
 
         pkg->sums[i] = malloc(67 * sizeof(char) + strlen(base));
 
         if (!pkg->sums[i]) {
-            printf("error: Failed to allocate memory\n");
-            exit(1);
+            log_fatal("Failed to allocate memory");
         }
 
         sha256_init(&ctx);
@@ -71,20 +70,17 @@ void pkg_verify(package *pkg) {
     pkg_checksums(pkg);
 
     if (pkg->src_len == 0) {
-        printf("error: No sources\n");
-        exit(1);
+        log_error("Sources file does not exist");
     }
 
     if (chdir(*pkg->path) != 0) {
-        printf("error: Repository not accessible\n");
-        exit(1);
+        log_error("Repository not accessible");
     }
 
     file = fopen("checksums", "r");
 
     if (!file) {
-        printf("error: Checksums file missing, run kiss c\n");
-        exit(1);
+        log_error("Checksums file missing, run 'kiss c pkg'");
     }
 
     // TODO FILE SIZE MISMATCHES
@@ -92,7 +88,7 @@ void pkg_verify(package *pkg) {
         buf[strcspn(buf, "\n")] = 0;
 
         if (strcmp(pkg->sums[i], buf) != 0 || i > pkg->src_len) {
-            printf("error: Checksum mismatch\n");
+            log_error("Checksums mismatch'");
             exit(1);
         }
 
@@ -100,28 +96,26 @@ void pkg_verify(package *pkg) {
     }
 
     fclose(file);
-    printf("Verified checksums\n");
+    log_info("Verified checksums");
 }
 
 void checksum_to_file(package *pkg) {
     FILE *file;
 
     if (chdir(*pkg->path) != 0) {
-        printf("error: Repository not accessible\n");
-        exit(1);
+        log_error("Repository not accessible");
     }
 
     file = fopen("checksums", "w");
 
     if (!file) {
-        printf("error: Cannot write checksums\n");
-        exit(1);
+        log_fatal("Cannot write checksums");
     }
 
     for (int i = 0; i < pkg->src_len; i++) {
         fprintf(file, "%s\n", pkg->sums[i]);
     }
-    fclose(file);
 
-    printf("Generated checksums\n");
+    fclose(file);
+    log_info("Generated checksums");
 }

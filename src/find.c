@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include "find.h"
+#include "log.h"
 #include "pkg.h"
 
 void pkg_find(package *pkg) {
@@ -18,8 +19,7 @@ void pkg_find(package *pkg) {
 
    for (i =0; i < REPO_LEN; i++) {
        if (chdir(REPOS[i]) != 0) {
-           printf("error: Repository not accessible\n");       
-           exit(1);
+           log_fatal("Repository %s not accessible", REPOS[i]);
        }
 
        if (chdir(pkg->name) == 0) {
@@ -27,8 +27,7 @@ void pkg_find(package *pkg) {
            pkg->path[pkg->path_len] = malloc(sizeof(char) * ((strlen(pwd) + 1)));
 
            if (pkg->path[pkg->path_len] == NULL) {
-               printf("Failed to allocate memory\n");
-               exit(1);
+               log_fatal("Failed to allocate memory");
            }
 
            strcpy(pkg->path[++pkg->path_len - 1], pwd);
@@ -39,7 +38,6 @@ void pkg_find(package *pkg) {
    pkg->path[pkg->path_len] = 0;
 
    if (pkg->path_len == 0) {
-       printf("error: %s not in any repository\n", pkg->name);
-       exit(1);
+       log_fatal("%s not in any repository", pkg->name);
    }
 }

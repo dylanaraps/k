@@ -6,6 +6,7 @@
 #include <limits.h>
 
 #include "list.h"
+#include "log.h"
 #include "pkg.h"
 
 void pkg_list(char *pkg_name) {
@@ -14,13 +15,11 @@ void pkg_list(char *pkg_name) {
     char cwd[PATH_MAX];
 
     if (chdir(PKG_DB) != 0) {
-        printf("error: Package db not accessible\n");
-        exit(1);
+        log_fatal("Package DB not accessible");
     }
 
     if (chdir(pkg_name) != 0) {
-        printf("error: Package %s not installed\n", pkg_name);
-        exit(1);
+        log_error("Package %s not installed", pkg_name);
 
     } else {
         path = getcwd(cwd, sizeof(cwd)); 
@@ -37,15 +36,13 @@ void pkg_list_all(void) {
     int tot;
 
     if (chdir(PKG_DB) != 0) {
-        printf("error: Failed to access package db\n");
-        exit(1);
+        log_fatal("Package DB not accessible");
     }
 
     tot = scandir(".", &list, NULL, alphasort);
 
     if (tot == -1) {
-        printf("error: Failed to access package db\n");
-        exit(1);
+        log_fatal("Package DB not accessible");
     }
 
     // '2' skips '.'/'..'.
