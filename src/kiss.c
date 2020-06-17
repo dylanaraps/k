@@ -5,8 +5,6 @@
 #include <limits.h>
 #include <unistd.h>
 
-#include <curl/curl.h>
-
 #include "build.h"
 #include "checksum.h"
 #include "extract.h"
@@ -55,9 +53,6 @@ void args(int argc, char *argv[]) {
         for(package *tmp = head; tmp; tmp = tmp->next) {
             PKG = tmp->name;
             pkg_extract(tmp);
-        }
-        for(package *tmp = head; tmp; tmp = tmp->next) {
-            PKG = tmp->name;
             pkg_build(tmp);
         }
 

@@ -38,12 +38,12 @@ static struct {
 
 
 static const char *level_names[] = {
-    "INFO", "WARN", "ERROR"
+    "INFO", "WARN", "ERRR"
 };
 
 #ifdef LOG_USE_COLOR
 static const char *level_colors[] = {
-  "\x1b[36m", "\x1b[31m", "\x1b[35m"
+  "\x1b[36;1m", "\x1b[34;1m", "\x1b[31;1m"
 };
 #endif
 
@@ -104,10 +104,10 @@ void log_log(int level, const char *file, const char *fmt, ...) {
     va_list args;
 #ifdef LOG_USE_COLOR
     fprintf(
-      stderr, "%s%-5s\x1b[m \x1b[34;1m%-10s\x1b[m  ",
+      stderr, "%s%s\x1b[m \x1b[34;1m%s\x1b[m  ",
       level_colors[level], level_names[level], file);
 #else
-    fprintf(stderr, "%-5s %-10s  ", level_names[level], file);
+    fprintf(stderr, "%s %s  ", level_names[level], file);
 #endif
     va_start(args, fmt);
     vfprintf(stderr, fmt, args);
@@ -121,7 +121,7 @@ void log_log(int level, const char *file, const char *fmt, ...) {
     va_list args;
     char buf[32];
     buf[strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", lt)] = '\0';
-    fprintf(L.fp, "%s %-5s %-10s  ", buf, level_names[level], file);
+    fprintf(L.fp, "%s %s %s  ", buf, level_names[level], file);
     va_start(args, fmt);
     vfprintf(L.fp, fmt, args);
     va_end(args);

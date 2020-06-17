@@ -5,6 +5,7 @@
 #include <string.h>
 #include <limits.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 #include "pkg.h"
 #include "log.h"
@@ -14,6 +15,7 @@
 void pkg_build(package *pkg) {
     char build_script[PATH_MAX + 1];
     char pkg_dir[PATH_MAX + 1];
+    int child;
 
     pkg->version = pkg_version(pkg->path[0]);
 
@@ -45,9 +47,22 @@ void pkg_build(package *pkg) {
         log_error("Build file not executable");
     }
 
-    execvp(build_script, (char*[]){ build_script, 
-                                    pkg_dir, 
-                                    pkg->version.version, 
-                                    NULL 
-                                  });
+    child = fork();
+
+    switch (child) {
+    case -1:
+        log_error("fork() failed");
+        break;
+
+    case 0:
+        execvp(build_script, (char*[]){ 
+            build_script, 
+            pkg_dir, 
+            pkg->version.version, 
+            NULL 
+        });
+        break;
+    }
+
+    waitpid(child, NULL, 0);
 }

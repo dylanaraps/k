@@ -19,7 +19,8 @@ void pkg_list(char *pkg_name) {
     }
 
     if (chdir(pkg_name) != 0) {
-        log_error("Package %s not installed", pkg_name);
+        PKG = pkg_name;
+        log_error("not installed");
 
     } else {
         path = getcwd(cwd, sizeof(cwd)); 
