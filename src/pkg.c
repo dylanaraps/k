@@ -8,6 +8,7 @@
 #include <libgen.h>
 #include <stdint.h>
 #include <sys/stat.h>
+#include <ftw.h>
 
 #include "find.h"
 #include "pkg.h"
@@ -132,4 +133,25 @@ void cache_init(void) {
 err:
     printf("%s\n", "Failed to create cache directory\n");
     exit(1);
+}
+
+static int rm(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf) {
+    // Unused.
+    (void)(sb);
+    (void)(typeflag);
+    (void)(ftwbuf);
+
+    int rv = remove(fpath);
+
+    if (rv) {
+        printf("warning: Failed to remove %s\n", fpath);
+    }
+
+    return rv;
+}
+
+void cache_destroy(void) {
+    nftw(MAK_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
+    nftw(PKG_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
+    nftw(TAR_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
 }

@@ -43,5 +43,6 @@ typedef struct package {
 void pkg_load(package **head, char *pkg_name);
 struct version pkg_version(char *repo_dir);
 void cache_init(void);
+void cache_destroy(void);
 
 #endif
