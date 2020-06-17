@@ -75,7 +75,7 @@ void pkg_extract(package *pkg) {
             );
 
         } else if (access(pkg->source.src[i], F_OK) != -1) {
-            dest = basename(pkg->source.src[i]);
+            dest = strchr(pkg->source.src[i], '/');
 
             log_info("Copying    %s", pkg->source.src[i]);
             in_fd = open(pkg->source.src[i], O_RDONLY);

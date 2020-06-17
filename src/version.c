@@ -17,22 +17,19 @@ struct version pkg_version(char *repo_dir) {
     SAVE_CWD;
     chdir(repo_dir);
 
-    f = fopen("version", "r");
-
-    if (!f) {
+    if (!(f = fopen("version", "r"))) {
         log_error("version file does not exist");
     }
 
     // Only need the first line.
-    getline(&buf, &(size_t){0}, f);
-    fclose(f);
-
-    if (!buf) {
+    if (!getline(&buf, &(size_t){0}, f)) {
         log_error("version file is invalid");
     }
 
-    version.version = strtok(buf,    " 	\n");
-    version.release = strtok(NULL,   " 	\n");
+    fclose(f);
+
+    version.version = strtok(buf,  " 	\r\n");
+    version.release = strtok(NULL, " 	\r\n");
 
     if (!version.release) {
         log_error("release field empty");
@@ -41,4 +38,3 @@ struct version pkg_version(char *repo_dir) {
     LOAD_CWD;
     return version;
 }
-
