@@ -15,6 +15,10 @@
 
 
 void pkg_extract(package *pkg) {
+    int in_fd;
+    int out_fd;
+    int err;
+    unsigned char buffer[4096];
     char *src;
     char *dest;
     int i;
@@ -65,11 +69,7 @@ void pkg_extract(package *pkg) {
             extract(pkg->source.src[i], 1, ARCHIVE_EXTRACT_PERM);
 
         } else if (access(pkg->source.src[i], F_OK) != -1) {
-            int in_fd;
-            int out_fd;
-            int err;
-            unsigned char buffer[4096];
-            char *dest = basename(pkg->source.src[i]);
+            dest = basename(pkg->source.src[i]);
 
             printf("Copying %s\n", pkg->source.src[i]);
             in_fd = open(pkg->source.src[i], O_RDONLY);
