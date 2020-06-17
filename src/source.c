@@ -110,11 +110,12 @@ void pkg_sources(package *pkg) {
         pkg->source.src[pkg->src_len] = xmalloc(strlen(pwd) + strlen(base) + 5);
         sprintf(pkg->source.src[pkg->src_len], "%s/%s", pwd, base);
 
-        ++pkg->src_len;
+        pkg->src_len++;
         xchdir(SRC_DIR);
     }
 
-   fclose(file);
-   pkg->source.src[pkg->src_len]  = 0;
-   pkg->source.dest[pkg->src_len] = 0;
+    free(buf);
+    fclose(file);
+    pkg->source.src[pkg->src_len]  = 0;
+    pkg->source.dest[pkg->src_len] = 0;
 }
