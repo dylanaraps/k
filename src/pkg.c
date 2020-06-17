@@ -62,8 +62,10 @@ void cache_init(void) {
         log_error("HOME is NULL");
     }
 
+    SAVE_CWD
+
     if (!CAC_DIR || CAC_DIR[0] == '\0') {
-        SAVE_CWD(HOME);
+        chdir(HOME);
 
         mkdir(".cache", 0777);
 

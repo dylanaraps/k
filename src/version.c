@@ -11,22 +11,27 @@
 
 struct version pkg_version(char *repo_dir) {
     struct version version = {0};
-    FILE *f;
+    FILE *file;
     char *buf = 0;
 
     SAVE_CWD;
     chdir(repo_dir);
 
-    if (!(f = fopen("version", "r"))) {
+    file = fopen("version", "r");
+
+    if (!file) {
         log_error("version file does not exist");
     }
 
     // Only need the first line.
-    if (!getline(&buf, &(size_t){0}, f)) {
+    // TODO: POSIX but unportable(?).
+    getline(&buf, &(size_t){0}, file);
+
+    if (!buf) {
         log_error("version file is invalid");
     }
 
-    fclose(f);
+    fclose(file);
 
     version.version = strtok(buf,  " 	\r\n");
     version.release = strtok(NULL, " 	\r\n");
