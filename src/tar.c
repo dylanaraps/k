@@ -230,8 +230,6 @@ create(const char *filename, int compress, const char **argv)
 #endif
 			}
 			archive_entry_free(entry);
-			if (needcr)
-				msg("\n");
 		}
 		archive_read_close(disk);
 		archive_read_free(disk);
@@ -310,8 +308,6 @@ extract(const char *filename, int do_extract, int flags)
 					needcr = 1;
 			}
 		}
-		if (needcr)
-			msg("\n");
 	}
 	archive_read_close(a);
 	archive_read_free(a);
