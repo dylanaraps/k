@@ -19,26 +19,21 @@ struct version pkg_version(char *repo_dir) {
 
     file = fopen("version", "r");
 
-    if (!file) {
+    if (!file)
         log_error("version file does not exist");
-    }
 
-    // Only need the first line.
-    // TODO: POSIX but unportable(?).
     getline(&buf, &(size_t){0}, file);
 
-    if (!buf) {
+    if (!buf)
         log_error("version file is invalid");
-    }
 
     fclose(file);
 
     version.version = strtok(buf,  " 	\r\n");
     version.release = strtok(NULL, " 	\r\n");
 
-    if (!version.release) {
+    if (!version.release)
         log_error("release field empty");
-    }
 
     LOAD_CWD;
     return version;

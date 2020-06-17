@@ -8,6 +8,7 @@
 
 #include "source.h"
 #include "log.h"
+#include "util.h"
 #include "pkg.h"
 
 static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) {
@@ -49,12 +50,8 @@ void pkg_sources(package *pkg) {
     }
     rewind(file);
 
-    pkg->source.src  = (char **) malloc(sizeof(char *) * len + 1);
-    pkg->source.dest = (char **) malloc(sizeof(char *) * len + 1);
-
-    if (!pkg->source.src || !pkg->source.dest) {
-        log_error("Failed to allocate memory");
-    }
+    pkg->source.src  = xmalloc(sizeof(char *) * len + 1);
+    pkg->source.dest = xmalloc(sizeof(char *) * len + 1);
 
     while (fgets(buf, sizeof buf, file) != NULL) {
         if (buf[0] == '#' || buf[0] == '\n') {
@@ -72,7 +69,7 @@ void pkg_sources(package *pkg) {
         toke = strtok_r(NULL, " 	\n", &p_src);
         dest = toke ? strdup(toke) : "";
 
-        pkg->source.dest[pkg->src_len] = malloc(strlen(dest) + 1);
+        pkg->source.dest[pkg->src_len] = xmalloc(strlen(dest) + 1);
         strcpy(pkg->source.dest[pkg->src_len], dest);
 
         mkdir(pkg->name, 0777);
@@ -102,7 +99,7 @@ void pkg_sources(package *pkg) {
         }
 
         pwd = getcwd(cwd, sizeof(cwd));
-        pkg->source.src[pkg->src_len] = malloc(strlen(pwd) + strlen(base) + 3);
+        pkg->source.src[pkg->src_len] = xmalloc(strlen(pwd) + strlen(base) + 3);
         strcpy(pkg->source.src[pkg->src_len], pwd);
         strcat(pkg->source.src[pkg->src_len], "/");
         strcat(pkg->source.src[pkg->src_len], base);

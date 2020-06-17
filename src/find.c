@@ -7,6 +7,7 @@
 
 #include "find.h"
 #include "log.h"
+#include "util.h"
 #include "pkg.h"
 
 void pkg_find(package *pkg) {
@@ -16,7 +17,7 @@ void pkg_find(package *pkg) {
 
    SAVE_CWD;
    pkg->path_len = 0;
-   pkg->path = malloc(sizeof(char*) * 1);
+   pkg->path = xmalloc(sizeof(char*) * 1);
 
    for (i = 0; i < REPO_LEN; i++) {
        if (chdir(REPOS[i]) != 0) {
@@ -25,12 +26,7 @@ void pkg_find(package *pkg) {
 
        if (chdir(pkg->name) == 0) {
            pwd = getcwd(pwd_buf, sizeof(pwd_buf));
-           pkg->path[pkg->path_len] = malloc(sizeof(char) * ((strlen(pwd) + 1)));
-
-           if (pkg->path[pkg->path_len] == NULL) {
-               log_error("Failed to allocate memory");
-           }
-
+           pkg->path[pkg->path_len] = xmalloc(strlen(pwd) + 1);
            strcpy(pkg->path[++pkg->path_len - 1], pwd);
        }
    }

@@ -6,6 +6,7 @@ ALL_LDFLAGS=$(LDFLAGS) -larchive -llzma -lbz2 -lcurl -lssl -lcrypto -lcrypto -lz
 
 OBJ=\
 	src/log.o \
+	src/util.o \
 	src/build.o \
 	src/checksum.o \
 	src/extract.o \
@@ -21,6 +22,7 @@ OBJ=\
 
 HDR=\
 	src/log.h \
+	src/util.h \
 	src/build.h \
 	src/checksum.h \
 	src/extract.h \

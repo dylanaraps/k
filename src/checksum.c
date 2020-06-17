@@ -10,6 +10,7 @@
 #include "sha.h"
 #include "log.h"
 #include "checksum.h"
+#include "util.h"
 #include "pkg.h"
 
 void pkg_checksums(package *pkg) {
@@ -21,7 +22,7 @@ void pkg_checksums(package *pkg) {
     int i;
     int j;
 
-    pkg->sums = malloc(sizeof(char *) * pkg->src_len + 1);
+    pkg->sums = xmalloc(sizeof(char *) * pkg->src_len + 1);
 
     for (i = 0; i < pkg->src_len; i++) {
         src  = fopen(pkg->source.src[i], "rb");
@@ -31,11 +32,7 @@ void pkg_checksums(package *pkg) {
             log_error("Failed to generate checksums");
         }
 
-        pkg->sums[i] = malloc(67 * sizeof(char) + strlen(base));
-
-        if (!pkg->sums[i]) {
-            log_error("Failed to allocate memory");
-        }
+        pkg->sums[i] = xmalloc(67 * sizeof(char) + strlen(base));
 
         sha256_init(&ctx);
         while ((j = fread(buf, 1, sizeof(buf), src)) > 0) {
