@@ -40,9 +40,8 @@ void pkg_list_all(void) {
 
     tot = scandir(".", &list, NULL, alphasort);
 
-    if (tot == -1) {
+    if (tot == -1)
         log_error("Package DB not accessible");
-    }
 
     // '2' skips '.'/'..'.
     for (int i = 2; i < tot; i++) {

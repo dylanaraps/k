@@ -116,7 +116,7 @@ static int rm(const char *fpath, const struct stat *sb, int tf, struct FTW *fb) 
 }
 
 void cache_destroy(void) {
-     nftw(MAK_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
-     nftw(PKG_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
-     nftw(TAR_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
+    nftw(MAK_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
+    nftw(PKG_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
+    nftw(TAR_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
 }

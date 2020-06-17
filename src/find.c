@@ -21,11 +21,12 @@ void pkg_find(package *pkg) {
 
    for (i = 0; i < REPO_LEN; i++) {
        xchdir(REPOS[i]);
-       xchdir(pkg->name);
 
-       pwd = getcwd(pwd_buf, sizeof(pwd_buf));
-       pkg->path[pkg->path_len] = xmalloc(strlen(pwd) + 1);
-       strcpy(pkg->path[++pkg->path_len - 1], pwd);
+       if (chdir(pkg->name) == 0) {
+           pwd = getcwd(pwd_buf, sizeof(pwd_buf));
+           pkg->path[pkg->path_len] = xmalloc(strlen(pwd) + 1);
+           strcpy(pkg->path[++pkg->path_len - 1], pwd);
+       }
    }
 
    LOAD_CWD;
