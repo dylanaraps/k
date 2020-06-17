@@ -10,7 +10,7 @@
 #include "util.h"
 #include "pkg.h"
 
-void pkg_list(char *pkg_name) {
+void pkg_list(package *pkg) {
     struct version version;
     char *path;
     char cwd[PATH_MAX];
@@ -18,14 +18,14 @@ void pkg_list(char *pkg_name) {
     SAVE_CWD;
     xchdir(PKG_DB);
 
-    if (chdir(pkg_name) != 0) {
-        PKG = pkg_name;
+    if (chdir(pkg->name) != 0) {
+        PKG = pkg->name;
         log_error("not installed");
 
     } else {
         path = getcwd(cwd, sizeof(cwd)); 
         version = pkg_version(path);
-        printf("%s %s %s\n", pkg_name, version.version, version.release);
+        printf("%s %s %s\n", pkg->name, version.version, version.release);
     }
 
     LOAD_CWD;

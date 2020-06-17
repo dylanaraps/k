@@ -16,8 +16,6 @@ extern char CAC_DIR[PATH_MAX + 1];
 extern char SRC_DIR[PATH_MAX + 1];
 extern char BIN_DIR[PATH_MAX + 1];
 
-// Satisfy sprintf();
-// https://patchwork.kernel.org/patch/10444915/
 extern char MAK_DIR[PATH_MAX + 22];
 extern char PKG_DIR[PATH_MAX + 22];
 extern char TAR_DIR[PATH_MAX + 22];
@@ -63,6 +61,19 @@ void cache_destroy(void);
     xchdir(OLD_CWD); \
     free(OLD_CWD); \
 }
+
+#define do1(f) { \
+for (package *tmp = head; tmp; tmp = tmp->next) { \
+    PKG = tmp->name; \
+    (*f)(tmp); \
+} } \
+
+#define do2(f, f2) { \
+for (package *tmp = head; tmp; tmp = tmp->next) { \
+    PKG = tmp->name; \
+    (*f)(tmp); \
+    (*f2)(tmp); \
+} } \
 
 /* for PATH_MAX on systems that don't have it in limits.h */
 #include <sys/param.h>

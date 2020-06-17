@@ -28,18 +28,21 @@ char BIN_DIR[PATH_MAX + 1];
 char *OLD_CWD;
 char old_cwd_buf[PATH_MAX + 1];
 
-int main (int argc, char *argv[]) {
-    if (argc == 1) {
-        printf("kiss [b|c|d|l|s|v] [pkg]...\n");
-        printf("build:        Build a package\n");
-        printf("checksum:     Generate checksums\n");
-        printf("download:     Pre-download all sources\n");
-        printf("list:         List installed packages\n");
-        printf("search:       Search for a package\n");
-        printf("version:      Package manager version\n");
+static void usage(void) {
+    printf("kiss [b|c|d|l|s|v] [pkg]...\n");
+    printf("build:        Build a package\n");
+    printf("checksum:     Generate checksums\n");
+    printf("download:     Pre-download all sources\n");
+    printf("list:         List installed packages\n");
+    printf("search:       Search for a package\n");
+    printf("version:      Package manager version\n");
 
-        exit(0);
-    }
+    exit(0);
+}
+
+int main (int argc, char *argv[]) {
+    if (argc == 1)
+        usage();
 
     cache_init();
     atexit(cache_destroy);
@@ -51,50 +54,32 @@ int main (int argc, char *argv[]) {
         PKG = head->name;
     }
 
-    if (!strcmp(argv[1], "b") || !strcmp(argv[1], "build")) {
-        for (package *tmp = head; tmp; tmp = tmp->next) {
-            PKG = tmp->name;
-            pkg_sources(tmp);
-        }
-        for (package *tmp = head; tmp; tmp = tmp->next) {
-            PKG = tmp->name;
-            pkg_verify(tmp);
-        }
-        for (package *tmp = head; tmp; tmp = tmp->next) {
-            PKG = tmp->name;
-            pkg_extract(tmp);
-            pkg_build(tmp);
-        }
+    switch (argv[1][0]) {
+    case 'b':
+        do1(pkg_sources);
+        do1(pkg_verify);
+        do2(pkg_extract, pkg_build);
+        break;
 
-    } else if (!strcmp(argv[1], "c") || !strcmp(argv[1], "checksum")) {
-        for (package *tmp = head; tmp; tmp = tmp->next) {
-            PKG = tmp->name;
-            pkg_sources(tmp);
-        }
-        for (package *tmp = head; tmp; tmp = tmp->next) {
-            PKG = tmp->name;
-            pkg_checksums(tmp);
-            checksum_to_file(tmp);
-        }
+    case 'c':
+        do1(pkg_sources);
+        do1(pkg_checksums);
+        break;
 
-    } else if (!strcmp(argv[1], "d") || !strcmp(argv[1], "download")) {
-        for (package *tmp = head; tmp; tmp = tmp->next) {
-            PKG = tmp->name;
-            pkg_sources(tmp);
-        }
+    case 'd':
+        do1(pkg_sources);
+        break;
 
-    } else if (!strcmp(argv[1], "l") || !strcmp(argv[1], "list")) {
+    case 'l':
         if (argc == 2) {
            pkg_list_all(); 
 
         } else {
-            for (package *tmp = head; tmp; tmp = tmp->next) {
-                PKG = tmp->name;
-                pkg_list(tmp->name);
-            }
+            do1(pkg_list);
         }
+        break;
 
-    } else if (!strcmp(argv[1], "s") || !strcmp(argv[1], "search")) {
+    case 's':
         for (package *tmp = head; tmp; tmp = tmp->next) {
             PKG = tmp->name;
 
@@ -102,9 +87,14 @@ int main (int argc, char *argv[]) {
                 printf("%s\n", *tmp->path);
             }
         }
+        break;
 
-    } else if (!strcmp(argv[1], "v") || !strcmp(argv[1], "version")) {
+    case 'v':
         printf("0.0.1\n");
+        break;
+
+    default:
+        usage();
     }
 
     free(head);
