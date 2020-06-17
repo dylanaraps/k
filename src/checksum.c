@@ -67,6 +67,7 @@ void pkg_verify(package *pkg) {
     char buf[LINE_MAX];
     int i = 0;
 
+    log_info("Verifying checksums...");
     pkg_checksums(pkg);
 
     if (pkg->src_len == 0) {

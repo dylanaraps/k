@@ -95,10 +95,10 @@ void pkg_sources(package *pkg) {
         } else if (chdir(repo) == 0 && 
                    chdir(dirname(src)) == 0 && 
                    access(base, F_OK) != -1) {
-            log_info("Found local source %s", src);
+            log_info("Found  local source %s/%s", base);
 
         } else {
-            log_error("No local file %s", src);
+            log_error("No local file %s", base);
         }
 
         pwd = getcwd(cwd, sizeof(cwd));
