@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <libgen.h>
+#include <fcntl.h>
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -53,6 +55,54 @@ void pkg_extract(package *pkg) {
             strcmp(src, ".lz")   == 0) {
             printf("Extracting %s...\n", pkg->source.src[i]);
             extract(pkg->source.src[i], 1, ARCHIVE_EXTRACT_PERM);
+
+        } else if (access(pkg->source.src[i], F_OK) != -1) {
+            int in_fd;
+            int out_fd;
+            int err;
+            unsigned char buffer[4096];
+            char *dest = basename(pkg->source.src[i]);
+
+            printf("Copying %s\n", pkg->source.src[i]);
+            in_fd = open(pkg->source.src[i], O_RDONLY);
+
+            if (in_fd == -1) {
+                printf("error: File not accessible %s\n", pkg->source.src[i]);
+                exit(1);
+            }
+
+            out_fd = open(dest, O_CREAT | O_WRONLY, 0666);
+
+            if (out_fd == -1) {
+                printf("error: Cannot copy file %s\n", pkg->source.src[i]);
+                exit(1);
+            }
+
+            while (1) {
+                err = read(in_fd, buffer, 4096); 
+
+                if (err == -1) {
+                    printf("error: File not accessible\n");
+                    exit(1);
+
+                } else if (err == 0) {
+                    break;
+                }
+
+                err = write(out_fd, buffer, err);
+
+                if (err == -1) {
+                    printf("error: Cannot copy file\n");
+                    exit(1);
+                }
+            }
+
+            close(in_fd);
+            close(out_fd);
+
+        } else {
+            printf("error: Source not found %s\n", pkg->source.src[i]);
+            exit(1);
         }
 
         chdir(MAK_DIR);

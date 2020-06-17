@@ -50,8 +50,8 @@ void pkg_sources(package *pkg) {
     }
     rewind(file);
 
-    pkg->source.src  = (char **) malloc(sizeof(char *) * len);
-    pkg->source.dest = (char **) malloc(sizeof(char *) * len);
+    pkg->source.src  = (char **) malloc(sizeof(char *) * len + 1);
+    pkg->source.dest = (char **) malloc(sizeof(char *) * len + 1);
 
     if (!pkg->source.src || !pkg->source.dest) {
         printf("error: Failed to allocate memory\n"); 

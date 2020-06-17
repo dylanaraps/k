@@ -8,6 +8,8 @@
 #include <libgen.h>
 #include <stdint.h>
 #include <sys/stat.h>
+
+#include <sys/stat.h>
 #include <ftw.h>
 
 #include "find.h"
@@ -135,11 +137,11 @@ err:
     exit(1);
 }
 
-static int rm(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf) {
+static int rm(const char *fpath, const struct stat *sb, int tf, struct FTW *fb) {
     // Unused.
     (void)(sb);
-    (void)(typeflag);
-    (void)(ftwbuf);
+    (void)(tf);
+    (void)(fb);
 
     int rv = remove(fpath);
 

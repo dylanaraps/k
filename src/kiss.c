@@ -99,7 +99,7 @@ void args(int argc, char *argv[]) {
 int main (int argc, char *argv[]) {
     getcwd(PWD, sizeof(PWD));
     cache_init();
-    atexit(cache_destroy);
+    /* atexit(cache_destroy); */
     REPOS = repo_load();
     args(argc, argv);
     return 0;

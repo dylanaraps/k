@@ -318,7 +318,6 @@ extract(const char *filename, int do_extract, int flags)
 
 	archive_write_close(ext);
   	archive_write_free(ext);
-	exit(0);
 }
 
 static int
