@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <libgen.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "log.h"
 #include "util.h"
@@ -62,4 +64,29 @@ void copy_file(char *src, char *dest) {
 
     fclose(in);
     fclose(out);
+}
+
+size_t strlcpy(char *d, const char *s, size_t n) {
+	char *d0 = d;
+	size_t *wd;
+	const size_t *ws;
+
+	if (!n--) goto finish;
+	if (((uintptr_t)s & (sizeof(size_t)-1)) == 
+        ((uintptr_t)d & (sizeof(size_t)-1))) {
+		for (; ((uintptr_t)s & (sizeof(size_t)-1)) && n && 
+                (*d=*s); n--, s++, d++);
+		if (n && *s) {
+			wd=(void *)d; ws=(const void *)s;
+			for (; n>=sizeof(size_t) && 
+                !(((*ws)-((size_t)-1/UCHAR_MAX)) & ~(*ws) & 
+                    (((size_t)-1/UCHAR_MAX) * (UCHAR_MAX/2+1)));
+            n-=sizeof(size_t), ws++, wd++) *wd = *ws;
+			d=(void *)wd; s=(const void *)ws;
+		}
+	}
+	for (; n && (*d=*s); n--, s++, d++);
+	*d = 0;
+finish:
+	return d-d0 + strlen(s);
 }

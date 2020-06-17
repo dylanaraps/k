@@ -16,7 +16,7 @@
 
 void pkg_build(package *pkg) {
     char build_script[PATH_MAX + 1];
-    char pkg_dir[PATH_MAX + 1];
+    char pkg_dir[PATH_MAX + 23];
     int child;
 
     pkg->version = pkg_version(pkg->path[0]);
@@ -27,8 +27,8 @@ void pkg_build(package *pkg) {
     xchdir(MAK_DIR);
     xchdir(pkg->name);
 
-    sprintf(build_script, "%s/build",  pkg->path[0]);
-    sprintf(pkg_dir, "%s/%s",  PKG_DIR, pkg->name);
+    snprintf(build_script, PATH_MAX + 1, "%s/build",  pkg->path[0]);
+    snprintf(pkg_dir, PATH_MAX + 23, "%s/%s",  PKG_DIR, pkg->name);
 
     if (access(build_script, X_OK) == -1)
         log_error("Build file not executable");

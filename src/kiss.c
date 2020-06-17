@@ -26,7 +26,7 @@ char TAR_DIR[PATH_MAX + 22];
 char SRC_DIR[PATH_MAX + 1];
 char BIN_DIR[PATH_MAX + 1];
 char *OLD_CWD;
-char old_cwd_buf[PATH_MAX+1];
+char old_cwd_buf[PATH_MAX + 1];
 
 int main (int argc, char *argv[]) {
     if (argc == 1) {

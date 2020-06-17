@@ -25,7 +25,7 @@ void pkg_find(package *pkg) {
        if (chdir(pkg->name) == 0) {
            pwd = getcwd(pwd_buf, sizeof(pwd_buf));
            pkg->path[pkg->path_len] = xmalloc(strlen(pwd) + 1);
-           strcpy(pkg->path[++pkg->path_len - 1], pwd);
+           strlcpy(pkg->path[++pkg->path_len - 1], pwd, strlen(pwd) + 1);
        }
    }
 

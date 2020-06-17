@@ -52,7 +52,7 @@ void cache_init(void) {
     char cwd[PATH_MAX];
     pid_t pid = getpid();
 
-    strcpy(HOME, getenv("HOME"));
+    strlcpy(HOME, getenv("HOME"), PATH_MAX + 1);
 
     if (HOME[0] == '\0')
         log_error("HOME is NULL");
@@ -65,7 +65,7 @@ void cache_init(void) {
         mkdir(".cache", 0777);
         xchdir(".cache");
         
-        strcpy(CAC_DIR, getcwd(cwd, sizeof(cwd)));
+        strlcpy(CAC_DIR, getcwd(cwd, sizeof(cwd)), PATH_MAX + 1);
     }
 
     mkdir(CAC_DIR, 0777);
@@ -74,7 +74,7 @@ void cache_init(void) {
     mkdir("kiss", 0777);
     xchdir("kiss");
 
-    strcpy(CAC_DIR, getcwd(cwd, sizeof(cwd)));
+    strlcpy(CAC_DIR, getcwd(cwd, sizeof(cwd)), PATH_MAX + 1);
     snprintf(MAK_DIR, PATH_MAX + 22, "%s/build-%jd",   CAC_DIR, (intmax_t) pid);
     snprintf(PKG_DIR, PATH_MAX + 22, "%s/pkg-%jd",     CAC_DIR, (intmax_t) pid);
     snprintf(TAR_DIR, PATH_MAX + 22, "%s/extract-%jd", CAC_DIR, (intmax_t) pid);
@@ -90,11 +90,11 @@ void cache_init(void) {
 
     mkdir("../sources", 0777);
     xchdir("../sources");
-    strcpy(SRC_DIR, getcwd(cwd, sizeof(cwd)));
+    strlcpy(SRC_DIR, getcwd(cwd, sizeof(cwd)), PATH_MAX + 1);
 
     mkdir("../bin", 0777);  
     xchdir("../bin");
-    strcpy(BIN_DIR, getcwd(cwd, sizeof(cwd)));
+    strlcpy(BIN_DIR, getcwd(cwd, sizeof(cwd)), PATH_MAX + 1);
 
     LOAD_CWD;
 }
