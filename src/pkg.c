@@ -75,9 +75,9 @@ void cache_init(void) {
     xchdir("kiss");
 
     strcpy(CAC_DIR, getcwd(cwd, sizeof(cwd)));
-    sprintf(MAK_DIR, "%s/build-%jd",   CAC_DIR, (intmax_t) pid);
-    sprintf(PKG_DIR, "%s/pkg-%jd",     CAC_DIR, (intmax_t) pid);
-    sprintf(TAR_DIR, "%s/extract-%jd", CAC_DIR, (intmax_t) pid);
+    snprintf(MAK_DIR, PATH_MAX + 22, "%s/build-%jd",   CAC_DIR, (intmax_t) pid);
+    snprintf(PKG_DIR, PATH_MAX + 22, "%s/pkg-%jd",     CAC_DIR, (intmax_t) pid);
+    snprintf(TAR_DIR, PATH_MAX + 22, "%s/extract-%jd", CAC_DIR, (intmax_t) pid);
 
     mkdir(MAK_DIR, 0777);
     xchdir(MAK_DIR);
