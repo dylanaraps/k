@@ -80,7 +80,7 @@ void pkg_extract(package *pkg) {
                 log_error("Cannot copy file %s\n", pkg->source.src[i]);
 
             while (1) {
-                err = fread(buffer, buf_len, buf_len, in); 
+                err = fread(buffer, 1, buf_len, in); 
 
                 if (err == -1)
                     log_error("File not accessible %s\n", pkg->source.src[i]);
@@ -88,7 +88,7 @@ void pkg_extract(package *pkg) {
                 if (err == 0)
                     break;
 
-                err = fwrite(buffer, buf_len, buf_len, out);
+                err = fwrite(buffer, 1, buf_len, out);
 
                 if (err == -1)
                     log_error("Cannot copy file %s\n", pkg->source.src[i]);
