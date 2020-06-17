@@ -50,26 +50,22 @@ void pkg_load(package **head, char *pkg_name) {
 
 void cache_init(void) {
     char cwd[PATH_MAX];
-    char MAK_DIR[PATH_MAX + 1];
-    char PKG_DIR[PATH_MAX + 1];
-    char TAR_DIR[PATH_MAX + 1];
     pid_t pid = getpid();
 
-    HOME = strdup(getenv("HOME"));
+    strcpy(HOME, getenv("HOME"));
 
-    if (!HOME || HOME[0] == '\0')
+    if (HOME[0] == '\0')
         log_error("HOME is NULL");
 
-    SAVE_CWD
-    CAC_DIR = strdup(getenv("XDG_CACHE_HOME"));
+    SAVE_CWD;
+    strcpy(CAC_DIR, getenv("XDG_CACHE_HOME"));
 
-    if (!CAC_DIR || CAC_DIR[0] == '\0') {
+    if (CAC_DIR[0] == '\0') {
         xchdir(HOME);
         mkdir(".cache", 0777);
         xchdir(".cache");
         
-        free(CAC_DIR);
-        CAC_DIR = strdup(getcwd(cwd, sizeof(cwd)));
+        strcpy(CAC_DIR, getcwd(cwd, sizeof(cwd)));
     }
 
     mkdir(CAC_DIR, 0777);
@@ -78,9 +74,7 @@ void cache_init(void) {
     mkdir("kiss", 0777);
     xchdir("kiss");
 
-    free(CAC_DIR);
-    CAC_DIR = strdup(getcwd(cwd, sizeof(cwd)));
-
+    strcpy(CAC_DIR, getcwd(cwd, sizeof(cwd)));
     sprintf(MAK_DIR, "%s/build-%jd",   CAC_DIR, (intmax_t) pid);
     sprintf(PKG_DIR, "%s/pkg-%jd",     CAC_DIR, (intmax_t) pid);
     sprintf(TAR_DIR, "%s/extract-%jd", CAC_DIR, (intmax_t) pid);
@@ -96,11 +90,11 @@ void cache_init(void) {
 
     mkdir("../sources", 0777);
     xchdir("../sources");
-    SRC_DIR = strdup(getcwd(cwd, sizeof(cwd)));
+    strcpy(SRC_DIR, getcwd(cwd, sizeof(cwd)));
 
     mkdir("../bin", 0777);  
     xchdir("../bin");
-    BIN_DIR = strdup(getcwd(cwd, sizeof(cwd)));
+    strcpy(BIN_DIR, getcwd(cwd, sizeof(cwd)));
 
     LOAD_CWD;
 }

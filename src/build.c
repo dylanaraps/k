@@ -11,6 +11,7 @@
 #include "log.h"
 #include "version.h"
 #include "util.h"
+#include "pkg.h"
 #include "build.h"
 
 void pkg_build(package *pkg) {

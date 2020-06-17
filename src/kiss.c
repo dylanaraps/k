@@ -17,10 +17,15 @@ char *OLD_CWD = NULL;
 char **REPOS = NULL;
 char *PKG = NULL;
 int  REPO_LEN = 0;
-const char *HOME;
-const char *XDG_CACHE_HOME;
-char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *BIN_DIR;
-char *OLD_PWD;
+char HOME[PATH_MAX + 1];
+char XDG_CACHE_HOME[PATH_MAX + 1];
+char CAC_DIR[PATH_MAX + 1];
+char MAK_DIR[PATH_MAX + 1];
+char PKG_DIR[PATH_MAX + 1];
+char TAR_DIR[PATH_MAX + 1];
+char SRC_DIR[PATH_MAX + 1];
+char BIN_DIR[PATH_MAX + 1];
+char *OLD_CWD;
 char old_cwd_buf[PATH_MAX+1];
 
 int main (int argc, char *argv[]) {

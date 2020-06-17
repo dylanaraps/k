@@ -7,10 +7,15 @@
 
 extern char **REPOS;
 extern int  REPO_LEN;
-extern const char *HOME;
-extern const char *XDG_CACHE_HOME;
-extern char *CAC_DIR, *MAK_DIR, *PKG_DIR, *TAR_DIR, *SRC_DIR, *BIN_DIR;
 extern char *PKG;
+extern char HOME[PATH_MAX + 1];
+extern char XDG_CACHE_HOME[PATH_MAX + 1];
+extern char CAC_DIR[PATH_MAX + 1];
+extern char MAK_DIR[PATH_MAX + 1];
+extern char PKG_DIR[PATH_MAX + 1];
+extern char TAR_DIR[PATH_MAX + 1];
+extern char SRC_DIR[PATH_MAX + 1];
+extern char BIN_DIR[PATH_MAX + 1];
 extern char *OLD_CWD;
 extern char old_cwd_buf[PATH_MAX+1];
 
