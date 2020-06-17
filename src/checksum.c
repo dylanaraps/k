@@ -34,7 +34,7 @@ void pkg_checksums(package *pkg) {
         pkg->sums[i] = malloc(67 * sizeof(char) + strlen(base));
 
         if (!pkg->sums[i]) {
-            log_fatal("Failed to allocate memory");
+            log_error("Failed to allocate memory");
         }
 
         sha256_init(&ctx);
@@ -109,7 +109,7 @@ void checksum_to_file(package *pkg) {
     file = fopen("checksums", "w");
 
     if (!file) {
-        log_fatal("Cannot write checksums");
+        log_error("Cannot write checksums");
     }
 
     for (int i = 0; i < pkg->src_len; i++) {

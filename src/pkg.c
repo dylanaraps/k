@@ -21,7 +21,7 @@ void pkg_load(package **head, char *pkg_name) {
     package *last = *head;
 
     if (!new_pkg) {
-        log_fatal("Failed to allocate memory");
+        log_error("Failed to allocate memory");
     }
 
     new_pkg->next        = NULL;
@@ -59,7 +59,7 @@ void cache_init(void) {
     pid_t pid = getpid();
 
     if (!HOME || HOME[0] == '\0') {
-        log_fatal("HOME is NULL");
+        log_error("HOME is NULL");
     }
 
     if (!CAC_DIR || CAC_DIR[0] == '\0') {
@@ -132,7 +132,7 @@ void cache_init(void) {
     return;
 
 err:
-    log_fatal("Failed to create cache directory");
+    log_error("Failed to create cache directory");
 }
 
 static int rm(const char *fpath, const struct stat *sb, int tf, struct FTW *fb) {

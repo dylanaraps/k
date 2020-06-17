@@ -33,11 +33,11 @@ void pkg_sources(package *pkg) {
     file = fopen("sources", "r");
 
     if (chdir(SRC_DIR) != 0) {
-        log_fatal("Sources directory not accessible");
+        log_error("Sources directory not accessible");
     }
 
     if (!file) {
-        log_fatal("Sources file invalid");
+        log_error("Sources file invalid");
     }
 
     // Guess at the length of resulting items based on non-
@@ -53,7 +53,7 @@ void pkg_sources(package *pkg) {
     pkg->source.dest = (char **) malloc(sizeof(char *) * len + 1);
 
     if (!pkg->source.src || !pkg->source.dest) {
-        log_fatal("Failed to allocate memory");
+        log_error("Failed to allocate memory");
     }
 
     while (fgets(buf, sizeof buf, file) != NULL) {
@@ -64,7 +64,7 @@ void pkg_sources(package *pkg) {
         toke = strtok_r(buf,  " 	\n", &p_src);
 
         if (!toke) {
-            log_fatal("Sources file invalid");
+            log_error("Sources file invalid");
         }
 
         src  = strdup(toke);
@@ -78,7 +78,7 @@ void pkg_sources(package *pkg) {
         mkdir(pkg->name, 0777);
 
         if (chdir(pkg->name) != 0) {
-            log_fatal("Sources directory not accessible");
+            log_error("Sources directory not accessible");
         }
 
         if (access(base, F_OK) != -1) {
@@ -128,7 +128,7 @@ void source_download(char *url) {
 
     if (curl_easy_perform(curl) != 0) {
         remove(name);
-        log_fatal("Failed to download source %s", url);
+        log_error("Failed to download source %s", url);
     }
 
     fclose(file);

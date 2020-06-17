@@ -105,7 +105,7 @@ void pkg_extract(package *pkg) {
             close(out_fd);
 
         } else {
-            log_fatal("Source not found %s", pkg->source.src[i]);
+            log_error("Source not found %s", pkg->source.src[i]);
         }
 
         chdir(MAK_DIR);

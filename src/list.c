@@ -15,7 +15,7 @@ void pkg_list(char *pkg_name) {
     char cwd[PATH_MAX];
 
     if (chdir(PKG_DB) != 0) {
-        log_fatal("Package DB not accessible");
+        log_error("Package DB not accessible");
     }
 
     if (chdir(pkg_name) != 0) {
@@ -36,13 +36,13 @@ void pkg_list_all(void) {
     int tot;
 
     if (chdir(PKG_DB) != 0) {
-        log_fatal("Package DB not accessible");
+        log_error("Package DB not accessible");
     }
 
     tot = scandir(".", &list, NULL, alphasort);
 
     if (tot == -1) {
-        log_fatal("Package DB not accessible");
+        log_error("Package DB not accessible");
     }
 
     // '2' skips '.'/'..'.
