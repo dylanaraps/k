@@ -59,6 +59,7 @@ void pkg_extract(package *pkg) {
 
         if (strcmp(src, ".tar")  == 0 ||
             strcmp(src, ".gz")   == 0 ||
+            strcmp(src, ".tgz")  == 0 ||
             strcmp(src, ".xz")   == 0 ||
             strcmp(src, ".bz2")  == 0 ||
             strcmp(src, ".zst")  == 0 ||
