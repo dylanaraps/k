@@ -5,6 +5,7 @@ ALL_CFLAGS=$(CFLAGS) -std=c99 -static -Wall -Wextra -Wpedantic
 ALL_LDFLAGS=$(LDFLAGS) -larchive -llzma -lbz2 -lcurl -lssl -lcrypto -lcrypto -lz
 
 OBJ=\
+	src/build.o \
 	src/checksum.o \
 	src/extract.o \
 	src/tar.o \
@@ -18,6 +19,7 @@ OBJ=\
 	src/kiss.o
 
 HDR=\
+	src/build.h \
 	src/checksum.h \
 	src/extract.h \
 	src/tar.h \

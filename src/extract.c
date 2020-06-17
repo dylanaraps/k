@@ -16,9 +16,17 @@
 
 void pkg_extract(package *pkg) {
     char *src;
+    char *dest;
     int i;
 
     if (chdir(MAK_DIR) != 0) {
+        printf("error: Cache directory not accessible\n");
+        exit(1);
+    }
+
+    mkdir(pkg->name, 0777);
+
+    if (chdir(pkg->name) != 0) {
         printf("error: Cache directory not accessible\n");
         exit(1);
     }
@@ -106,5 +114,6 @@ void pkg_extract(package *pkg) {
         }
 
         chdir(MAK_DIR);
+        chdir(pkg->name);
     }
 }
