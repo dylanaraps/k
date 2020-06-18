@@ -31,6 +31,13 @@ void xchdir(const char *path) {
         log_error("Directory %s not accessible", path);
 }
 
+int ends_with(const char *str, const char *suf, size_t str_len, size_t suf_len) {
+    if (!str || !suf || suf_len > str_len)
+       return 0; 
+
+    return strncmp(str + str_len - suf_len, suf, suf_len) == 0;
+}
+
 void copy_file(char *src, char *dest) {
     FILE *in;
     FILE *out;

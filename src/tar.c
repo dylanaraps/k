@@ -251,6 +251,7 @@ extract(const char *filename, int do_extract, int flags)
 	archive_read_support_filter_xz(a);
 	archive_read_support_filter_gzip(a);
 	archive_read_support_filter_compress(a);
+    archive_read_support_format_zip_seekable(a);
 	archive_read_support_format_tar(a);
 	archive_read_support_format_cpio(a);
 	archive_write_disk_set_standard_lookup(ext);

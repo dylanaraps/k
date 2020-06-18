@@ -17,8 +17,8 @@
 
 
 void pkg_extract(package *pkg) {
-    char *src;
     int i;
+    int src_len;
 
     xchdir(MAK_DIR);
     mkdir(pkg->name, 0777);
@@ -36,18 +36,18 @@ void pkg_extract(package *pkg) {
             xchdir(pkg->source.dest[i]);
         }
 
-        // TODO: match more than singular suffix.
-        src = strrchr(pkg->source.src[i], '.');
+        src_len = strlen(pkg->source.src[i]);
 
-        if (strcmp(src, ".tar")  == 0 ||
-            strcmp(src, ".gz")   == 0 ||
-            strcmp(src, ".tgz")  == 0 ||
-            strcmp(src, ".xz")   == 0 ||
-            strcmp(src, ".bz2")  == 0 ||
-            strcmp(src, ".zst")  == 0 ||
-            strcmp(src, ".lzma") == 0 ||
-            strcmp(src, ".txz")  == 0 ||
-            strcmp(src, ".lz")   == 0) {
+        if (ends_with(pkg->source.src[i], ".tar",      src_len, 4) == 0 ||
+            ends_with(pkg->source.src[i], ".tgz",      src_len, 4) == 0 ||
+            ends_with(pkg->source.src[i], ".zip",      src_len, 4) == 0 ||
+            ends_with(pkg->source.src[i], ".txz",      src_len, 4) == 0 ||
+            ends_with(pkg->source.src[i], ".tar.gz",   src_len, 7) == 0 ||
+            ends_with(pkg->source.src[i], ".tar.lz",   src_len, 7) == 0 || 
+            ends_with(pkg->source.src[i], ".tar.xz",   src_len, 7) == 0 ||
+            ends_with(pkg->source.src[i], ".tar.bz2",  src_len, 8) == 0 ||
+            ends_with(pkg->source.src[i], ".tar.zst",  src_len, 8) == 0 ||
+            ends_with(pkg->source.src[i], ".tar.lzma", src_len, 9) == 0) {
 
             log_info("Extracting %s", pkg->source.src[i]);
 
