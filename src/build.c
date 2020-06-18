@@ -15,20 +15,14 @@
 #include "build.h"
 
 void pkg_build(package *pkg) {
-    char build_script[PATH_MAX + 7];
-    char pkg_dir[PATH_MAX + 23];
     int child;
 
-    xchdir(PKG_DIR);
-    mkdir(pkg->name, 0777);
-    xchdir(pkg->name);
-    xchdir(MAK_DIR);
-    xchdir(pkg->name);
+    SAVE_CWD;
 
-    snprintf(build_script, PATH_MAX + 7, "%s/build",  pkg->path[0]);
-    snprintf(pkg_dir, PATH_MAX + 23, "%s/%s",  PKG_DIR, pkg->name);
+    mkchdir(pkg->dest_dir);
+    mkchdir(pkg->build_dir);
 
-    if (access(build_script, X_OK) == -1)
+    if (access(pkg->build, X_OK) == -1)
         log_error("Build file not executable");
     
     switch (child = fork()) {
@@ -37,9 +31,9 @@ void pkg_build(package *pkg) {
         break;
 
     case 0:
-        execvp(build_script, (char*[]){ 
-            build_script, 
-            pkg_dir, 
+        execvp(pkg->build, (char*[]){ 
+            pkg->build, 
+            pkg->dest_dir, 
             pkg->ver, 
             NULL 
         });
@@ -48,4 +42,6 @@ void pkg_build(package *pkg) {
     default:
         waitpid(child, NULL, 0);
     }
+
+    LOAD_CWD;
 }
