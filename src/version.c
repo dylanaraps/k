@@ -45,5 +45,6 @@ void pkg_version(package *pkg) {
 
     free(buf);
     fclose(file);
+
     LOAD_CWD;
 }
