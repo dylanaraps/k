@@ -11,7 +11,7 @@
 
 void pkg_version(package *pkg) {
     FILE *file;
-    char *buf = 0;
+    char *buf = NULL;
     char *tok;
 
     SAVE_CWD;
@@ -33,7 +33,7 @@ void pkg_version(package *pkg) {
         log_error("Invalid version file");
 
     pkg->ver = xmalloc(strlen(tok) + 1);
-    strlcpy(pkg->ver, tok, sizeof(tok));
+    strlcpy(pkg->ver, tok, strlen(tok) + 1);
 
     tok = strtok(NULL, " 	\r\n");
 
@@ -41,7 +41,7 @@ void pkg_version(package *pkg) {
         log_error("release field empty");
 
     pkg->rel = xmalloc(strlen(tok) + 1);
-    strlcpy(pkg->rel, tok, sizeof(tok));
+    strlcpy(pkg->rel, tok, strlen(tok) + 1);
 
     fclose(file);
     LOAD_CWD;
