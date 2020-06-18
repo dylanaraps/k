@@ -19,8 +19,6 @@ void pkg_build(package *pkg) {
     char pkg_dir[PATH_MAX + 23];
     int child;
 
-    pkg_version(pkg);
-
     xchdir(PKG_DIR);
     mkdir(pkg->name, 0777);
     xchdir(pkg->name);
@@ -33,9 +31,8 @@ void pkg_build(package *pkg) {
     if (access(build_script, X_OK) == -1)
         log_error("Build file not executable");
 
-    child = fork();
-
-    switch (child) {
+    
+    switch (child = fork()) {
     case -1:
         log_error("fork() failed");
         break;
@@ -48,7 +45,8 @@ void pkg_build(package *pkg) {
             NULL 
         });
         break;
-    }
 
-    waitpid(child, NULL, 0);
+    default:
+        waitpid(child, NULL, 0);
+    }
 }
