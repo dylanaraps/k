@@ -16,20 +16,17 @@ void cache_init(void) {
     char cwd[PATH_MAX + 1];
     pid_t pid = getpid();
 
-    strlcpy(HOME, getenv("HOME"), PATH_MAX + 1);
-
-    if (HOME[0] == '\0')
-        log_error("HOME is NULL");
+    strlcpy(HOME,    getenv("HOME"), sizeof(cwd));
+    strlcpy(CAC_DIR, getenv("XDG_CACHE_HOME"), sizeof(cwd));
 
     SAVE_CWD;
-    strlcpy(CAC_DIR, getenv("XDG_CACHE_HOME"), PATH_MAX + 1);
 
     if (CAC_DIR[0] == '\0') {
         xchdir(HOME);
         mkdir(".cache", 0777);
         xchdir(".cache");
         
-        strlcpy(CAC_DIR, getcwd(cwd, sizeof(cwd)), PATH_MAX + 1);
+        strlcpy(CAC_DIR, getcwd(cwd, sizeof(cwd)), sizeof(cwd));
     }
 
     mkdir(CAC_DIR, 0777);
@@ -54,11 +51,11 @@ void cache_init(void) {
 
     mkdir("../sources", 0777);
     xchdir("../sources");
-    strlcpy(SRC_DIR, getcwd(cwd, sizeof(cwd)), PATH_MAX + 1);
+    strlcpy(SRC_DIR, getcwd(cwd, sizeof(cwd)), sizeof(cwd));
 
     mkdir("../bin", 0777);  
     xchdir("../bin");
-    strlcpy(BIN_DIR, getcwd(cwd, sizeof(cwd)), PATH_MAX + 1);
+    strlcpy(BIN_DIR, getcwd(cwd, sizeof(cwd)), sizeof(cwd));
 
     LOAD_CWD;
 }
