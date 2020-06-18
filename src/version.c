@@ -9,13 +9,13 @@
 #include "log.h"
 #include "pkg.h"
 
-struct version pkg_version(char *repo_dir) {
-    struct version version = {0};
+void pkg_version(package *pkg) {
     FILE *file;
     char *buf = 0;
+    char *tok;
 
     SAVE_CWD;
-    chdir(repo_dir);
+    chdir(*pkg->path);
 
     file = fopen("version", "r");
 
@@ -27,14 +27,22 @@ struct version pkg_version(char *repo_dir) {
     if (!buf)
         log_error("version file is invalid");
 
-    fclose(file);
+    tok = strtok(buf,  " 	\r\n");
 
-    version.version = strtok(buf,  " 	\r\n");
-    version.release = strtok(NULL, " 	\r\n");
+    if (!tok)
+        log_error("Invalid version file");
 
-    if (!version.release)
+    pkg->ver = xmalloc(strlen(tok) + 1);
+    strlcpy(pkg->ver, tok, sizeof(tok));
+
+    tok = strtok(NULL, " 	\r\n");
+
+    if (!tok)
         log_error("release field empty");
 
+    pkg->rel = xmalloc(strlen(tok) + 1);
+    strlcpy(pkg->rel, tok, sizeof(tok));
+
+    fclose(file);
     LOAD_CWD;
-    return version;
 }

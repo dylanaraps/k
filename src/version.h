@@ -1,1 +1,3 @@
-struct version pkg_version(char *repo_dir);
+#include "pkg.h"
+
+void pkg_version(package *pkg);

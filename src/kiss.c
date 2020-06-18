@@ -41,12 +41,13 @@ static void usage(void) {
 }
 
 int main (int argc, char *argv[]) {
+    package *head = NULL;
+
     if (argc == 1)
         usage();
 
     cache_init();
     atexit(cache_destroy);
-    package *head = NULL;
     REPOS = repo_load();
 
     for (int i = 2; i < argc; i++) {

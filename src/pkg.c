@@ -15,6 +15,7 @@
 #include "find.h"
 #include "log.h"
 #include "util.h"
+#include "version.h"
 #include "pkg.h"
 
 void pkg_load(package **head, char *pkg_name) {
@@ -34,6 +35,7 @@ void pkg_load(package **head, char *pkg_name) {
     new_pkg->path_len    = 0;
 
     pkg_find(new_pkg);
+    pkg_version(new_pkg);
 
     if (!*head) {
         new_pkg->prev = NULL;

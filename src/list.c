@@ -8,36 +8,29 @@
 #include "list.h"
 #include "log.h"
 #include "util.h"
+#include "version.h"
 #include "pkg.h"
 
 void pkg_list(package *pkg) {
-    struct version version;
-    char *path;
-    char cwd[PATH_MAX];
-
     SAVE_CWD;
     xchdir(PKG_DB);
 
     if (chdir(pkg->name) != 0) {
         PKG = pkg->name;
         log_error("not installed");
-
-    } else {
-        path = getcwd(cwd, sizeof(cwd)); 
-        version = pkg_version(path);
-        printf("%s %s %s\n", pkg->name, version.version, version.release);
     }
+
+    printf("%s %s %s\n", pkg->name, pkg->ver, pkg->rel);
 
     LOAD_CWD;
 }
 
 void pkg_list_all(void) {
-    struct version version;
+    package *head = NULL;
     struct dirent  **list;
     int tot;
 
     xchdir(PKG_DB);
-
     tot = scandir(".", &list, NULL, alphasort);
 
     if (tot == -1)
@@ -45,14 +38,13 @@ void pkg_list_all(void) {
 
     // '2' skips '.'/'..'.
     for (int i = 2; i < tot; i++) {
-        if (chdir(list[i]->d_name) == 0) {
-            version = pkg_version(list[i]->d_name);    
-
-            printf("%s %s %s\n", list[i]->d_name, \
-                    version.version, version.release);
-        }
+        if (chdir(list[i]->d_name) == 0)
+            pkg_load(&head, list[i]->d_name);
 
         xchdir(PKG_DB);
     }
+
+    for (package *tmp = head; tmp; tmp = tmp->next)
+        pkg_list(tmp);
 }
 

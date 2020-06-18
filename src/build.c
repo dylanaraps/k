@@ -19,7 +19,7 @@ void pkg_build(package *pkg) {
     char pkg_dir[PATH_MAX + 23];
     int child;
 
-    pkg->version = pkg_version(pkg->path[0]);
+    pkg_version(pkg);
 
     xchdir(PKG_DIR);
     mkdir(pkg->name, 0777);
@@ -44,7 +44,7 @@ void pkg_build(package *pkg) {
         execvp(build_script, (char*[]){ 
             build_script, 
             pkg_dir, 
-            pkg->version.version, 
+            pkg->ver, 
             NULL 
         });
         break;

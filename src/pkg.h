@@ -23,11 +23,6 @@ extern char TAR_DIR[PATH_MAX + 22];
 extern char *OLD_CWD;
 extern char old_cwd_buf[PATH_MAX+1];
 
-struct version {
-    char *version;
-    char *release;
-};
-
 struct source {
     char **src;
     char **dest;
@@ -35,13 +30,14 @@ struct source {
 
 typedef struct package {
     char *name;
+    char *ver;
+    char *rel;
     char **sums;
 
     char **path;
     int  path_len;
 
     struct source source;
-    struct version version;
     int  src_len;
 
     struct package *next;
@@ -49,7 +45,6 @@ typedef struct package {
 } package;
 
 void pkg_load(package **head, char *pkg_name);
-struct version pkg_version(char *repo_dir);
 void cache_init(void);
 void cache_destroy(void);
 
