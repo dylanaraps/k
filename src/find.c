@@ -11,24 +11,20 @@
 #include "pkg.h"
 
 void pkg_find(package *pkg) {
-   int i;
-   int p_len;
-
    SAVE_CWD;
-   pkg->path_len = 0;
-   pkg->path = xmalloc(sizeof(char *) * REPO_LEN);
 
-   for (i = 0; i < REPO_LEN; i++) {
+   pkg->path_len = 0;
+   pkg->path = xmalloc(REPO_LEN * sizeof(char *));
+
+   for (int i = 0; i < REPO_LEN; i++) {
        xchdir(REPOS[i]);
 
        if (chdir(pkg->name) == 0) {
-           p_len = strlen(REPOS[i]) + strlen(pkg->name) + 2;
-           pkg->path[pkg->path_len] = xmalloc(p_len);
-
-           snprintf(pkg->path[pkg->path_len], p_len, "%s/%s", 
+           pkg->path[pkg->path_len] = xmalloc(PATH_MAX + 1);
+           snprintf(pkg->path[pkg->path_len], PATH_MAX + 1, "%s/%s", 
                     REPOS[i], pkg->name);
 
-           ++pkg->path_len;
+           pkg->path_len++;
        }
    }
 

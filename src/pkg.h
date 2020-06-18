@@ -42,6 +42,7 @@ typedef struct package {
 
     struct package *next;
     struct package *prev;
+
 } package;
 
 void pkg_load(package **head, char *pkg_name);

@@ -84,8 +84,8 @@ int main (int argc, char *argv[]) {
         for (package *tmp = head; tmp; tmp = tmp->next) {
             PKG = tmp->name;
 
-            for (char *c = *tmp->path; c; c=*++tmp->path) {
-                printf("%s\n", *tmp->path);
+            for (int i = 0; i < tmp->path_len; i++) {
+                printf("%s\n", tmp->path[i]);
             }
         }
         break;

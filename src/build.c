@@ -15,7 +15,7 @@
 #include "build.h"
 
 void pkg_build(package *pkg) {
-    char build_script[PATH_MAX + 1];
+    char build_script[PATH_MAX + 7];
     char pkg_dir[PATH_MAX + 23];
     int child;
 
@@ -25,7 +25,7 @@ void pkg_build(package *pkg) {
     xchdir(MAK_DIR);
     xchdir(pkg->name);
 
-    snprintf(build_script, PATH_MAX + 1, "%s/build",  pkg->path[0]);
+    snprintf(build_script, PATH_MAX + 7, "%s/build",  pkg->path[0]);
     snprintf(pkg_dir, PATH_MAX + 23, "%s/%s",  PKG_DIR, pkg->name);
 
     if (access(build_script, X_OK) == -1)
