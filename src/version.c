@@ -43,6 +43,7 @@ void pkg_version(package *pkg) {
     pkg->rel = xmalloc(strlen(tok) + 1);
     strlcpy(pkg->rel, tok, strlen(tok) + 1);
 
+    free(buf);
     fclose(file);
     LOAD_CWD;
 }
