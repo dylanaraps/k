@@ -52,9 +52,9 @@ void pkg_extract(package *pkg) {
             log_info("Extracting %s", pkg->source.src[i]);
 
             extract(pkg->source.src[i], 1, 
-                ARCHIVE_EXTRACT_PERM  | 
-                ARCHIVE_MATCH_MTIME   | 
-                ARCHIVE_MATCH_CTIME   |
+                ARCHIVE_EXTRACT_PERM | 
+                ARCHIVE_MATCH_MTIME | 
+                ARCHIVE_MATCH_CTIME |
                 ARCHIVE_EXTRACT_SECURE_NODOTDOT |
                 ARCHIVE_EXTRACT_TIME
             );
