@@ -91,7 +91,7 @@ void pkg_verify(package *pkg) {
 void checksum_to_file(package *pkg) {
     FILE *file;
 
-    xchdir(*pkg->path);
+    xchdir(pkg->path[0]);
     file = fopen("checksums", "w");
 
     if (!file)
