@@ -43,7 +43,7 @@ void pkg_sources(package *pkg) {
     char *dest;
     char *src;
     char *buf = 0;
-    char cwd[PATH_MAX + 1];
+    char cwd[PATH_MAX];
     char *pwd;
     int len = 0;
 

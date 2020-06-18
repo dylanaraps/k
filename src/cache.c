@@ -13,7 +13,7 @@
 #include "pkg.h"
 
 void cache_init(void) {
-    char cwd[PATH_MAX + 1];
+    char cwd[PATH_MAX];
     pid_t pid = getpid();
 
     strlcpy(HOME,    getenv("HOME"), sizeof(cwd));

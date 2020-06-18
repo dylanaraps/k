@@ -10,18 +10,18 @@
 extern char **REPOS;
 extern int  REPO_LEN;
 extern char *PKG;
-extern char HOME[PATH_MAX + 1];
-extern char XDG_CACHE_HOME[PATH_MAX + 1];
-extern char CAC_DIR[PATH_MAX + 1];
-extern char SRC_DIR[PATH_MAX + 1];
-extern char BIN_DIR[PATH_MAX + 1];
+extern char HOME[PATH_MAX];
+extern char XDG_CACHE_HOME[PATH_MAX];
+extern char CAC_DIR[PATH_MAX];
+extern char SRC_DIR[PATH_MAX];
+extern char BIN_DIR[PATH_MAX];
 
 extern char MAK_DIR[PATH_MAX + 22];
 extern char PKG_DIR[PATH_MAX + 22];
 extern char TAR_DIR[PATH_MAX + 22];
 
 extern char *OLD_CWD;
-extern char old_cwd_buf[PATH_MAX+1];
+extern char old_cwd_buf[PATH_MAX];
 
 typedef struct package {
     char *name;

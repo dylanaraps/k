@@ -18,16 +18,16 @@ char *OLD_CWD = NULL;
 char **REPOS = NULL;
 char *PKG = NULL;
 int  REPO_LEN = 0;
-char HOME[PATH_MAX + 1];
-char XDG_CACHE_HOME[PATH_MAX + 1];
-char CAC_DIR[PATH_MAX + 1];
+char HOME[PATH_MAX];
+char XDG_CACHE_HOME[PATH_MAX];
+char CAC_DIR[PATH_MAX];
 char MAK_DIR[PATH_MAX + 22];
 char PKG_DIR[PATH_MAX + 22];
 char TAR_DIR[PATH_MAX + 22];
-char SRC_DIR[PATH_MAX + 1];
-char BIN_DIR[PATH_MAX + 1];
+char SRC_DIR[PATH_MAX];
+char BIN_DIR[PATH_MAX];
 char *OLD_CWD;
-char old_cwd_buf[PATH_MAX + 1];
+char old_cwd_buf[PATH_MAX];
 
 static void usage(void) {
     printf("kiss [b|c|d|l|s|v] [pkg]...\n");
