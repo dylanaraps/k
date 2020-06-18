@@ -11,6 +11,7 @@
 #include "source.h"
 #include "repo.h"
 #include "list.h"
+#include "cache.h"
 #include "pkg.h"
 
 char *OLD_CWD = NULL;

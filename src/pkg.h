@@ -42,8 +42,6 @@ typedef struct package {
 
 void pkg_init(package **head, char *pkg_name);
 void pkg_destroy(package *pkg);
-void cache_init(void);
-void cache_destroy(void);
 
 #define SAVE_CWD { \
     OLD_CWD = getcwd(old_cwd_buf, sizeof(old_cwd_buf)); \
