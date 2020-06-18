@@ -30,7 +30,6 @@ void pkg_build(package *pkg) {
 
     if (access(build_script, X_OK) == -1)
         log_error("Build file not executable");
-
     
     switch (child = fork()) {
     case -1:
