@@ -21,7 +21,6 @@ void pkg_list(package *pkg) {
     }
 
     printf("%s %s %s\n", pkg->name, pkg->ver, pkg->rel);
-
     LOAD_CWD;
 }
 
@@ -30,21 +29,22 @@ void pkg_list_all(void) {
     struct dirent  **list;
     int tot;
 
-    xchdir(PKG_DB);
-    tot = scandir(".", &list, NULL, alphasort);
+    tot = scandir(PKG_DB, &list, NULL, alphasort);
 
     if (tot == -1)
         log_error("Package DB not accessible");
 
     // '2' skips '.'/'..'.
     for (int i = 2; i < tot; i++) {
-        if (chdir(list[i]->d_name) == 0)
+        if (opendir(list[i]->d_name) != 0)
             pkg_load(&head, list[i]->d_name);
 
+        free(list[i]);
         xchdir(PKG_DB);
     }
+    free(list);
 
-    for (package *tmp = head; tmp; tmp = tmp->next)
-        pkg_list(tmp);
+    for (package *p = head; p; p = p->next)
+        pkg_list(p);
 }
 

@@ -26,7 +26,7 @@ void pkg_load(package **head, char *pkg_name) {
         log_error("Failed to allocate memory");
 
     new_pkg->next        = NULL;
-    new_pkg->name        = pkg_name;
+    new_pkg->name        = strdup(pkg_name);
     new_pkg->sums        = NULL;
     new_pkg->path        = NULL;
     new_pkg->source.src  = NULL;
