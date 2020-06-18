@@ -4,6 +4,7 @@
 #include <libgen.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "log.h"
 #include "util.h"
@@ -23,12 +24,20 @@ void xchdir(const char *path) {
     int ret;
 
     if (!path)
-        log_error("Directory %s not accessible", path);
+        log_error("Directory is null");
 
     ret = chdir(path);
     
     if (ret != 0)
         log_error("Directory %s not accessible", path);
+}
+
+void mkchdir(const char *path) {
+    if (!path)
+        log_error("Directory is null");
+
+    mkdir(path, 0777); 
+    xchdir(path);
 }
 
 int ends_with(const char *str, const char *suf, size_t str_len, size_t suf_len) {

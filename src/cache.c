@@ -21,40 +21,28 @@ void cache_init(void) {
 
     SAVE_CWD;
 
+    // XDG_CACHE_HOME is unset.
     if (CAC_DIR[0] == '\0') {
         xchdir(HOME);
-        mkdir(".cache", 0777);
-        xchdir(".cache");
-        
+        mkchdir(".cache");
         strlcpy(CAC_DIR, getcwd(cwd, sizeof(cwd)), sizeof(cwd));
     }
 
-    mkdir(CAC_DIR, 0777);
-    xchdir(CAC_DIR);
-
-    mkdir("kiss", 0777);
-    xchdir("kiss");
+    mkchdir(CAC_DIR);
+    mkchdir("kiss");
 
     strlcpy(CAC_DIR, getcwd(cwd, sizeof(cwd)), PATH_MAX + 1);
     snprintf(MAK_DIR, PATH_MAX + 22, "%s/build-%jd",   CAC_DIR, (intmax_t) pid);
     snprintf(PKG_DIR, PATH_MAX + 22, "%s/pkg-%jd",     CAC_DIR, (intmax_t) pid);
     snprintf(TAR_DIR, PATH_MAX + 22, "%s/extract-%jd", CAC_DIR, (intmax_t) pid);
 
-    mkdir(MAK_DIR, 0777);
-    xchdir(MAK_DIR);
+    mkchdir(MAK_DIR);
+    mkchdir(PKG_DIR);
+    mkchdir(TAR_DIR);
 
-    mkdir(PKG_DIR, 0777);
-    xchdir(PKG_DIR);
-
-    mkdir(TAR_DIR, 0777);
-    xchdir(TAR_DIR);
-
-    mkdir("../sources", 0777);
-    xchdir("../sources");
+    mkchdir("../sources");
     strlcpy(SRC_DIR, getcwd(cwd, sizeof(cwd)), sizeof(cwd));
-
-    mkdir("../bin", 0777);  
-    xchdir("../bin");
+    mkchdir("../bin");  
     strlcpy(BIN_DIR, getcwd(cwd, sizeof(cwd)), sizeof(cwd));
 
     LOAD_CWD;
