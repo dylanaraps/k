@@ -24,8 +24,7 @@ void pkg_list(package *pkg) {
     LOAD_CWD;
 }
 
-void pkg_list_all(void) {
-    package *head = NULL;
+void pkg_list_all(package *pkg) {
     struct dirent  **list;
     int tot;
 
@@ -37,14 +36,14 @@ void pkg_list_all(void) {
     // '2' skips '.'/'..'.
     for (int i = 2; i < tot; i++) {
         if (opendir(list[i]->d_name) != 0)
-            pkg_load(&head, list[i]->d_name);
+            pkg_init(&pkg, list[i]->d_name);
 
         free(list[i]);
         xchdir(PKG_DB);
     }
     free(list);
 
-    for (package *p = head; p; p = p->next)
-        pkg_list(p);
+    for (; pkg; pkg = pkg->next)
+        pkg_list(pkg);
 }
 

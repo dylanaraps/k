@@ -18,21 +18,21 @@
 #include "version.h"
 #include "pkg.h"
 
-void pkg_load(package **head, char *pkg_name) {
+void pkg_init(package **head, char *pkg_name) {
     package *new_pkg = malloc(sizeof(package));    
     package *last = *head;
 
     if (!new_pkg)
         log_error("Failed to allocate memory");
 
-    new_pkg->next        = NULL;
-    new_pkg->name        = strdup(pkg_name);
-    new_pkg->sums        = NULL;
-    new_pkg->path        = NULL;
-    new_pkg->source.src  = NULL;
-    new_pkg->source.dest = NULL;
-    new_pkg->src_len     = 0;
-    new_pkg->path_len    = 0;
+    new_pkg->next     = NULL;
+    new_pkg->name     = strdup(pkg_name);
+    new_pkg->sums     = NULL;
+    new_pkg->path     = NULL;
+    new_pkg->src      = NULL;
+    new_pkg->dest     = NULL;
+    new_pkg->src_len  = 0;
+    new_pkg->path_len = 0;
 
     pkg_find(new_pkg);
     pkg_version(new_pkg);
@@ -49,6 +49,22 @@ void pkg_load(package **head, char *pkg_name) {
     last->next = new_pkg;
     new_pkg->prev = last;
 }
+
+void pkg_destroy(package *pkg) {
+    for (; pkg; pkg = pkg->next) {
+        free(pkg->name);
+        free(pkg->sums);
+        free(pkg->path);
+        free(pkg->src);
+        free(pkg->dest);
+        free(pkg->ver);
+        free(pkg->rel);
+        free(pkg);
+    }
+
+    free(pkg);
+}
+
 
 void cache_init(void) {
     char cwd[PATH_MAX];

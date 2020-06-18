@@ -51,7 +51,7 @@ int main (int argc, char *argv[]) {
     REPOS = repo_load();
 
     for (int i = 2; i < argc; i++) {
-        pkg_load(&head, argv[i]);
+        pkg_init(&head, argv[i]);
         PKG = head->name;
     }
 
@@ -73,7 +73,7 @@ int main (int argc, char *argv[]) {
 
     case 'l':
         if (argc == 2) {
-           pkg_list_all(); 
+           pkg_list_all(head); 
 
         } else {
             do1(pkg_list);
@@ -98,6 +98,6 @@ int main (int argc, char *argv[]) {
         usage();
     }
 
-    free(head);
+    pkg_destroy(head);
     return 0;
 }

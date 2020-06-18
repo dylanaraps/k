@@ -25,12 +25,12 @@ void pkg_checksums(package *pkg) {
     pkg->sums = xmalloc(sizeof(char *) * pkg->src_len + 1);
 
     for (i = 0; i < pkg->src_len; i++) {
-        src  = fopen(pkg->source.src[i], "rb");
+        src  = fopen(pkg->src[i], "rb");
 
         if (!src)
             log_error("Failed to generate checksums");
 
-        base = basename(pkg->source.src[i]);
+        base = basename(pkg->src[i]);
         pkg->sums[i] = xmalloc(67 + strlen(base));
 
         sha256_init(&ctx);

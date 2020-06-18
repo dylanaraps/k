@@ -63,8 +63,8 @@ void pkg_sources(package *pkg) {
             len++;
     rewind(file);
 
-    pkg->source.src  = xmalloc(sizeof(char *) * (len + 1));
-    pkg->source.dest = xmalloc(sizeof(char *) * (len + 1));
+    pkg->src  = xmalloc(sizeof(char *) * (len + 1));
+    pkg->dest = xmalloc(sizeof(char *) * (len + 1));
 
     while ((getline(&buf, &(size_t){0}, file) != -1)) {
         if (buf[0] == '#' || buf[0] == '\n')
@@ -80,8 +80,8 @@ void pkg_sources(package *pkg) {
         toke = strtok(NULL, " 	\n");
         dest = toke ? strdup(toke) : "";
 
-        pkg->source.dest[pkg->src_len] = xmalloc(strlen(dest) + 1);
-        strcpy(pkg->source.dest[pkg->src_len], dest);
+        pkg->dest[pkg->src_len] = xmalloc(strlen(dest) + 1);
+        strcpy(pkg->dest[pkg->src_len], dest);
 
         mkdir(pkg->name, 0777);
         xchdir(pkg->name);
@@ -107,8 +107,8 @@ void pkg_sources(package *pkg) {
         }
 
         pwd = getcwd(cwd, sizeof(cwd));
-        pkg->source.src[pkg->src_len] = xmalloc(strlen(pwd) + strlen(base) + 5);
-        sprintf(pkg->source.src[pkg->src_len], "%s/%s", pwd, base);
+        pkg->src[pkg->src_len] = xmalloc(strlen(pwd) + strlen(base) + 5);
+        sprintf(pkg->src[pkg->src_len], "%s/%s", pwd, base);
 
         pkg->src_len++;
         xchdir(SRC_DIR);
@@ -116,6 +116,6 @@ void pkg_sources(package *pkg) {
 
     free(buf);
     fclose(file);
-    pkg->source.src[pkg->src_len]  = 0;
-    pkg->source.dest[pkg->src_len] = 0;
+    pkg->src[pkg->src_len]  = 0;
+    pkg->dest[pkg->src_len] = 0;
 }
