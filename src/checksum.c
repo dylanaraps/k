@@ -21,7 +21,6 @@ void pkg_checksums(package *pkg) {
     sha256_ctx ctx;
     int i;
     int j;
-    int buf_len;
 
     pkg->sums = xmalloc(sizeof(char *) * pkg->src_len + 1);
 
@@ -32,17 +31,16 @@ void pkg_checksums(package *pkg) {
             log_error("Failed to generate checksums");
 
         base = basename(pkg->source.src[i]);
-        buf_len = 67 * sizeof(char) + strlen(base);
-        pkg->sums[i] = xmalloc(buf_len);
+        pkg->sums[i] = xmalloc(67 + strlen(base));
 
         sha256_init(&ctx);
         while ((j = fread(buf, 1, sizeof(buf), src)) > 0)
             sha256_update(&ctx, buf, j);
         sha256_final(&ctx, shasum);
 
-        snprintf(pkg->sums[i], buf_len, "%02x%02x%02x%02x%02x%02x\
-%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
-%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x  %s",  
+        snprintf(pkg->sums[i], 67 + strlen(base), \
+"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
+%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x  %s",  
             shasum[0],  shasum[1],  shasum[2],  shasum[3],
             shasum[4],  shasum[5],  shasum[6],  shasum[7],
             shasum[8],  shasum[9],  shasum[10], shasum[11],
