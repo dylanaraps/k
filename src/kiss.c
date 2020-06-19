@@ -39,5 +39,6 @@ int main (int argc, char *argv[]) {
     }
 
     repo_init();
+    printf("%s\n", REPOS[0]);
     free(pkgs);
 }

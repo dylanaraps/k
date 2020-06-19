@@ -20,6 +20,7 @@ void repo_init(void) {
     if (!kiss_path) {
         die("KISS_PATH must be set");
     }
+
     if (!strchr(kiss_path, '/')) {
         die("Invalid KISS_PATH");
     }
@@ -35,6 +36,8 @@ void repo_init(void) {
         /* add fallback */
         if (!tmp) {
             tmp = "/var/db/kiss/installed";
+
+            /* todo: prepend KISS_ROOT */
         }
 
         if (tmp[0] != '/') {

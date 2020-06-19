@@ -1,8 +1,3 @@
-typedef struct repo {
-    char *name;    
-
-    struct repo *prev;
-    struct repo *next;
-} repo;
+extern char **REPOS;
 
 void repo_init(void);
