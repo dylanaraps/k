@@ -1,3 +1,5 @@
+#include <stdlib.h> /* exit */
+
 void _msg(const char* type, const char *fmt, ...);
 
 #define die(...) _msg("ERRR", __VA_ARGS__),exit(1)

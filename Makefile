@@ -7,6 +7,7 @@ ALL_LDFLAGS=$(LDFLAGS) -larchive -llzma -lbz2 -lcurl -lssl -lcrypto -lcrypto -lz
 OBJ=\
 	src/repo.o \
 	src/find.o \
+	src/list.o \
 	src/log.o \
 	src/util.o \
 	src/pkg.o \
@@ -15,6 +16,7 @@ OBJ=\
 HDR=\
 	src/repo.h \
 	src/find.h \
+	src/list.h \
 	src/log.h \
 	src/util.h \
 	src/pkg.h

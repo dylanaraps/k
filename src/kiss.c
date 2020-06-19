@@ -3,6 +3,7 @@
 #include <limits.h> /* PATH_MAX */
 
 #include "find.h"
+#include "list.h"
 #include "log.h"
 #include "repo.h"
 #include "pkg.h"
@@ -43,6 +44,9 @@ int main (int argc, char *argv[]) {
             break;
 
         case 'l':
+            for (; PKG; PKG = PKG->next) {
+                pkg_list(PKG);
+            }
             break;
 
         case 'v':
