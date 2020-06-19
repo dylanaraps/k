@@ -15,8 +15,8 @@ void *xmalloc(size_t n) {
 }
 
 
-int cntchr(char *str, int chr) {
-    char *tmp = str;
+int cntchr(const char *str, int chr) {
+    const char *tmp = str;
     int i = 0;
 
     for (; tmp[i]; tmp[i] == chr ? i++ : *tmp++);   

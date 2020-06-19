@@ -7,7 +7,7 @@
 
 package *PKG;
 
-void pkg_init(package **pkg, char *pkg_name) {
+void pkg_init(package **pkg, const char *pkg_name) {
     package *tmp = *pkg;
     package *new = xmalloc(sizeof(package)); 
 
