@@ -58,18 +58,32 @@ int main (int argc, char *argv[]) {
 
     switch (argv[1][0]) {
     case 'b':
-        do1(pkg_sources);
-        do1(pkg_verify);
-        do2(pkg_extract, pkg_build);
+        for (package *tmp = head; tmp; tmp = tmp->next)
+            pkg_sources(tmp);
+
+        for (package *tmp = head; tmp; tmp = tmp->next)
+            pkg_verify(tmp);
+
+        for (package *tmp = head; tmp; tmp = tmp->next) {
+            pkg_extract(tmp);
+            pkg_build(tmp);
+        }
+
         break;
 
     case 'c':
-        do1(pkg_sources);
-        do1(pkg_checksums);
+        for (package *tmp = head; tmp; tmp = tmp->next)
+            pkg_sources(tmp);
+
+        for (package *tmp = head; tmp; tmp = tmp->next)
+            pkg_checksums(tmp);
+
         break;
 
     case 'd':
-        do1(pkg_sources);
+        for (package *tmp = head; tmp; tmp = tmp->next)
+            pkg_sources(tmp);
+
         break;
 
     case 'l':
@@ -77,7 +91,8 @@ int main (int argc, char *argv[]) {
            pkg_list_all(head); 
 
         } else {
-            do1(pkg_list);
+            for (package *tmp = head; tmp; tmp = tmp->next)
+                pkg_list(tmp);
         }
         break;
 

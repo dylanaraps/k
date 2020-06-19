@@ -61,17 +61,4 @@ void pkg_destroy(package *pkg);
     free(OLD_CWD); \
 }
 
-#define do1(f) { \
-for (package *tmp = head; tmp; tmp = tmp->next) { \
-    PKG = tmp->name; \
-    (*f)(tmp); \
-} } \
-
-#define do2(f, f2) { \
-for (package *tmp = head; tmp; tmp = tmp->next) { \
-    PKG = tmp->name; \
-    (*f)(tmp); \
-    (*f2)(tmp); \
-} } \
-
 #endif
