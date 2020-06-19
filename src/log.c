@@ -39,5 +39,4 @@ void log_log(int level, const char *fmt, ...) {
     vfprintf(stderr, fmt, args);
     fprintf(stderr, "\n");
     va_end(args);
-    fflush(stderr);
 }
