@@ -15,7 +15,6 @@ void repo_init(void) {
     char *tmp = 0;
     int repo_len = 0;
     int i;
-    int j = 0;
 
     if (!kiss_path) {
         die("KISS_PATH must be set");
@@ -50,8 +49,5 @@ void repo_init(void) {
     }
 
     free(kiss_path);
-
-    for (i = 0; i < repo_len; i++) {
-        printf("%s\n", REPOS[i]);
-    }
+    free(tmp);
 }
