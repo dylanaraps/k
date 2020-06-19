@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "log.h"
+#include "find.h"
 #include "util.h"
 #include "pkg.h"
 
@@ -16,6 +17,8 @@ void pkg_init(package **pkg, char *pkg_name) {
     *new = (package) {
         .name = pkg_name,
     };
+
+    pkg_find(new);
 
     if (!*pkg) {
         *pkg = new;

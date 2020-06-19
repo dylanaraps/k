@@ -2,6 +2,7 @@
 #include <stdlib.h> /* exit */
 #include <limits.h> /* PATH_MAX */
 
+#include "find.h"
 #include "log.h"
 #include "repo.h"
 #include "pkg.h"
@@ -34,6 +35,12 @@ int main (int argc, char *argv[]) {
 
     switch (argv[1][0]) {
         case 's':
+            for (package *tmp = pkgs; tmp; tmp = tmp->next) {
+                for (int i = 0; i < tmp->path_len; i++) {
+                    printf("%s\n", tmp->path[i]);
+                }
+            }
+
             break;
 
         case 'v':

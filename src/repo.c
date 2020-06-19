@@ -9,8 +9,8 @@
 #include "util.h"
 #include "repo.h"
 
-char **REPOS;
-int repo_len;
+char **REPOS = {0};
+int REPO_LEN = 0;
 
 void repo_init(void) {
     char *kiss_path = strdup(getenv("KISS_PATH"));    
@@ -27,10 +27,10 @@ void repo_init(void) {
    
     /* Add +1 due to inbetween count */
     /* Add +1 for the fallback */
-    repo_len = 2 + cntchr(kiss_path, ':');
-    REPOS = xmalloc(repo_len * sizeof(char *));
+    REPO_LEN = 2 + cntchr(kiss_path, ':');
+    REPOS = xmalloc(REPO_LEN * sizeof(char *));
 
-    for (i = 0; i < repo_len; i++) {
+    for (i = 0; i < REPO_LEN; i++) {
         tmp = strtok(i ? NULL : kiss_path, ":");
 
         /* add fallback */
@@ -63,7 +63,7 @@ void repo_init(void) {
 void repo_destroy(void) {
     int i; 
 
-    for (i = 0; i < repo_len; i++) {
+    for (i = 0; i < REPO_LEN; i++) {
         free(REPOS[i]);
     }
 
