@@ -35,9 +35,9 @@ int main (int argc, char *argv[]) {
 
     switch (argv[1][0]) {
         case 's':
-            for (package *tmp = pkgs; tmp; tmp = tmp->next) {
-                for (int i = 0; i < tmp->path_len; i++) {
-                    printf("%s\n", tmp->path[i]);
+            for (; pkgs; pkgs = pkgs->next) {
+                for (int i = 0; i < pkgs->path_len; i++) {
+                    printf("%s\n", pkgs->path[i]);
                 }
             }
 
