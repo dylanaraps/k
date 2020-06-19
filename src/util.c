@@ -33,6 +33,14 @@ void xchdir(const char *path) {
         die("Directory %s not accessible", path);
 }
 
+void mkchdir(const char *path) {
+    if (!path)
+        die("Directory is null");
+
+    mkdir(path, 0777); 
+    xchdir(path);
+}
+
 FILE *xfopen(const char *file, const char *p) {
      FILE *f;
 
@@ -45,14 +53,6 @@ FILE *xfopen(const char *file, const char *p) {
          die("Failed to open file %s", file);
 
      return f;
-}
-
-void mkchdir(const char *path) {
-    if (!path)
-        die("Directory is null");
-
-    mkdir(path, 0777); 
-    xchdir(path);
 }
 
 int ends_with(const char *str, const char *suf, size_t str_len, size_t suf_len) {

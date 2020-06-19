@@ -70,5 +70,3 @@ void pkg_destroy(package *pkg) {
 
     free(pkg);
 }
-
-

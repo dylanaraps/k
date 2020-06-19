@@ -13,7 +13,6 @@
 void pkg_find(package *pkg) {
    SAVE_CWD;
 
-   pkg->path_len = 0;
    pkg->path = xmalloc(REPO_LEN * sizeof(char *));
 
    for (int i = 0; i < REPO_LEN; i++) {
@@ -32,5 +31,5 @@ void pkg_find(package *pkg) {
    pkg->path[pkg->path_len] = 0;
 
    if (pkg->path_len == 0)
-       die("not in any repository");
+       die("[%s] not in any repository", pkg->name);
 }
