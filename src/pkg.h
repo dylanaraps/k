@@ -5,6 +5,12 @@
 
 #include "util.h"
 
+/* for PATH_MAX on systems that don't have it in limits.h */
+#include <sys/param.h>
+#ifndef PATH_MAX
+#define  PATH_MAX         256
+#endif
+
 #define PKG_DB "/var/db/kiss/installed/"
 
 extern char **REPOS;
@@ -67,11 +73,5 @@ for (package *tmp = head; tmp; tmp = tmp->next) { \
     (*f)(tmp); \
     (*f2)(tmp); \
 } } \
-
-/* for PATH_MAX on systems that don't have it in limits.h */
-#include <sys/param.h>
-#ifndef PATH_MAX
-#define  PATH_MAX         256
-#endif
 
 #endif
