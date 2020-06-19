@@ -1,16 +1,18 @@
 .POSIX:
 
 PREFIX=/usr/local
-ALL_CFLAGS=$(CFLAGS) -std=c99 -static -Wall -Wextra -Wpedantic -DLOG_USE_COLOR
+ALL_CFLAGS=$(CFLAGS) -std=c99 -static -Wall -Wextra -Wpedantic
 ALL_LDFLAGS=$(LDFLAGS) -larchive -llzma -lbz2 -lcurl -lssl -lcrypto -lcrypto -lz
 
 OBJ=\
+	src/repo.o \
 	src/log.o \
-	src/pkg.o \
 	src/util.o \
+	src/pkg.o \
 	src/kiss.o
 
 HDR=\
+	src/repo.h \
 	src/log.h \
 	src/util.h \
 	src/pkg.h

@@ -1,6 +1,5 @@
 typedef struct package {
     char *name;    
-    char *junk;
 
     struct package *next;
     struct package *prev;

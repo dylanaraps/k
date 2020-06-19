@@ -13,3 +13,12 @@ void *xmalloc(size_t n) {
 
     return p;
 }
+
+int cntchr(char *str, int chr) {
+    char *tmp = str;
+    int i = 0;
+
+    for (; tmp[i]; tmp[i] == chr ? i++ : *tmp++);   
+
+    return i;
+}

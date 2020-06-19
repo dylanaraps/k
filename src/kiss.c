@@ -1,7 +1,9 @@
 #include <stdio.h>  /* printf */
 #include <stdlib.h> /* exit */
+#include <limits.h> /* PATH_MAX */
 
 #include "log.h"
+#include "repo.h"
 #include "pkg.h"
 
 static void usage(void) {
@@ -36,5 +38,6 @@ int main (int argc, char *argv[]) {
             break;
     }
 
+    repo_init();
     free(pkgs);
 }
