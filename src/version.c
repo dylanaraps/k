@@ -14,6 +14,7 @@ void pkg_version(package *pkg) {
     char *ver;
     char *tok;
     size_t len;
+    size_t err;
 
     if (chdir(pkg->path[0]) != 0) {
         die("Package '%s' not installed", pkg->name);
@@ -39,7 +40,12 @@ void pkg_version(package *pkg) {
 
     len = strlen(tok) + 1;
     pkg->ver = xmalloc(len);
-    strncpy(pkg->ver, tok, len);
+
+    err = strlcpy(pkg->ver, tok, len);
+
+    if (err > len) {
+        die("strlcpy was truncated");
+    }
 
     tok = strtok(NULL, " 	\r\n"); 
 
@@ -49,7 +55,12 @@ void pkg_version(package *pkg) {
 
     len = strlen(tok) + 1;
     pkg->rel = xmalloc(len);
-    strncpy(pkg->rel, tok, len);
+
+    err = strlcpy(pkg->rel, tok, len);
+
+    if (err > len) {
+        die("strlcpy was truncated");
+    }
 
     fclose(file);
 }

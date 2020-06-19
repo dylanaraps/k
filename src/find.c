@@ -1,7 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include <limits.h> /* PATH_MAX */
 #include <unistd.h> /* chdir */
-#include <string.h> /* strncpy */
 
 #include "log.h"
 #include "repo.h"
@@ -15,6 +14,7 @@ void pkg_find(package *pkg) {
     char cwd[PATH_MAX];
     char *tmp;
     int i;
+    size_t err;
 
     pkg->path = xmalloc(REPO_LEN * sizeof(char *));
 
@@ -31,7 +31,11 @@ void pkg_find(package *pkg) {
            }
 
            pkg->path[pkg->path_l] = xmalloc(PATH_MAX); 
-           strncpy(pkg->path[pkg->path_l], tmp, PATH_MAX);
+           err = strlcpy(pkg->path[pkg->path_l], tmp, PATH_MAX);
+
+           if (err > PATH_MAX) {
+               die("strlcpy truncated path");
+           }
 
            pkg->path_l++;
        }

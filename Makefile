@@ -1,11 +1,12 @@
 .POSIX:
 
 PREFIX=/usr/local
-ALL_CFLAGS=$(CFLAGS) -g -O0 -std=c99 -static -Wall -Wextra -Wpedantic -W -Werror
+ALL_CFLAGS=$(CFLAGS) -g -O0 -std=c99 -static -Wall -Wextra -Wpedantic -W
 ALL_LDFLAGS=$(LDFLAGS) -larchive -llzma -lbz2 -lcurl -lssl -lcrypto -lcrypto -lz
 
 OBJ=\
 	src/repo.o \
+	src/cache.o \
 	src/find.o \
 	src/list.o \
 	src/version.o \
@@ -16,6 +17,7 @@ OBJ=\
 
 HDR=\
 	src/repo.h \
+	src/cache.h \
 	src/find.h \
 	src/list.h \
 	src/version.h \

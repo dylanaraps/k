@@ -16,6 +16,7 @@ void repo_init(void) {
     char *kiss_path = strdup(getenv("KISS_PATH"));    
     char *tmp = 0;
     int i;
+    size_t err;
 
     if (!kiss_path) {
         die("KISS_PATH must be set");
@@ -53,7 +54,11 @@ void repo_init(void) {
         }
 
         REPOS[i] = xmalloc(PATH_MAX);
-        strncpy(REPOS[i], tmp, PATH_MAX);
+        err = strlcpy(REPOS[i], tmp, PATH_MAX);
+
+        if (err > PATH_MAX) {
+            die("strlcpy truncated path");
+        }
     }
 
     free(kiss_path);

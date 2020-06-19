@@ -1,7 +1,9 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>  /* printf */
 #include <stdlib.h> /* exit */
 #include <limits.h> /* PATH_MAX */
 
+#include "cache.h"
 #include "find.h"
 #include "list.h"
 #include "version.h"
@@ -26,6 +28,8 @@ int main (int argc, char *argv[]) {
         usage();
     }
 
+    cache_init();
+    atexit(cache_destroy);
     repo_init();
     atexit(repo_destroy);
 
