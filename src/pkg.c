@@ -36,20 +36,16 @@ void pkg_init(package **pkg, char *pkg_name) {
 }
 
 void pkg_destroy(void) {
-    package *tmp = PKG;
     int i;
 
     while (PKG) {
-        tmp = PKG->next;
-
         for (i = 0; i < PKG->path_l; i++) {
             free(PKG->path[i]);
         }
 
         free(PKG->path);
-        free(PKG);
-
-        PKG = tmp;
+        PKG = PKG->next;
+        free(PKG->prev);
     }
 
     free(PKG);
