@@ -12,5 +12,6 @@ typedef struct package {
 } package;
 
 void pkg_init(package **pkg, char *pkg_name);
+void pkg_destroy(package *pkg);
 
 #endif

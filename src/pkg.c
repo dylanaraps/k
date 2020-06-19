@@ -32,3 +32,23 @@ void pkg_init(package **pkg, char *pkg_name) {
         new->prev = tmp;
     }
 }
+
+void pkg_destroy(package *pkg) {
+    package *tmp = pkg;
+    int i;
+
+    while (pkg) {
+        tmp = pkg->next;
+
+        for (i = 0; i < pkg->path_l; i++) {
+            free(pkg->path[i]);
+        }
+
+        free(pkg->path);
+        free(pkg);
+
+        pkg = tmp;
+    }
+
+    free(pkg);
+}

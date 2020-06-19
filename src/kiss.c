@@ -43,10 +43,16 @@ int main (int argc, char *argv[]) {
 
             break;
 
+        case 'l':
+            break;
+
         case 'v':
             printf("0.0.1\n");
             break;
+
+        default:
+            usage();
     }
 
-    free(pkgs);
+    pkg_destroy(pkgs);
 }
