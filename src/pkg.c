@@ -15,7 +15,7 @@ void pkg_init(package **pkg, char *pkg_name) {
         die("Package name is null");
     }
 
-    /* implicitly initializes all fields */
+    /* initializes all fields */
     *new = (package) {
         .name = pkg_name,
     };
@@ -35,7 +35,7 @@ void pkg_init(package **pkg, char *pkg_name) {
     }
 }
 
-void pkg_destroy(void) {
+void pkg_destroy_all(void) {
     package *tmp = PKG;
     int i;
 

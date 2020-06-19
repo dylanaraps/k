@@ -30,7 +30,7 @@ int main (int argc, char *argv[]) {
     for (int i = 2; i < argc; i++) {
         pkg_init(&PKG, argv[i]);
     }
-    atexit(pkg_destroy);
+    atexit(pkg_destroy_all);
 
     switch (argv[1][0]) {
         case 's':
