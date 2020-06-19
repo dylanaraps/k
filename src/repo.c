@@ -2,7 +2,8 @@
 #include <stdlib.h> /* getenv, size_t */
 #include <string.h> /* strdup, strlen, strtok */
 #include <limits.h> /* PATH_MAX */
-#include <stdio.h> /* printf */
+#include <stdio.h>  /* printf */
+#include <unistd.h> /* chdir */
 
 #include "log.h"
 #include "util.h"
@@ -25,7 +26,7 @@ void repo_init(void) {
    
     /* Add +1 due to inbetween count */
     /* Add +1 for the fallback */
-    repo_len = cntchr(kiss_path, ':') + 2;
+    repo_len = 2 + cntchr(kiss_path, ':');
     REPOS = xmalloc(repo_len * sizeof(char *));
 
     for (i = 0; i < repo_len; i++) {
@@ -42,6 +43,10 @@ void repo_init(void) {
 
         if (strlen(tmp) > PATH_MAX) {
             die("Repository exceeds PATH_MAX");
+        }
+
+        if (chdir(tmp) != 0) {
+            die("Repository is not accessible");
         }
 
         REPOS[i] = xmalloc(PATH_MAX);
