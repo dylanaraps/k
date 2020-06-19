@@ -1,7 +1,10 @@
 #define _POSIX_C_SOURCE 200809L
-#include <stdlib.h> /* malloc, size_t */
-#include <limits.h> /* PATH_MAX */
-#include <string.h> /* strncpy */
+#include <stdlib.h>   /* malloc, size_t */
+#include <stdio.h>    /* printf */
+#include <limits.h>   /* PATH_MAX */
+#include <string.h>   /* strncpy */
+#include <sys/stat.h> /* mkdir */
+#include <errno.h>    /* errno, EEXIST, S_IRWXU */
 
 #include "log.h"
 #include "util.h"
@@ -36,14 +39,38 @@ int cntchr(const char *str, int chr) {
 
 void mkdir_p(const char *dir) {
     char tmp[PATH_MAX];   
-    size_t len;
+    int err;
+    char *p = 0;
 
     if (!dir) {
         die("mkdir input empty");
     }
 
-    strncpy(tmp, dir, PATH_MAX);
+    err = strlcpy(tmp, dir, PATH_MAX);
     
+    if (err > PATH_MAX) {
+        die("strlcpy truncated PATH");
+    }
+
+    for (p = tmp + 1; *p; p++) {
+       if (*p == '/') {
+           *p = 0;
+
+           err = mkdir(tmp, S_IRWXU);
+
+           if (err == -1 && errno != EEXIST) {
+               die("Failed to create directory %s", tmp);    
+           }
+
+           *p = '/';
+       }
+    }
+
+    err = mkdir(tmp, S_IRWXU);
+
+    if (err == -1 && errno != EEXIST) {
+        die("Failed to create directory %s", tmp);    
+    }
 }
 
 /*	$OpenBSD: strlcpy.c,v 1.16 2019/01/25 00:19:25 millert Exp $	*/

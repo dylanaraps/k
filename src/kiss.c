@@ -9,6 +9,7 @@
 #include "version.h"
 #include "log.h"
 #include "repo.h"
+#include "util.h"
 #include "pkg.h"
 
 static void usage(void) {
