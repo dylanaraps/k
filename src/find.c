@@ -9,6 +9,8 @@
 #include "pkg.h"
 #include "find.h"
 
+/* todo: globbing */
+
 void pkg_find(package *pkg) {
     char cwd[PATH_MAX];
     char *tmp;
