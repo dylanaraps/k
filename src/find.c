@@ -1,7 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include <limits.h> /* PATH_MAX */
 #include <unistd.h> /* chdir */
-#include <string.h> /* strcpy */
+#include <string.h> /* strncpy */
 
 #include "log.h"
 #include "repo.h"
@@ -11,6 +11,7 @@
 
 void pkg_find(package *pkg) {
     char cwd[PATH_MAX];
+    char *tmp;
     int i;
 
     pkg->path = xmalloc(REPO_LEN * sizeof(char *));
@@ -21,14 +22,20 @@ void pkg_find(package *pkg) {
        }
 
        if (chdir(pkg->name) == 0) {
-            pkg->path[pkg->path_len] = xmalloc(PATH_MAX); 
-            strcpy(pkg->path[pkg->path_len], getcwd(cwd, sizeof(cwd)));
+           tmp = getcwd(cwd, PATH_MAX);
 
-            pkg->path_len++;
+           if (!tmp) {
+               die("Repository not accessible");
+           }
+
+           pkg->path[pkg->path_l] = xmalloc(PATH_MAX); 
+           strncpy(pkg->path[pkg->path_l], tmp, PATH_MAX);
+
+           pkg->path_l++;
        }
     }
 
-    if (pkg->path_len == 0) {
+    if (pkg->path_l == 0) {
         die("Package (%s) does not exist", pkg->name);
     }
 }

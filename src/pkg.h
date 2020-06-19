@@ -5,7 +5,7 @@ typedef struct package {
     char *name;    
 
     char **path;
-    int  path_len;
+    int  path_l;
 
     struct package *next;
     struct package *prev;

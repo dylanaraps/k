@@ -36,7 +36,7 @@ int main (int argc, char *argv[]) {
     switch (argv[1][0]) {
         case 's':
             for (; pkgs; pkgs = pkgs->next) {
-                for (int i = 0; i < pkgs->path_len; i++) {
+                for (int i = 0; i < pkgs->path_l; i++) {
                     printf("%s\n", pkgs->path[i]);
                 }
             }

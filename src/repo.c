@@ -53,7 +53,7 @@ void repo_init(void) {
         }
 
         REPOS[i] = xmalloc(PATH_MAX);
-        strcpy(REPOS[i], tmp);
+        strncpy(REPOS[i], tmp, PATH_MAX);
     }
 
     free(kiss_path);
