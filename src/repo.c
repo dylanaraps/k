@@ -25,8 +25,8 @@ void repo_init(void) {
         die("Invalid KISS_PATH");
     }
    
-    /* Add +1 due to inbetween count */
-    /* Add +1 for the fallback */
+    /* add +1 due to inbetween count */
+    /* add +1 for the fallback */
     REPO_LEN = 2 + cntchr(kiss_path, ':');
     REPOS = xmalloc(REPO_LEN * sizeof(char *));
 
