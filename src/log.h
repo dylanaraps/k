@@ -6,12 +6,12 @@
 
 #include "pkg.h"
 
-enum { M_INFO, M_WARN, M_ERRR };
+enum { M_ERRR, M_WARN, M_INFO };
 
 void log_log(int level, const char *fmt, ...);
 
-#define msg(...) log_log(M_INFO,  __VA_ARGS__)
-#define war(...) log_log(M_WARN,  __VA_ARGS__)
-#define die(...) log_log(M_ERRR, __VA_ARGS__),exit(1)
+#define die(...) log_log(0, __VA_ARGS__),exit(1)
+#define war(...) log_log(1, __VA_ARGS__)
+#define msg(...) log_log(2, __VA_ARGS__)
 
 #endif

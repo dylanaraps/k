@@ -16,7 +16,6 @@
 
 char *OLD_CWD = NULL;
 char **REPOS = NULL;
-char *PKG = NULL;
 int  REPO_LEN = 0;
 char HOME[PATH_MAX];
 char XDG_CACHE_HOME[PATH_MAX];
@@ -51,10 +50,8 @@ int main (int argc, char *argv[]) {
     atexit(cache_destroy);
     REPOS = repo_load();
 
-    for (int i = 2; i < argc; i++) {
+    for (int i = 2; i < argc; i++)
         pkg_init(&head, argv[i]);
-        PKG = head->name;
-    }
 
     switch (argv[1][0]) {
     case 'b':
@@ -97,13 +94,10 @@ int main (int argc, char *argv[]) {
         break;
 
     case 's':
-        for (package *tmp = head; tmp; tmp = tmp->next) {
-            PKG = tmp->name;
-
-            for (int i = 0; i < tmp->path_len; i++) {
+        for (package *tmp = head; tmp; tmp = tmp->next)
+            for (int i = 0; i < tmp->path_len; i++)
                 printf("%s\n", tmp->path[i]);
-            }
-        }
+
         break;
 
     case 'v':

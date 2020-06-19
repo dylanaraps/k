@@ -84,11 +84,11 @@ void pkg_sources(package *pkg) {
         xchdir(pkg->name);
 
         if (access(base, F_OK) != -1) {
-            msg("Found cached source %s", base);
+            msg("[%s] Found cached source %s", pkg->name, base);
 
         } else if (strncmp(src, "https://", 8) == 0 ||
                    strncmp(src, "http://",  7) == 0) {
-            msg("Downloading %s", src);
+            msg("[%s] Downloading %s", pkg->name, src);
             download(src);
 
         } else if (strncmp(src, "git+", 4) == 0) {
@@ -97,10 +97,10 @@ void pkg_sources(package *pkg) {
         } else if (chdir(repo) == 0 && 
                    chdir(dirname(src)) == 0 && 
                    access(base, F_OK) != -1) {
-            msg("Found local source %s/%s", base);
+            msg("[%s] Found local source %s", pkg->name, base);
 
         } else {
-            die("No local file %s", base);
+            die("[%s] No local file %s", pkg->name, base);
         }
 
         pwd = getcwd(cwd, sizeof(cwd));

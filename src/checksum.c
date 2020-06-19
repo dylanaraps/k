@@ -51,6 +51,8 @@ void pkg_checksums(package *pkg) {
         printf("%s\n", pkg->sums[i]);
         fclose(src);
     }
+
+    checksum_to_file(pkg);
 }
 
 void pkg_verify(package *pkg) {
@@ -58,7 +60,7 @@ void pkg_verify(package *pkg) {
     char *buf = 0;
     int i = 0;
 
-    msg("Verifying checksums...");
+    msg("[%s] Verifying checksums", pkg->name);
     pkg_checksums(pkg);
 
     if (pkg->src_len == 0)
@@ -78,7 +80,7 @@ void pkg_verify(package *pkg) {
 
     fclose(file);
     free(buf);
-    msg("Verified checksums");
+    msg("[%s] Verified checksums", pkg->name);
 }
 
 void checksum_to_file(package *pkg) {
@@ -91,5 +93,5 @@ void checksum_to_file(package *pkg) {
         fprintf(file, "%s\n", pkg->sums[i]);
 
     fclose(file);
-    msg("Generated checksums");
+    msg("[%s] Generated checksums", pkg->name);
 }

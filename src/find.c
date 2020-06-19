@@ -31,8 +31,6 @@ void pkg_find(package *pkg) {
    LOAD_CWD;
    pkg->path[pkg->path_len] = 0;
 
-   if (pkg->path_len == 0) {
-       PKG = pkg->name;
+   if (pkg->path_len == 0)
        die("not in any repository");
-   }
 }

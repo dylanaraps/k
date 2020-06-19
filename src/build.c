@@ -23,8 +23,10 @@ void pkg_build(package *pkg) {
     mkchdir(pkg->build_dir);
 
     if (access(pkg->build, X_OK) == -1)
-        die("Build file not executable");
+        die("[%s] Build file not executable", pkg->name);
     
+    msg("[%s] Starting build", pkg->name);
+
     switch (child = fork()) {
     case -1:
         die("fork() failed");

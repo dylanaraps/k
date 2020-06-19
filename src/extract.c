@@ -49,7 +49,7 @@ void pkg_extract(package *pkg) {
             ends_with(pkg->src[i], ".tar.zst",  src_len, 8) == 0 ||
             ends_with(pkg->src[i], ".tar.lzma", src_len, 9) == 0) {
 
-            msg("Extracting %s", pkg->src[i]);
+            msg("[%s] Extracting %s", pkg->name, pkg->src[i]);
 
             extract(pkg->src[i], 1, 
                 ARCHIVE_EXTRACT_PERM | 
@@ -60,11 +60,11 @@ void pkg_extract(package *pkg) {
             );
 
         } else if (access(pkg->src[i], F_OK) != -1) {
-            msg("Copying    %s", pkg->src[i]);
+            msg("[%s] Copying %s", pkg->name, pkg->src[i]);
             copy_file(pkg->src[i], basename(pkg->src[i]));
 
         } else {
-            die("Source not found %s", pkg->src[i]);
+            die("[%s] Source not found %s", pkg->name, pkg->src[i]);
         }
 
         xchdir(MAK_DIR);

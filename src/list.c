@@ -15,10 +15,8 @@ void pkg_list(package *pkg) {
     SAVE_CWD;
     xchdir(PKG_DB);
 
-    if (chdir(pkg->name) != 0) {
-        PKG = pkg->name;
-        die("not installed");
-    }
+    if (chdir(pkg->name) != 0)
+        die("[%s] not installed", pkg->name);
 
     printf("%s %s %s\n", pkg->name, pkg->ver, pkg->rel);
     LOAD_CWD;
