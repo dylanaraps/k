@@ -1,3 +1,4 @@
 kiss
 src/*.o
 .ccls-cache/*
+old/*.o
