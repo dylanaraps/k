@@ -7,6 +7,9 @@ typedef struct package {
     char **path;
     int  path_l;
 
+    char *ver;
+    char *rel;
+
     struct package *next;
     struct package *prev;
 } package;

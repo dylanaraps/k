@@ -4,6 +4,7 @@
 
 #include "find.h"
 #include "list.h"
+#include "version.h"
 #include "log.h"
 #include "repo.h"
 #include "pkg.h"
@@ -45,7 +46,8 @@ int main (int argc, char *argv[]) {
 
         case 'l':
             for (; PKG; PKG = PKG->next) {
-                pkg_list(PKG);
+                /* pkg_list(PKG); */
+                pkg_version(PKG);
             }
             break;
 

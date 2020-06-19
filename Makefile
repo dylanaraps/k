@@ -8,6 +8,7 @@ OBJ=\
 	src/repo.o \
 	src/find.o \
 	src/list.o \
+	src/version.o \
 	src/log.o \
 	src/util.o \
 	src/pkg.o \
@@ -17,6 +18,7 @@ HDR=\
 	src/repo.h \
 	src/find.h \
 	src/list.h \
+	src/version.h \
 	src/log.h \
 	src/util.h \
 	src/pkg.h
