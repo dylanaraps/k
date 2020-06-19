@@ -5,6 +5,8 @@
 #include "util.h"
 #include "pkg.h"
 
+package *PKG;
+
 void pkg_init(package **pkg, char *pkg_name) {
     package *tmp = *pkg;
     package *new = xmalloc(sizeof(package)); 
@@ -33,22 +35,22 @@ void pkg_init(package **pkg, char *pkg_name) {
     }
 }
 
-void pkg_destroy(package *pkg) {
-    package *tmp = pkg;
+void pkg_destroy(void) {
+    package *tmp = PKG;
     int i;
 
-    while (pkg) {
-        tmp = pkg->next;
+    while (PKG) {
+        tmp = PKG->next;
 
-        for (i = 0; i < pkg->path_l; i++) {
-            free(pkg->path[i]);
+        for (i = 0; i < PKG->path_l; i++) {
+            free(PKG->path[i]);
         }
 
-        free(pkg->path);
-        free(pkg);
+        free(PKG->path);
+        free(PKG);
 
-        pkg = tmp;
+        PKG = tmp;
     }
 
-    free(pkg);
+    free(PKG);
 }

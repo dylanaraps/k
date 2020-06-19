@@ -11,7 +11,9 @@ typedef struct package {
     struct package *prev;
 } package;
 
+extern package *PKG;
+
 void pkg_init(package **pkg, char *pkg_name);
-void pkg_destroy(package *pkg);
+void pkg_destroy(void);
 
 #endif

@@ -20,8 +20,6 @@ static void usage(void) {
 }
 
 int main (int argc, char *argv[]) {
-    package *pkgs = NULL;
-
     if (argc == 1) {
         usage();
     }
@@ -30,14 +28,15 @@ int main (int argc, char *argv[]) {
     atexit(repo_destroy);
 
     for (int i = 2; i < argc; i++) {
-        pkg_init(&pkgs, argv[i]);
+        pkg_init(&PKG, argv[i]);
     }
+    atexit(pkg_destroy);
 
     switch (argv[1][0]) {
         case 's':
-            for (; pkgs; pkgs = pkgs->next) {
-                for (int i = 0; i < pkgs->path_l; i++) {
-                    printf("%s\n", pkgs->path[i]);
+            for (; PKG; PKG = PKG->next) {
+                for (int i = 0; i < PKG->path_l; i++) {
+                    printf("%s\n", PKG->path[i]);
                 }
             }
 
@@ -53,6 +52,4 @@ int main (int argc, char *argv[]) {
         default:
             usage();
     }
-
-    pkg_destroy(pkgs);
 }
