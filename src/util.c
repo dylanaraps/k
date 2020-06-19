@@ -6,10 +6,17 @@
 void *xmalloc(size_t n) {
     void *p;
 
+    if (n == 0) {
+        die("Empty memory allocation");    
+    }
+
     p = malloc(n);
 
-    if (!p)
+    if (!p) {
         die("Failed to allocate memory");
+    }
+
+    msg("Allocated %zu bytes", n);
 
     return p;
 }
