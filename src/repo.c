@@ -15,15 +15,17 @@ void repo_init(void) {
     char *tmp = 0;
     int repo_len = 0;
     int i;
+    int j = 0;
 
     if (!kiss_path) {
         die("KISS_PATH must be set");
     }
-
     if (!strchr(kiss_path, '/')) {
         die("Invalid KISS_PATH");
     }
    
+    /* Add +1 due to inbetween count */
+    /* Add +1 for the fallback */
     repo_len = cntchr(kiss_path, ':') + 2;
     REPOS = xmalloc(repo_len * sizeof(char *));
 
@@ -35,6 +37,10 @@ void repo_init(void) {
             tmp = "/var/db/kiss/installed";
         }
 
+        if (tmp[0] != '/') {
+            die("Repository must be absolute");
+        }
+
         if (strlen(tmp) > PATH_MAX) {
             die("Repository exceeds PATH_MAX");
         }
@@ -44,5 +50,8 @@ void repo_init(void) {
     }
 
     free(kiss_path);
-}
 
+    for (i = 0; i < repo_len; i++) {
+        printf("%s\n", REPOS[i]);
+    }
+}
