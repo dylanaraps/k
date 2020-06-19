@@ -57,7 +57,6 @@ void repo_init(void) {
     }
 
     free(kiss_path);
-    free(tmp);
 }
 
 void repo_destroy(void) {
