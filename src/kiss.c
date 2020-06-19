@@ -25,6 +25,9 @@ int main (int argc, char *argv[]) {
         usage();
     }
 
+    repo_init();
+    atexit(repo_destroy);
+
     for (int i = 2; i < argc; i++) {
         pkg_init(&pkgs, argv[i]);
     }
@@ -38,7 +41,5 @@ int main (int argc, char *argv[]) {
             break;
     }
 
-    repo_init();
-    printf("%s\n", REPOS[0]);
     free(pkgs);
 }

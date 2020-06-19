@@ -10,11 +10,11 @@
 #include "repo.h"
 
 char **REPOS;
+int repo_len;
 
 void repo_init(void) {
     char *kiss_path = strdup(getenv("KISS_PATH"));    
     char *tmp = 0;
-    int repo_len = 0;
     int i;
 
     if (!kiss_path) {
@@ -58,4 +58,14 @@ void repo_init(void) {
 
     free(kiss_path);
     free(tmp);
+}
+
+void repo_destroy(void) {
+    int i; 
+
+    for (i = 0; i < repo_len; i++) {
+        free(REPOS[i]);
+    }
+
+    free(REPOS);
 }
