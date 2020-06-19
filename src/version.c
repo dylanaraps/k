@@ -2,13 +2,18 @@
 #include <stdio.h>  /* FILE */
 #include <unistd.h> /* chdir */
 #include <limits.h> /* LINE_MAX */
+#include <string.h> /* strchr */
 
 #include "log.h"
+#include "util.h"
 #include "version.h"
 
 void pkg_version(package *pkg) {
     char line[LINE_MAX];
     FILE *file;
+    char *ver;
+    char *tok;
+    size_t len;
 
     if (chdir(pkg->path[0]) != 0) {
         die("Package '%s' not installed", pkg->name);
@@ -20,6 +25,31 @@ void pkg_version(package *pkg) {
         die("Version file does not exist");
     }
 
-    fgets(line, LINE_MAX, file) ;
+    ver = fgets(line, LINE_MAX, file);
+
+    if (!ver) {
+        die("Failed to read version file");
+    }
+
+    tok = strtok(ver, " 	");
+
+    if (!tok) {
+        die("Invalid version file");
+    }
+
+    len = strlen(tok) + 1;
+    pkg->ver = xmalloc(len);
+    strncpy(pkg->ver, tok, len);
+
+    tok = strtok(NULL, " 	\r\n"); 
+
+    if (!tok) {
+        die("Release field missing");
+    }
+
+    len = strlen(tok) + 1;
+    pkg->rel = xmalloc(len);
+    strncpy(pkg->rel, tok, len);
+
     fclose(file);
 }

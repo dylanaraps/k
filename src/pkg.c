@@ -2,6 +2,7 @@
 
 #include "log.h"
 #include "find.h"
+#include "version.h"
 #include "util.h"
 #include "pkg.h"
 
@@ -21,6 +22,7 @@ void pkg_init(package **pkg, const char *pkg_name) {
     };
 
     pkg_find(new);
+    pkg_version(new);
 
     if (!*pkg) {
         *pkg = new;
@@ -41,6 +43,9 @@ void pkg_destroy_all(void) {
 
     while (PKG) {
         tmp = PKG->next;
+
+        free(PKG->ver);
+        free(PKG->rel);
 
         for (i = 0; i < PKG->path_l; i++) {
             free(PKG->path[i]);

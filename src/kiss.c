@@ -46,8 +46,7 @@ int main (int argc, char *argv[]) {
 
         case 'l':
             for (; PKG; PKG = PKG->next) {
-                /* pkg_list(PKG); */
-                pkg_version(PKG);
+                pkg_list(PKG);
             }
             break;
 

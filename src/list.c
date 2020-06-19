@@ -14,5 +14,5 @@ void pkg_list(package *pkg) {
         die("Package '%s' not installed", pkg->name);
     }
 
-    printf("%s\n", pkg->name);
+    printf("%s %s %s\n", pkg->name, pkg->ver, pkg->rel);
 }
