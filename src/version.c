@@ -7,43 +7,45 @@
 
 #include "version.h"
 #include "log.h"
+#include "util.h"
 #include "pkg.h"
 
 void pkg_version(package *pkg) {
     FILE *file;
     char *buf = NULL;
     char *tok;
+    size_t len;
 
     SAVE_CWD;
     chdir(*pkg->path);
 
-    file = fopen("version", "r");
-
-    if (!file)
-        log_error("version file does not exist");
+    file = xfopen("version", "r");
 
     getline(&buf, &(size_t){0}, file);
 
     if (!buf)
-        log_error("version file is invalid");
+        die("version file is invalid");
 
     tok = strtok(buf,  " 	\r\n");
+    len = strlen(tok) + 1;
 
     if (!tok)
-        log_error("Invalid version file");
+        die("Invalid version file");
 
-    pkg->ver = xmalloc(strlen(tok) + 1);
-    strlcpy(pkg->ver, tok, strlen(tok) + 1);
+    pkg->ver = xmalloc(len);
+    strlcpy(pkg->ver, tok, len);
 
     tok = strtok(NULL, " 	\r\n");
+    len = strlen(tok) + 1;
 
     if (!tok)
-        log_error("release field empty");
+        die("release field empty");
 
-    pkg->rel = xmalloc(strlen(tok) + 1);
-    strlcpy(pkg->rel, tok, strlen(tok) + 1);
+    pkg->rel = xmalloc(len);
+    strlcpy(pkg->rel, tok, len);
 
     free(buf);
+    free(tok);
     fclose(file);
 
     LOAD_CWD;

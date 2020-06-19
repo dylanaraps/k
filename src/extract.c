@@ -25,11 +25,11 @@ void pkg_extract(package *pkg) {
     xchdir(pkg->name);
 
     if (pkg->src_len == 0)
-        log_error("Sources file does not exist");
+        die("Sources file does not exist");
 
     for (i = 0; i < pkg->src_len; i++) {
         if (!pkg->src[i])
-            log_error("Sources file does not exist");
+            die("Sources file does not exist");
 
         if (pkg->dest[i][0] != 0) {
             mkdir(pkg->dest[i], 0777);
@@ -49,7 +49,7 @@ void pkg_extract(package *pkg) {
             ends_with(pkg->src[i], ".tar.zst",  src_len, 8) == 0 ||
             ends_with(pkg->src[i], ".tar.lzma", src_len, 9) == 0) {
 
-            log_info("Extracting %s", pkg->src[i]);
+            msg("Extracting %s", pkg->src[i]);
 
             extract(pkg->src[i], 1, 
                 ARCHIVE_EXTRACT_PERM | 
@@ -60,11 +60,11 @@ void pkg_extract(package *pkg) {
             );
 
         } else if (access(pkg->src[i], F_OK) != -1) {
-            log_info("Copying    %s", pkg->src[i]);
+            msg("Copying    %s", pkg->src[i]);
             copy_file(pkg->src[i], basename(pkg->src[i]));
 
         } else {
-            log_error("Source not found %s", pkg->src[i]);
+            die("Source not found %s", pkg->src[i]);
         }
 
         xchdir(MAK_DIR);

@@ -33,6 +33,6 @@ void pkg_find(package *pkg) {
 
    if (pkg->path_len == 0) {
        PKG = pkg->name;
-       log_error("not in any repository");
+       die("not in any repository");
    }
 }

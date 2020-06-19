@@ -19,7 +19,7 @@ static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) {
 static void download(char *url) {
     CURL *curl = curl_easy_init();
     char *name = basename(url);
-    FILE *file = fopen(name, "wb");
+    FILE *file = xfopen(name, "wb");
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, file_write);
@@ -28,7 +28,7 @@ static void download(char *url) {
 
     if (curl_easy_perform(curl) != 0) {
         remove(name);
-        log_error("Failed to download source %s", url);
+        die("Failed to download source %s", url);
     }
 
     fclose(file);
@@ -49,10 +49,7 @@ void pkg_sources(package *pkg) {
 
     pkg->src_len = 0;
     xchdir(repo);
-    file = fopen("sources", "r");
-
-    if (!file)
-        log_error("Sources file invalid");
+    file = xfopen("sources", "r");
 
     xchdir(SRC_DIR);
 
@@ -73,7 +70,7 @@ void pkg_sources(package *pkg) {
         toke = strtok(buf,  " 	\n");
 
         if (!toke)
-            log_error("Sources file invalid");
+            die("Sources file invalid");
 
         src  = strdup(toke);
         base = basename(src);
@@ -87,23 +84,23 @@ void pkg_sources(package *pkg) {
         xchdir(pkg->name);
 
         if (access(base, F_OK) != -1) {
-            log_info("Found cached source %s", base);
+            msg("Found cached source %s", base);
 
         } else if (strncmp(src, "https://", 8) == 0 ||
                    strncmp(src, "http://",  7) == 0) {
-            log_info("Downloading %s", src);
+            msg("Downloading %s", src);
             download(src);
 
         } else if (strncmp(src, "git+", 4) == 0) {
-            log_error("Skipping git source (not yet supported) %s", src);
+            die("Skipping git source (not yet supported) %s", src);
 
         } else if (chdir(repo) == 0 && 
                    chdir(dirname(src)) == 0 && 
                    access(base, F_OK) != -1) {
-            log_info("Found local source %s/%s", base);
+            msg("Found local source %s/%s", base);
 
         } else {
-            log_error("No local file %s", base);
+            die("No local file %s", base);
         }
 
         pwd = getcwd(cwd, sizeof(cwd));

@@ -17,7 +17,7 @@ char **repo_load(void) {
     path = strdup(getenv("KISS_PATH"));
 
     if (!path || path[0] == '\0')
-        log_error("KISS_PATH must be set");
+        die("KISS_PATH must be set");
 
     res = xmalloc(strlen(path) + 24);
     tok = strtok(path, ":"); 

@@ -25,11 +25,7 @@ void pkg_checksums(package *pkg) {
     pkg->sums = xmalloc(sizeof(char *) * pkg->src_len + 1);
 
     for (i = 0; i < pkg->src_len; i++) {
-        src  = fopen(pkg->src[i], "rb");
-
-        if (!src)
-            log_error("Failed to generate checksums");
-
+        src  = xfopen(pkg->src[i], "rb");
         base = basename(pkg->src[i]);
         pkg->sums[i] = xmalloc(67 + strlen(base));
 
@@ -62,44 +58,38 @@ void pkg_verify(package *pkg) {
     char *buf = 0;
     int i = 0;
 
-    log_info("Verifying checksums...");
+    msg("Verifying checksums...");
     pkg_checksums(pkg);
 
     if (pkg->src_len == 0)
-        log_error("Sources file does not exist");
+        die("Sources file does not exist");
 
     xchdir(*pkg->path);
-    file = fopen("checksums", "r");
-
-    if (!file)
-        log_error("Checksums file missing, run 'kiss c pkg'");
+    file = xfopen("checksums", "r");
 
     while ((getline(&buf, &(size_t){0}, file) != -1)) {
         buf[strcspn(buf, "\n")] = 0;
 
         if (strcmp(pkg->sums[i], buf) != 0 || i > pkg->src_len)
-            log_error("Checksums mismatch'");
+            die("Checksums mismatch'");
 
         i++;
     }
 
     fclose(file);
     free(buf);
-    log_info("Verified checksums");
+    msg("Verified checksums");
 }
 
 void checksum_to_file(package *pkg) {
     FILE *file;
 
     xchdir(pkg->path[0]);
-    file = fopen("checksums", "w");
-
-    if (!file)
-        log_error("Cannot write checksums");
+    file = xfopen("checksums", "w");
 
     for (int i = 0; i < pkg->src_len; i++)
         fprintf(file, "%s\n", pkg->sums[i]);
 
     fclose(file);
-    log_info("Generated checksums");
+    msg("Generated checksums");
 }

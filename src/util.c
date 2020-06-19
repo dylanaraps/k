@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <dirent.h>
 
 #include "log.h"
 #include "util.h"
@@ -15,7 +16,7 @@ void *xmalloc(size_t n) {
     p = malloc(n);
 
     if (!p)
-        log_error("Failed to allocate memory");
+        die("Failed to allocate memory");
 
     return p;
 }
@@ -24,17 +25,31 @@ void xchdir(const char *path) {
     int ret;
 
     if (!path)
-        log_error("Directory is null");
+        die("Directory is null");
 
     ret = chdir(path);
     
     if (ret != 0)
-        log_error("Directory %s not accessible", path);
+        die("Directory %s not accessible", path);
+}
+
+FILE *xfopen(const char *file, const char *p) {
+     FILE *f;
+
+     if (!file || !p)
+         die("File is null");
+
+     f = fopen(file, p);
+
+     if (!f)
+         die("Failed to open file %s", file);
+
+     return f;
 }
 
 void mkchdir(const char *path) {
     if (!path)
-        log_error("Directory is null");
+        die("Directory is null");
 
     mkdir(path, 0777); 
     xchdir(path);
@@ -54,21 +69,14 @@ void copy_file(char *src, char *dest) {
     int buf_len = 4096;
     char buffer[buf_len];
 
-    in = fopen(src, "r");
-
-    if (!in)
-        log_error("File not accessible %s\n", src);
-
-    out = fopen(dest, "w");
-
-    if (!out)
-        log_error("Cannot copy file %s\n", src);
+    in  = xfopen(src,  "r");
+    out = xfopen(dest, "w");
 
     while (1) {
         err = fread(buffer, 1, buf_len, in); 
 
         if (err == -1)
-            log_error("File not accessible %s\n", src);
+            die("File not accessible %s\n", src);
 
         if (err == 0)
             break;
@@ -76,7 +84,7 @@ void copy_file(char *src, char *dest) {
         err = fwrite(buffer, 1, buf_len, out);
 
         if (err == -1)
-            log_error("Cannot copy file %s\n", src);
+            die("Cannot copy file %s\n", src);
     }
 
     fclose(in);

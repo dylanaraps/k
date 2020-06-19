@@ -20,10 +20,10 @@ void pkg_init(package **head, char *pkg_name) {
     package *last = *head;
 
     if (!pkg)
-        log_error("Failed to allocate memory");
+        die("Failed to allocate memory");
 
     if (!pkg_name)
-        log_error("Package name is NULL");
+        die("Package name is NULL");
 
     pkg->next     = NULL;
     pkg->name     = strdup(pkg_name);

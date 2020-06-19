@@ -59,7 +59,7 @@ static int rm(const char *fpath, const struct stat *sb, int tf, struct FTW *fb) 
     rv = remove(fpath);
 
     if (rv)
-        log_warn("Failed to remove %s", fpath);
+        war("Failed to remove %s", fpath);
 
     return rv;
 }

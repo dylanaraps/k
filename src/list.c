@@ -17,7 +17,7 @@ void pkg_list(package *pkg) {
 
     if (chdir(pkg->name) != 0) {
         PKG = pkg->name;
-        log_error("not installed");
+        die("not installed");
     }
 
     printf("%s %s %s\n", pkg->name, pkg->ver, pkg->rel);
@@ -31,7 +31,7 @@ void pkg_list_all(package *pkg) {
     tot = scandir(PKG_DB, &list, NULL, alphasort);
 
     if (tot == -1)
-        log_error("Package DB not accessible");
+        die("Package DB not accessible");
 
     // '2' skips '.'/'..'.
     for (int i = 2; i < tot; i++) {
