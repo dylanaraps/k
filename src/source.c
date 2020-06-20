@@ -75,7 +75,13 @@ static void source_resolve(package *pkg, char *src, char *dest) {
     char *file = basename(src);
     int err = 0;
 
-    if (chdir(pkg->src_dir) == 0) {
+    if (strncmp(src, "https://", 8) == 0 ||
+        strncmp(src, "http://",  7) == 0) {
+
+        if (chdir(pkg->src_dir) != 0) {
+            die("[%s] Source directory is not accessible", pkg->name); 
+        }
+
         if (access(file, F_OK) != -1) {
             msg("[%s] Found cached source %s", pkg->name, src);
 
@@ -83,14 +89,26 @@ static void source_resolve(package *pkg, char *src, char *dest) {
             msg("[%s] Downloading %s", pkg->name, src);
             download(pkg, src);
         }
-        err = snprintf(dest, PATH_MAX, "%s/%s", pkg->src_dir, file);     
 
-    } else if (chdir(pkg->path[0]) == 0) {
-        if (access(src, F_OK) != -1) {
-            err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path[0], file);     
-        }
+        err = snprintf(dest, PATH_MAX, "%s/%s", pkg->src_dir, file);     
+        goto end;
+
+    } else if (strncmp(src, "git+", 4) == 0) {
+        die("[%s] Found git source (not yet supported) %s", src, pkg->name);
+
+        /* libgit2? or... git commands directly. */
     }
 
+    if (chdir(pkg->path[0]) != 0) {
+        die("[%s] Repository directory is not accessible", pkg->name); 
+    }
+
+    if (access(src, F_OK) != -1) {
+        msg("[%s] Found local source %s", pkg->name, src);
+        err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path[0], file);     
+    } 
+
+end:
     if (err < 1) {
         die("[%s] Source '%s' does not exist", pkg->name, file);
     }
