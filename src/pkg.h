@@ -1,6 +1,8 @@
 #ifndef _KPKG_H
 #define _KPKG_H
 
+#include <limits.h> /* PATH_MAX */
+
 typedef struct package {
     char *name;    
 
@@ -10,9 +12,9 @@ typedef struct package {
     char *ver;
     char *rel;
 
-    char *mak_dir;
-    char *pkg_dir;
-    char *tar_dir;
+    char mak_dir[PATH_MAX];
+    char pkg_dir[PATH_MAX];
+    char tar_dir[PATH_MAX];
 
     struct package *next;
     struct package *prev;
