@@ -47,3 +47,11 @@ void pkg_find(package *pkg) {
         die("Package '%s' does not exist", pkg->name);
     }
 }
+
+void pkg_paths(package *pkg) {
+    int i;
+
+    for (i = 0; i < pkg->path_l; i++) {
+        printf("%s\n", pkg->path[i]);
+    }
+}

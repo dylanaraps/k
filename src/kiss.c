@@ -27,8 +27,6 @@ static void usage(void) {
 }
 
 int main (int argc, char *argv[]) {
-    package *tmp;
-
     if (argc == 1) {
         usage();
     }
@@ -56,21 +54,15 @@ int main (int argc, char *argv[]) {
             break;
 
         case 's':
-            for (tmp = PKG; tmp; tmp = tmp->next) {
-                for (int i = 0; i < tmp->path_l; i++) {
-                    printf("%s\n", tmp->path[i]);
-                }
-            }
+            pkg_iter(PKG, pkg_paths, NULL);
             break;
 
         case 'l':
             if (argc == 2) {
-               pkg_list_all(PKG);
+                pkg_list_all(PKG);
 
             } else {
-                for (tmp = PKG; tmp; tmp = tmp->next) {
-                    pkg_list(tmp);
-                }
+                pkg_iter(PKG, pkg_list, NULL);
             }
             break;
 
