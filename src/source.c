@@ -142,7 +142,7 @@ void pkg_source(package *pkg) {
 
     /* empty sources file */
     if (pkg->src_l == 0) {
-        goto end;
+        die("Empty sources file");
     }
 
     pkg->src = xmalloc((pkg->src_l + 1) * sizeof(char *));
@@ -179,6 +179,5 @@ void pkg_source(package *pkg) {
         i++;
     }
 
-end:
     fclose(file);
 }
