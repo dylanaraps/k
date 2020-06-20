@@ -16,9 +16,8 @@ char CAC_DIR[PATH_MAX];
 const char *caches[] = {
     "sources",
     "bin",
-    "logs",
 };
-static const int cache_len = 3;
+static const int cache_len = 2;
 
 const char *states[] = {
     "build",
