@@ -5,7 +5,7 @@
 #include <limits.h> /* PATH_MAX */
 
 typedef struct package {
-    char *name;    
+    char *name;
 
     char **path;
     int  path_l;

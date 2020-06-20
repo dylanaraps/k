@@ -15,7 +15,7 @@ void *xmalloc(size_t n) {
     void *p;
 
     if (n == 0) {
-        die("Empty memory allocation");    
+        die("Empty memory allocation");
     }
 
     p = malloc(n);
@@ -31,7 +31,7 @@ int cntchr(const char *str, int chr) {
     const char *tmp = str;
     int i = 0;
 
-    for (; tmp[i]; tmp[i] == chr ? i++ : *tmp++);   
+    for (; tmp[i]; tmp[i] == chr ? i++ : *tmp++);
 
     return i;
 }
@@ -51,7 +51,7 @@ int cntlines(FILE *file) {
 }
 
 void mkdir_p(const char *dir) {
-    char tmp[PATH_MAX];   
+    char tmp[PATH_MAX];
     int err;
     char *p = 0;
 
@@ -64,7 +64,7 @@ void mkdir_p(const char *dir) {
     }
 
     err = strlcpy(tmp, dir, PATH_MAX);
-    
+
     if (err > PATH_MAX) {
         die("strlcpy truncated PATH");
     }
@@ -76,7 +76,7 @@ void mkdir_p(const char *dir) {
            err = mkdir(tmp, S_IRWXU);
 
            if (err == -1 && errno != EEXIST) {
-               die("Failed to create directory %s", tmp);    
+               die("Failed to create directory %s", tmp);
            }
 
            *p = '/';
@@ -86,6 +86,6 @@ void mkdir_p(const char *dir) {
     err = mkdir(tmp, S_IRWXU);
 
     if (err == -1 && errno != EEXIST) {
-        die("Failed to create directory %s", tmp);    
+        die("Failed to create directory %s", tmp);
     }
 }

@@ -32,7 +32,7 @@ void pkg_find(package *pkg) {
                die("[%s] Repository not accessible (%s)", pkg->name, REPOS[i]);
            }
 
-           pkg->path[pkg->path_l] = xmalloc(PATH_MAX); 
+           pkg->path[pkg->path_l] = xmalloc(PATH_MAX);
            err = strlcpy(pkg->path[pkg->path_l], tmp, PATH_MAX);
 
            if (err > PATH_MAX) {

@@ -14,7 +14,7 @@ char **REPOS = {0};
 int REPO_LEN = 0;
 
 void repo_init(void) {
-    char *kiss_path = strdup(getenv("KISS_PATH"));    
+    char *kiss_path = strdup(getenv("KISS_PATH"));
     char *tmp = 0;
     int i;
     size_t err;
@@ -26,7 +26,7 @@ void repo_init(void) {
     if (!strchr(kiss_path, '/')) {
         die("Invalid KISS_PATH");
     }
-   
+
     /* add +1 due to inbetween count */
     /* add +1 for the fallback */
     REPO_LEN = 2 + cntchr(kiss_path, ':');
@@ -66,7 +66,7 @@ void repo_init(void) {
 }
 
 void repo_destroy(void) {
-    int i; 
+    int i;
 
     for (i = 0; i < REPO_LEN; i++) {
         free(REPOS[i]);

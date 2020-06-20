@@ -14,16 +14,16 @@
 char CAC_DIR[PATH_MAX];
 
 const char *caches[] = {
-    "sources", 
-    "bin", 
-    "logs", 
+    "sources",
+    "bin",
+    "logs",
 };
 static const int cache_len = 3;
 
 const char *states[] = {
-    "build", 
-    "pkg", 
-    "extract", 
+    "build",
+    "pkg",
+    "extract",
 };
 static const int state_len = 3;
 
@@ -70,10 +70,10 @@ void xdg_cache_dir(char *buf, int len) {
     dir = getenv("XDG_CACHE_HOME");
 
     if (!dir) {
-        dir = getenv("HOME"); 
+        dir = getenv("HOME");
 
         if (!dir) {
-            die("HOME is NULL"); 
+            die("HOME is NULL");
         }
 
         ret = snprintf(buf, len, "%s/.cache/kiss", dir);

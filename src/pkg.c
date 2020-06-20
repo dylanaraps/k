@@ -12,7 +12,7 @@ package *PKG;
 
 void pkg_init(package **pkg, char *pkg_name) {
     package *tmp = *pkg;
-    package *new = xmalloc(sizeof(package)); 
+    package *new = xmalloc(sizeof(package));
 
     /* initializes all fields */
     *new = (package) {
@@ -68,7 +68,7 @@ void pkg_destroy(package *pkg) {
     }
 
     if (PKG == pkg) {
-        PKG = pkg->next; 
+        PKG = pkg->next;
     }
 
     if (pkg->next) {

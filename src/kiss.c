@@ -58,7 +58,7 @@ int main (int argc, char *argv[]) {
 
         case 'l':
             if (argc == 2) {
-               pkg_list_all(PKG); 
+               pkg_list_all(PKG);
 
             } else {
                 for (; PKG; PKG = PKG->next) {

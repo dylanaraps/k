@@ -48,7 +48,7 @@ void pkg_version(package *pkg) {
         die("strlcpy was truncated");
     }
 
-    tok = strtok(NULL, " 	\r\n"); 
+    tok = strtok(NULL, " 	\r\n");
 
     if (!tok) {
         die("Release field missing");

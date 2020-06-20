@@ -24,9 +24,9 @@ static void download(package *pkg, char *url) {
     FILE *file;
 
     if (chdir(pkg->src_dir) != 0) {
-        die("[%s] Source cache not accessible");    
+        die("[%s] Source cache not accessible");
     }
-        
+
     file = fopen(name, "wb");
 
     if (!file) {
@@ -53,15 +53,15 @@ void source_init(package *pkg) {
     if (chdir(CAC_DIR) != 0) {
         die("Cache directory is not accessible");
     }
-    
+
     if (chdir("../sources") != 0) {
-        die("[%s] Source directory is not accessible", pkg->name); 
+        die("[%s] Source directory is not accessible", pkg->name);
     }
 
     mkdir_p(pkg->name);
 
     if (chdir(pkg->name) != 0) {
-        die("[%s] Source directory is not accessible", pkg->name); 
+        die("[%s] Source directory is not accessible", pkg->name);
     }
 
     tmp = getcwd(pkg->src_dir, PATH_MAX);
@@ -79,7 +79,7 @@ static void source_resolve(package *pkg, char *src, char *dest) {
         strncmp(src, "http://",  7) == 0) {
 
         if (chdir(pkg->src_dir) != 0) {
-            die("[%s] Source directory is not accessible", pkg->name); 
+            die("[%s] Source directory is not accessible", pkg->name);
         }
 
         if (access(file, F_OK) != -1) {
@@ -90,7 +90,7 @@ static void source_resolve(package *pkg, char *src, char *dest) {
             download(pkg, src);
         }
 
-        err = snprintf(dest, PATH_MAX, "%s/%s", pkg->src_dir, file);     
+        err = snprintf(dest, PATH_MAX, "%s/%s", pkg->src_dir, file);
         goto end;
 
     } else if (strncmp(src, "git+", 4) == 0) {
@@ -100,13 +100,13 @@ static void source_resolve(package *pkg, char *src, char *dest) {
     }
 
     if (chdir(pkg->path[0]) != 0) {
-        die("[%s] Repository directory is not accessible", pkg->name); 
+        die("[%s] Repository directory is not accessible", pkg->name);
     }
 
     if (access(src, F_OK) != -1) {
         msg("[%s] Found local source %s", pkg->name, src);
-        err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path[0], file);     
-    } 
+        err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path[0], file);
+    }
 
 end:
     if (err < 1) {
@@ -147,7 +147,7 @@ void pkg_source(package *pkg) {
     pkg->src = xmalloc((pkg->src_l + 1) * sizeof(char *));
     pkg->des = xmalloc((pkg->src_l + 1) * sizeof(char *));
 
-    while (fgets(line, LINE_MAX, file)) { 
+    while (fgets(line, LINE_MAX, file)) {
         if (line[0] == '#' || line[0] == '\n') {
             continue;
         }
