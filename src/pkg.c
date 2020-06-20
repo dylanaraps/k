@@ -40,19 +40,13 @@ void pkg_init(package **pkg, char *pkg_name) {
 }
 
 void pkg_iter(package *pkg, void (*f[2])(package *), const char *msg) {
-    package *tmp = pkg;
+    package *tmp;
 
     printf("\n\033[1m%s\033[m\n", msg);
-    printf("\033[?7l____________________________________________________________________________________________________________________________________________\033[?7h\n\n");
 
     for (tmp = pkg; tmp; tmp = tmp->next) {
-        printf("\033[1m%s\033[m (%s %s)\n", tmp->name, tmp->ver, tmp->rel);
-        printf("\033[?7l____________________________________________________________________________________________________________________________________________\033[?7h\n\n");
-
         (f[0])(tmp);
         (f[1])(tmp);
-
-        printf("\n");
     }
 }
 

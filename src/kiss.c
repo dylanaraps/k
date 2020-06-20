@@ -47,16 +47,16 @@ int main (int argc, char *argv[]) {
     switch (argv[1][0]) {
         case 'c':
             f[0] = pkg_source;
-            pkg_iter(PKG, f, "CHECKING SOURCES");
+            pkg_iter(PKG, f, "Checking sources");
 
             f[0] = pkg_checksums;
-            pkg_iter(PKG, f, "GENERATING CHECKSUMS");
+            pkg_iter(PKG, f, "Generating checksums");
 
             break;
 
         case 'd':
             f[0] = pkg_source;
-            pkg_iter(PKG, f,    "DOWNLOADING SOURCES");
+            pkg_iter(PKG, f, "Downloading sources");
 
             break;
 
