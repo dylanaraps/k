@@ -24,14 +24,40 @@ const char *states[] = {
 };
 
 void cache_init(void) {
+    int pid_len;
+    char* pid_str = 0;
     pid_t pid;
+    int ret;
 
     xdg_cache_dir(CAC_DIR, PATH_MAX);
-
     pid = getpid();
-
     mkdir_p(CAC_DIR);
-    printf("%s\n", CAC_DIR);
+
+    if (chdir(CAC_DIR) != 0) {
+        die("Cache directory is not accessible");
+    }
+
+    for (int i = 0; i < 3; i++) {
+       mkdir_p(caches[i]); 
+    }
+
+    pid_len = snprintf(NULL, 0,"%d", pid);
+    pid_str = xmalloc(pid_len + 1);
+    ret     = snprintf(pid_str, pid_len + 1, "%d", pid);
+
+    if (ret == -1) {
+        die("Failed to covert pid to string");
+    }
+
+    mkdir_p(pid_str);
+
+    if (chdir(pid_str) != 0) {
+        die("Cache directory is not accessible");
+    }
+
+    for (int i = 0; i < 3; i++) {
+       mkdir_p(states[i]); 
+    }
 }
 
 void xdg_cache_dir(char *buf, size_t len) {

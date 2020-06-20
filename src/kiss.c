@@ -50,9 +50,15 @@ int main (int argc, char *argv[]) {
             break;
 
         case 'l':
-            for (; PKG; PKG = PKG->next) {
-                pkg_list(PKG);
+            if (argc == 2) {
+               pkg_list_all(PKG); 
+
+            } else {
+                for (; PKG; PKG = PKG->next) {
+                    pkg_list(PKG);
+                }
             }
+
             break;
 
         case 'v':
