@@ -80,12 +80,8 @@ static void source_resolve(package *pkg, char *src, char *dest) {
         err = snprintf(dest, PATH_MAX, "%s/%s", pkg->src_dir, file);     
     }
 
-    if (err == 0) {
+    if (err < 1) {
         die("[%s] Source '%s' does not exist", pkg->name, file);
-    }
-
-    if (err == -1) {
-        die("[%s] Failed to construct source path", pkg->name);
     }
 
     if (err > PATH_MAX) {
