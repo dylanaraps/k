@@ -39,33 +39,50 @@ void pkg_init(package **pkg, char *pkg_name) {
     }
 }
 
-void pkg_destroy_all(void) {
-    package *tmp = PKG;
+static void pkg_free(package *pkg) {
     int i;
 
-    while (PKG) {
-        tmp = PKG->next;
+    free(pkg->name);
+    free(pkg->ver);
+    free(pkg->rel);
 
-        free(PKG->name);
-        free(PKG->ver);
-        free(PKG->rel);
+    for (i = 0; i < pkg->path_l; i++) {
+        free(pkg->path[i]);
+    }
+    free(pkg->path);
 
-        for (i = 0; i < PKG->path_l; i++) {
-            free(PKG->path[i]);
-        }
-        free(PKG->path);
+    for (i = 0; i < pkg->src_l; i++) {
+        free(pkg->src[i]);
+        free(pkg->des[i]);
+    }
+    free(pkg->src);
+    free(pkg->des);
 
-        for (i = 0; i < PKG->src_l; i++) {
-            free(PKG->src[i]);
-            free(PKG->des[i]);
-        }
-        free(PKG->src);
-        free(PKG->des);
+    free(pkg);
+}
 
-        free(PKG);
-
-        PKG = tmp;
+void pkg_destroy(package *pkg) {
+    if (!PKG || !pkg) {
+        return;
     }
 
-    free(PKG);
+    if (PKG == pkg) {
+        PKG = pkg->next; 
+    }
+
+    if (pkg->next) {
+        pkg->next->prev = pkg->prev;
+    }
+
+    if (pkg->prev) {
+        pkg->prev->next = pkg->next;
+    }
+
+    pkg_free(pkg);
+}
+
+void pkg_destroy_all(void) {
+    while (PKG) {
+        pkg_destroy(PKG);
+    }
 }
