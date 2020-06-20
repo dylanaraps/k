@@ -1,5 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
-#include <limits.h> /* PATH_MAX, LINE_MAX */
+#include <limits.h> /* PATH_MAX */
 #include <unistd.h> /* chdir */
 #include <string.h> /* strcspn */
 #include <libgen.h> /* basename */
@@ -120,7 +120,7 @@ static void source_resolve(package *pkg, char *src, char *dest) {
 }
 
 void pkg_source(package *pkg) {
-    char line[LINE_MAX];
+    char *line = 0;
     char *tok;
     FILE *file;
     int i = 0;
@@ -147,7 +147,7 @@ void pkg_source(package *pkg) {
     pkg->src = xmalloc((pkg->src_l + 1) * sizeof(char *));
     pkg->des = xmalloc((pkg->src_l + 1) * sizeof(char *));
 
-    while (fgets(line, LINE_MAX, file)) {
+    while (getline(&line, &(size_t){0}, file) != -1) {
         if (line[0] == '#' || line[0] == '\n') {
             continue;
         }
@@ -178,5 +178,6 @@ void pkg_source(package *pkg) {
         i++;
     }
 
+    free(line);
     fclose(file);
 }
