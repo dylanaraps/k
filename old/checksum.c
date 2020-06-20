@@ -36,7 +36,7 @@ void pkg_checksums(package *pkg) {
 
         snprintf(pkg->sums[i], 67 + strlen(base), \
 "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
-%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x  %s",  
+%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x  %s",
             shasum[0],  shasum[1],  shasum[2],  shasum[3],
             shasum[4],  shasum[5],  shasum[6],  shasum[7],
             shasum[8],  shasum[9],  shasum[10], shasum[11],

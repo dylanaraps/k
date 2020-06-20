@@ -98,6 +98,9 @@ static void source_resolve(package *pkg, char *src, char *dest) {
 
         /* libgit2? or... git commands directly. */
         /* libgit2 requires cmake which is too much for core. */
+        /* git commands lose the benefit of static compilation... */
+        /* welp. no shallow clones in libgit2. */
+        /* https://github.com/libgit2/libgit2/issues/3058 */
     }
 
     if (chdir(pkg->path[0]) != 0) {

@@ -6,6 +6,7 @@ ALL_LDFLAGS=$(LDFLAGS) -larchive -llzma -lbz2 -lcurl -lssl -lcrypto -lcrypto -lz
 
 OBJ=\
 	src/source.o \
+	src/checksum.o \
 	src/repo.o \
 	src/cache.o \
 	src/find.o \
@@ -18,6 +19,7 @@ OBJ=\
 
 HDR=\
 	src/source.h \
+	src/checksum.h \
 	src/repo.h \
 	src/cache.h \
 	src/find.h \
@@ -28,10 +30,10 @@ HDR=\
 	src/pkg.h
 
 .c.o:
-	$(CC) $(ALL_CFLAGS) -c -o $@ $< 
+	$(CC) $(ALL_CFLAGS) -c -o $@ $<
 
 kiss: $(OBJ)
-	$(CC) -DCURL_STATICLIB $(ALL_CFLAGS) -o $@ $(OBJ) $(ALL_LDFLAGS) 
+	$(CC) -DCURL_STATICLIB $(ALL_CFLAGS) -o $@ $(OBJ) $(ALL_LDFLAGS)
 
 $(OBJ): $(HDR)
 

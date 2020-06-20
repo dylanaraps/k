@@ -18,6 +18,7 @@ typedef struct package {
     char tar_dir[PATH_MAX];
     char src_dir[PATH_MAX];
 
+    char **sum;
     char **src;
     char **des;
     int  src_l;
