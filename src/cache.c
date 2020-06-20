@@ -69,6 +69,10 @@ void xdg_cache_dir(char *buf, int len) {
 
     dir = getenv("XDG_CACHE_HOME");
 
+    if (!dir || !len) {
+        die("Failed to construct cache directory");
+    }
+
     if (!dir) {
         dir = getenv("HOME");
 
@@ -107,7 +111,7 @@ void xdg_cache_dir(char *buf, int len) {
 static int rm(const char *fpath, const struct stat *sb, int tf, struct FTW *fb) {
     int rv;
 
-    // Unused.
+    // inused
     (void)(sb);
     (void)(tf);
     (void)(fb);
