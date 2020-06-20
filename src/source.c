@@ -140,7 +140,6 @@ void pkg_source(package *pkg) {
 
     pkg->src_l = cntlines(file);
 
-    /* empty sources file */
     if (pkg->src_l == 0) {
         die("Empty sources file");
     }
