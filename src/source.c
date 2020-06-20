@@ -75,9 +75,7 @@ static void source_resolve(package *pkg, char *src, char *dest) {
     char *file = basename(src);
     int err = 0;
 
-    if (strncmp(src, "https://", 8) == 0 ||
-        strncmp(src, "http://",  7) == 0) {
-
+    if (strstr(src, "://")) {
         if (chdir(pkg->src_dir) != 0) {
             die("Source directory is not accessible");
         }
