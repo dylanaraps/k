@@ -13,29 +13,40 @@
 #include "cache.h"
 #include "source.h"
 
-/* static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) { */
-/*     size_t written = fwrite(ptr, size, nmemb, (FILE *)stream); */
-/*     return written; */
-/* } */
+static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) {
+    size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
+    return written;
+}
 
-/* static void download(char *url) { */
-    /* CURL *curl = curl_easy_init(); */
-    /* char *name = basename(url); */
-    /* FILE *file = xfopen(name, "wb"); */
+static void download(package *pkg, char *url) {
+    CURL *curl = curl_easy_init();
+    char *name = basename(url);
+    FILE *file;
 
-    /* curl_easy_setopt(curl, CURLOPT_URL, url); */
-    /* curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, file_write); */
-    /* curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L); */
-    /* curl_easy_setopt(curl, CURLOPT_WRITEDATA, file); */
+    if (chdir(pkg->src_dir) != 0) {
+        die("[%s] Source cache not accessible");    
+    }
+        
+    file = fopen(name, "wb");
 
-    /* if (curl_easy_perform(curl) != 0) { */
-    /*     remove(name); */
-    /*     die("Failed to download source %s", url); */
-    /* } */
+    if (!file) {
+        die("[%s] Failed to open %s", pkg->name, name);
+    }
 
-    /* fclose(file); */
-    /* curl_easy_cleanup(curl); */
-/* } */
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, file_write);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+
+    if (curl_easy_perform(curl) != 0) {
+        remove(name);
+        die("Failed to download source %s", url);
+    }
+
+    fclose(file);
+    curl_easy_cleanup(curl);
+}
+
 void source_init(package *pkg) {
     char *tmp;
 
@@ -64,20 +75,20 @@ static void source_resolve(package *pkg, char *src, char *dest) {
     char *file = basename(src);
     int err = 0;
 
-    if (chdir(pkg->path[0]) != 0) {
-        die("[%s] Repository directory is not accessible", pkg->name); 
-    }
+    if (chdir(pkg->src_dir) == 0) {
+        if (access(file, F_OK) != -1) {
+            msg("[%s] Found cached source %s", pkg->name, src);
 
-    if (access(src, F_OK) != -1) {
-        err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path[0], file);     
-    }
-
-    if (chdir(pkg->src_dir) != 0) {
-        die("[%s] Source directory is not accessible", pkg->name); 
-    }
-
-    if (access(file, F_OK) != -1) {
+        } else {
+            msg("[%s] Downloading %s", pkg->name, src);
+            download(pkg, src);
+        }
         err = snprintf(dest, PATH_MAX, "%s/%s", pkg->src_dir, file);     
+
+    } else if (chdir(pkg->path[0]) == 0) {
+        if (access(src, F_OK) != -1) {
+            err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path[0], file);     
+        }
     }
 
     if (err < 1) {
@@ -94,7 +105,6 @@ void pkg_source(package *pkg) {
     char *tok;
     FILE *file;
     int i = 0;
-    int len;
     int err;
 
     source_init(pkg);
@@ -119,9 +129,13 @@ void pkg_source(package *pkg) {
     pkg->src = xmalloc((pkg->src_l + 1) * sizeof(char *));
     pkg->des = xmalloc((pkg->src_l + 1) * sizeof(char *));
 
-    while (fgets(line, LINE_MAX, file) && i < pkg->src_l) { 
+    while (fgets(line, LINE_MAX, file)) { 
         if (line[0] == '#' || line[0] == '\n') {
             continue;
+        }
+
+        if (i > pkg->src_l) {
+            die("[%s] Mismatch in source parser", pkg->name);
         }
 
         tok = strtok(line, " 	\r\n");
@@ -130,29 +144,18 @@ void pkg_source(package *pkg) {
             die("[%s] Invalid sources file", pkg->name);
         }
 
-        len = strlen(tok) + 1;
-        pkg->src[i] = xmalloc(len);
-        err = snprintf(pkg->src[i], len, "%s", basename(tok));
-
-        if (err == -1) {
-            die("Failed to construct cache directory");
-        }
-
+        pkg->src[i] = xmalloc(PATH_MAX);
+        pkg->des[i] = xmalloc(PATH_MAX);
         source_resolve(pkg, tok, pkg->src[i]);
-        /* printf("%s\n", pkg->src[i]); */
 
-        /* tok = strtok(NULL, " 	\r\n"); */
+        tok = strtok(NULL, " 	\r\n");
 
-        /* /1* ensure optional field is not null *1/ */
-        /* tok = tok ? tok : ""; */
+        /* ensure optional field is not null */
+        err = strlcpy(pkg->des[i], tok ? tok : "", PATH_MAX);
 
-        /* len = strlen(tok) + 1; */
-        /* pkg->des[i] = xmalloc(len); */
-        /* err = strlcpy(pkg->des[i], tok, len); */
-
-        /* if (err > len) { */
-        /*     die("strlcpy was truncated"); */
-        /* } */
+        if (err > PATH_MAX) {
+            die("strlcpy was truncated");
+        }
 
         i++;
     }
