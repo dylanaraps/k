@@ -22,14 +22,14 @@ void pkg_find(package *pkg) {
 
     for (i = 0; i < REPO_LEN; i++) {
        if (chdir(REPOS[i]) != 0) {
-            die("Repository not accessible (%s)", REPOS[i]);
+            die("[%s] Repository not accessible (%s)", pkg->name, REPOS[i]);
        }
 
        if (chdir(pkg->name) == 0) {
            tmp = getcwd(cwd, PATH_MAX);
 
            if (!tmp) {
-               die("Repository not accessible");
+               die("[%s] Repository not accessible (%s)", pkg->name, REPOS[i]);
            }
 
            pkg->path[pkg->path_l] = xmalloc(PATH_MAX); 
@@ -44,6 +44,6 @@ void pkg_find(package *pkg) {
     }
 
     if (pkg->path_l == 0) {
-        die("Package (%s) does not exist", pkg->name);
+        die("Package '%s' does not exist", pkg->name);
     }
 }

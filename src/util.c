@@ -1,7 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include <stdlib.h>   /* malloc, size_t */
 #include <stdio.h>    /* printf */
-#include <limits.h>   /* PATH_MAX */
+#include <limits.h>   /* PATH_MAX, LINE_MAX */
 #include <string.h>   /* strncpy */
 #include <sys/stat.h> /* mkdir */
 #include <errno.h>    /* errno, EEXIST, S_IRWXU */
@@ -31,6 +31,20 @@ int cntchr(const char *str, int chr) {
     int i = 0;
 
     for (; tmp[i]; tmp[i] == chr ? i++ : *tmp++);   
+
+    return i;
+}
+
+int cntlines(FILE *file) {
+    char line[LINE_MAX];
+    int i = 0;
+
+    while (fgets(line, LINE_MAX, file)) {
+        if (line[0] != '#' && line[0] != '\n') {
+           i++;
+        }
+    }
+    rewind(file);
 
     return i;
 }

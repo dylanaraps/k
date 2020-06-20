@@ -2,6 +2,7 @@
 #include <limits.h> /* PATH_MAX, LINE_MAX */
 #include <unistd.h> /* chdir */
 #include <string.h> /* strcspn */
+#include <libgen.h> /* basename */
 
 #include <curl/curl.h>
 
@@ -44,7 +45,7 @@ void pkg_source(package *pkg) {
     int err;
 
     if (chdir(pkg->path[0]) != 0) {
-        die("[%s] Repository is not accessible", pkg->name);
+        die("[%s] Repository is not accessible (%s)", pkg->name, pkg->path[0]);
     }
 
     file = fopen("sources", "r");
@@ -53,13 +54,12 @@ void pkg_source(package *pkg) {
         die("[%s] Failed to open sources file", pkg->name);
     }
 
-    /* guess at the file length */
-    while (fgets(line, LINE_MAX, file)) {
-        if (line[0] != '#' && line[0] != '\n') {
-            pkg->src_l++;
-        }
+    pkg->src_l = cntlines(file);
+
+    /* empty sources file */
+    if (pkg->src_l == 0) {
+        goto end;
     }
-    rewind(file);
 
     pkg->src = xmalloc((pkg->src_l + 1) * sizeof(char *));
     pkg->des = xmalloc((pkg->src_l + 1) * sizeof(char *));
@@ -77,11 +77,13 @@ void pkg_source(package *pkg) {
 
         len = strlen(tok) + 1;
         pkg->src[i] = xmalloc(len);
-        err = strlcpy(pkg->src[i], tok, len);
+        err = snprintf(pkg->src[i], len, "%s", basename(tok));
 
-        if (err > len) {
-            die("strlcpy was truncated");
+        if (err == -1) {
+            die("Failed to construct cache directory");
         }
+
+        printf("%s\n", pkg->src[i]);
 
         tok = strtok(NULL, " 	\r\n");
 
@@ -99,5 +101,6 @@ void pkg_source(package *pkg) {
         i++;
     }
 
+end:
     fclose(file);
 }
