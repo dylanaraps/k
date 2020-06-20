@@ -89,7 +89,6 @@ static void source_resolve(package *pkg, char *src, char *dest) {
         }
 
         err = snprintf(dest, PATH_MAX, "%s/%s", pkg->src_dir, file);
-        goto end;
 
     } else if (strncmp(src, "git+", 4) == 0) {
         die("Found git source (not yet supported) %s", src);
@@ -99,18 +98,18 @@ static void source_resolve(package *pkg, char *src, char *dest) {
         /* git commands lose the benefit of static compilation... */
         /* welp. no shallow clones in libgit2. */
         /* https://github.com/libgit2/libgit2/issues/3058 */
+
+    } else {
+        if (chdir(pkg->path[0]) != 0) {
+            die("Repository directory is not accessible");
+        }
+
+        if (access(src, F_OK) != -1) {
+            msg("Found  local source %s", src);
+            err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path[0], src);
+        }
     }
 
-    if (chdir(pkg->path[0]) != 0) {
-        die("Repository directory is not accessible");
-    }
-
-    if (access(src, F_OK) != -1) {
-        msg("Found  local source %s", src);
-        err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path[0], src);
-    }
-
-end:
     if (err < 1) {
         die("Source '%s' does not exist", file);
     }
