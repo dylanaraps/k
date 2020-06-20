@@ -5,6 +5,7 @@
 #include <string.h>   /* strncpy */
 #include <sys/stat.h> /* mkdir */
 #include <errno.h>    /* errno, EEXIST, S_IRWXU */
+#include <unistd.h>   /* access */
 
 #include "log.h"
 #include "strl.h"
@@ -56,6 +57,10 @@ void mkdir_p(const char *dir) {
 
     if (!dir) {
         die("mkdir input empty");
+    }
+
+    if (access(dir, F_OK) != -1) {
+        return;
     }
 
     err = strlcpy(tmp, dir, PATH_MAX);

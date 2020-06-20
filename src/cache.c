@@ -40,7 +40,7 @@ void cache_init(void) {
     }
 
     if (ret > PATH_MAX) {
-        die("Cache directory exceeds PAGE_SIZE");
+        die("Cache directory exceeds PATH_MAX");
     }
 
     mkdir_p(CAC_DIR);

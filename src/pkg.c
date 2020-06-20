@@ -57,6 +57,7 @@ static void pkg_free(package *pkg) {
     }
     free(pkg->src);
     free(pkg->des);
+    free(pkg->src_dir);
 
     free(pkg);
 }
