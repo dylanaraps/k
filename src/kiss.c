@@ -4,6 +4,7 @@
 #include <limits.h> /* PATH_MAX */
 
 #include "cache.h"
+#include "checksum.h"
 #include "source.h"
 #include "find.h"
 #include "list.h"
@@ -26,6 +27,8 @@ static void usage(void) {
 }
 
 int main (int argc, char *argv[]) {
+    package *tmp;
+
     if (argc == 1) {
         usage();
     }
@@ -42,19 +45,33 @@ int main (int argc, char *argv[]) {
 
     switch (argv[1][0]) {
         case 'c':
-            for (; PKG; PKG = PKG->next) {
+            for (tmp = PKG; tmp; tmp = tmp->next) {
+                printf("| %s\n", tmp->name);
+                LINE;
                 pkg_source(PKG);
+                LINE;
+                printf("|\n\n");
+            }
+            for (tmp = PKG; tmp; tmp = tmp->next) {
+                printf("| %s\n", tmp->name);
+                LINE;
+                pkg_checksums(PKG);
+                LINE;
+                printf("|\n\n");
             }
             break;
 
         case 'd':
-            for (; PKG; PKG = PKG->next) {
+            for (tmp = PKG; tmp; tmp = tmp->next) {
+                printf("| %s\n", tmp->name);
+                LINE;
                 pkg_source(PKG);
+                LINE;
             }
             break;
 
         case 's':
-            for (; PKG; PKG = PKG->next) {
+            for (tmp = PKG; tmp; tmp = tmp->next) {
                 for (int i = 0; i < PKG->path_l; i++) {
                     printf("%s\n", PKG->path[i]);
                 }
@@ -66,7 +83,7 @@ int main (int argc, char *argv[]) {
                pkg_list_all(PKG);
 
             } else {
-                for (; PKG; PKG = PKG->next) {
+                for (tmp = PKG; tmp; tmp = tmp->next) {
                     pkg_list(PKG);
                 }
             }

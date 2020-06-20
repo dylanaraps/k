@@ -2,5 +2,8 @@
 
 void _msg(const char* type, const char *fmt, ...);
 
-#define die(...) _msg("ERRR", __VA_ARGS__),exit(1)
-#define msg(...) _msg("INFO", __VA_ARGS__)
+#define die(...) _msg("\033[31;1mERRR\033[m", __VA_ARGS__),exit(1)
+#define msg(...) _msg("\033[32;1mINFO\033[m", __VA_ARGS__)
+
+#define LINE printf("+---------------------------------------------------\n")
+
