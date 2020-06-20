@@ -1,5 +1,6 @@
 #include <libgen.h> /* basename */
 #include <string.h> /* strlen */
+#include <unistd.h> /* chdir */
 
 #include "log.h"
 #include "util.h"
@@ -7,6 +8,27 @@
 #include "pkg.h"
 #include "checksum.h"
 #include "sha256.h"
+
+static void checksum_to_file(package *pkg) {
+    FILE *file;
+    int i;
+
+    if (chdir(pkg->path[0]) != 0) {
+        die("Repository files not accessible");
+    }
+
+    file = fopen("checksums", "w");
+
+    if (!file) {
+        die("Failed to open checksums file");
+    }
+
+    for (i = 0; i < pkg->src_l; i++) {
+        fprintf(file, "%s\n", pkg->sum[i]);
+    }
+
+    fclose(file);
+}
 
 void pkg_checksums(package *pkg) {
     unsigned char buf[1000];
@@ -55,4 +77,6 @@ x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
         msg("%s", pkg->sum[i]);
         fclose(file);
     }
+
+    checksum_to_file(pkg);
 }
