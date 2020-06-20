@@ -31,8 +31,13 @@ void pkg_list_all(package *pkg) {
 
     // '2' skips '.'/'..'.
     for (int i = 2; i < tot; i++) {
+        pkg_init(&pkg, list[i]->d_name);
         free(list[i]);
     }
     free(list);
+
+    for (; pkg; pkg = pkg->next) {
+        pkg_list(pkg);
+    }
 }
 

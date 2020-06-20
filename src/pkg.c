@@ -1,4 +1,6 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include <string.h> /* strlen */
 
 #include "log.h"
 #include "find.h"
@@ -8,18 +10,18 @@
 
 package *PKG;
 
-void pkg_init(package **pkg, const char *pkg_name) {
+void pkg_init(package **pkg, char *pkg_name) {
     package *tmp = *pkg;
     package *new = xmalloc(sizeof(package)); 
+
+    /* initializes all fields */
+    *new = (package) {
+        .name = strdup(pkg_name),
+    };
 
     if (!pkg_name) {
         die("Package name is null");
     }
-
-    /* initializes all fields */
-    *new = (package) {
-        .name = pkg_name,
-    };
 
     pkg_find(new);
     pkg_version(new);
@@ -44,6 +46,7 @@ void pkg_destroy_all(void) {
     while (PKG) {
         tmp = PKG->next;
 
+        free(PKG->name);
         free(PKG->ver);
         free(PKG->rel);
 

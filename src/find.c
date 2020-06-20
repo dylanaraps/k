@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include <limits.h> /* PATH_MAX */
 #include <unistd.h> /* chdir */
+#include <glob.h>   /* glob */
 
 #include "log.h"
 #include "repo.h"
