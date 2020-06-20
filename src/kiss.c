@@ -28,6 +28,7 @@ static void usage(void) {
 
 int main (int argc, char *argv[]) {
     package *tmp;
+    void (*f[2]) (package *) = { [1] = pkg_null };
 
     if (argc == 1) {
         usage();
@@ -45,40 +46,24 @@ int main (int argc, char *argv[]) {
 
     switch (argv[1][0]) {
         case 'c':
-            printf("\n\033[1mCHECKING SOURCES\033[m\n");
-            LINE;
+            f[0] = pkg_source;
+            pkg_iter(PKG, f, "CHECKING SOURCES");
 
-            for (tmp = PKG; tmp; tmp = tmp->next) {
-                printf("\033[1m%s\033[m\n", tmp->name);
-                LINE;
-                pkg_source(PKG);
-                printf("\n");
-            }
+            f[0] = pkg_checksums;
+            pkg_iter(PKG, f, "GENERATING CHECKSUMS");
 
-            printf("\n\033[1mGENERATING CHECKSUMS\033[m\n");
-            LINE;
-
-            for (tmp = PKG; tmp; tmp = tmp->next) {
-                printf("\033[1m%s\033[m\n", tmp->name);
-                LINE;
-                pkg_checksums(PKG);
-                printf("\n");
-            }
             break;
 
         case 'd':
-            for (tmp = PKG; tmp; tmp = tmp->next) {
-                printf("\033[1m%s\033[m\n", tmp->name);
-                LINE;
-                pkg_source(PKG);
-                printf("\n");
-            }
+            f[0] = pkg_source;
+            pkg_iter(PKG, f,    "DOWNLOADING SOURCES");
+
             break;
 
         case 's':
             for (tmp = PKG; tmp; tmp = tmp->next) {
-                for (int i = 0; i < PKG->path_l; i++) {
-                    printf("%s\n", PKG->path[i]);
+                for (int i = 0; i < tmp->path_l; i++) {
+                    printf("%s\n", tmp->path[i]);
                 }
             }
             break;
@@ -89,7 +74,7 @@ int main (int argc, char *argv[]) {
 
             } else {
                 for (tmp = PKG; tmp; tmp = tmp->next) {
-                    pkg_list(PKG);
+                    pkg_list(tmp);
                 }
             }
             break;

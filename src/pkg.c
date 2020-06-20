@@ -39,6 +39,25 @@ void pkg_init(package **pkg, char *pkg_name) {
     }
 }
 
+void pkg_iter(package *pkg, void (*f[2])(package *), const char *msg) {
+    package *tmp = pkg;
+
+    printf("\n\033[1m%s\033[m\n", msg);
+    printf("_______________________________________________");
+    printf("_________________________________\n\n");
+
+    for (tmp = pkg; tmp; tmp = tmp->next) {
+        printf("\033[1m%s\033[m\n", tmp->name);
+        printf("_______________________________________________");
+        printf("_________________________________\n\n");
+
+        (f[0])(tmp);
+        (f[1])(tmp);
+
+        printf("\n");
+    }
+}
+
 static void pkg_free(package *pkg) {
     int i;
 
@@ -54,13 +73,16 @@ static void pkg_free(package *pkg) {
     for (i = 0; i < pkg->src_l; i++) {
         free(pkg->src[i]);
         free(pkg->des[i]);
+        free(pkg->sum[i]);
     }
     free(pkg->src);
     free(pkg->des);
+    free(pkg->sum);
     free(pkg->src_dir);
 
     free(pkg);
 }
+
 
 void pkg_destroy(package *pkg) {
     if (!PKG || !pkg) {
@@ -86,4 +108,8 @@ void pkg_destroy_all(void) {
     while (PKG) {
         pkg_destroy(PKG);
     }
+}
+
+void pkg_null(package *pkg) {
+    (void)(pkg);
 }

@@ -30,6 +30,8 @@ typedef struct package {
 extern package *PKG;
 
 void pkg_init(package **pkg, char *pkg_name);
+void pkg_iter(package *pkg, void (*f[2]) (package *), const char *msg);
 void pkg_destroy_all(void);
+void pkg_null(package *pkg);
 
 #endif
