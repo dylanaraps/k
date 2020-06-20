@@ -4,6 +4,7 @@
 #include <limits.h> /* PATH_MAX */
 
 #include "cache.h"
+#include "source.h"
 #include "find.h"
 #include "list.h"
 #include "version.h"
@@ -40,6 +41,12 @@ int main (int argc, char *argv[]) {
     atexit(pkg_destroy_all);
 
     switch (argv[1][0]) {
+        case 'd':
+            for (; PKG; PKG = PKG->next) {
+                pkg_source(PKG);
+            }
+            break;
+
         case 's':
             for (; PKG; PKG = PKG->next) {
                 for (int i = 0; i < PKG->path_l; i++) {

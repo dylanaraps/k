@@ -53,8 +53,15 @@ void pkg_destroy_all(void) {
         for (i = 0; i < PKG->path_l; i++) {
             free(PKG->path[i]);
         }
-
         free(PKG->path);
+
+        for (i = 0; i < PKG->src_l; i++) {
+            free(PKG->src[i]);
+            free(PKG->des[i]);
+        }
+        free(PKG->src);
+        free(PKG->des);
+
         free(PKG);
 
         PKG = tmp;

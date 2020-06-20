@@ -5,6 +5,7 @@ ALL_CFLAGS=$(CFLAGS) -std=c99 -static -Wall -Wextra -Wpedantic -W
 ALL_LDFLAGS=$(LDFLAGS) -larchive -llzma -lbz2 -lcurl -lssl -lcrypto -lcrypto -lz
 
 OBJ=\
+	src/source.o \
 	src/repo.o \
 	src/cache.o \
 	src/find.o \
@@ -16,6 +17,7 @@ OBJ=\
 	src/kiss.o
 
 HDR=\
+	src/source.h \
 	src/repo.h \
 	src/cache.h \
 	src/find.h \
