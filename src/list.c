@@ -34,10 +34,8 @@ void pkg_list_all(package *pkg) {
         pkg_init(&pkg, list[i]->d_name);
         free(list[i]);
     }
-    free(list);
 
-    for (; pkg; pkg = pkg->next) {
-        pkg_list(pkg);
-    }
+    free(list);
+    pkg_iter(pkg, pkg_list, NULL);
 }
 

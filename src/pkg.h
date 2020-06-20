@@ -22,6 +22,7 @@ typedef struct package {
     char **src;
     char **des;
     int  src_l;
+    int  sum_l;
 
     struct package *next;
     struct package *prev;
@@ -30,7 +31,7 @@ typedef struct package {
 extern package *PKG;
 
 void pkg_init(package **pkg, char *pkg_name);
-void pkg_iter(package *pkg, void (*f[2]) (package *), const char *msg);
+void pkg_iter(package *pkg, void (*f)(package *pkg), const char *msg);
 void pkg_destroy_all(void);
 void pkg_null(package *pkg);
 

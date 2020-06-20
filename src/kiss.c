@@ -28,7 +28,6 @@ static void usage(void) {
 
 int main (int argc, char *argv[]) {
     package *tmp;
-    void (*f[2]) (package *) = { [1] = pkg_null };
 
     if (argc == 1) {
         usage();
@@ -46,17 +45,13 @@ int main (int argc, char *argv[]) {
 
     switch (argv[1][0]) {
         case 'c':
-            f[0] = pkg_source;
-            pkg_iter(PKG, f, "Checking sources");
-
-            f[0] = pkg_checksums;
-            pkg_iter(PKG, f, "Generating checksums");
+            pkg_iter(PKG, pkg_source, "Checking sources");
+            pkg_iter(PKG, pkg_checksums, "Generating checksums");
 
             break;
 
         case 'd':
-            f[0] = pkg_source;
-            pkg_iter(PKG, f, "Downloading sources");
+            pkg_iter(PKG, pkg_source, "Downloading sources");
 
             break;
 
