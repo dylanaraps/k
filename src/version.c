@@ -10,9 +10,8 @@
 #include "version.h"
 
 void pkg_version(package *pkg) {
-    char line[LINE_MAX];
+    char *line = 0;
     FILE *file;
-    char *ver;
     char *tok;
     size_t len;
     size_t err;
@@ -27,13 +26,13 @@ void pkg_version(package *pkg) {
         die("Version file does not exist");
     }
 
-    ver = fgets(line, LINE_MAX, file);
+    err = getline(&line, &(size_t){0}, file);
 
-    if (!ver) {
+    if ((int) err == -1) {
         die("Failed to read version file");
     }
 
-    tok = strtok(ver, " 	");
+    tok = strtok(line, " 	");
 
     if (!tok) {
         die("Invalid version file");
@@ -63,5 +62,6 @@ void pkg_version(package *pkg) {
         die("strlcpy was truncated");
     }
 
+    free(line);
     fclose(file);
 }
