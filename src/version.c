@@ -5,6 +5,7 @@
 #include <string.h> /* strchr */
 
 #include "log.h"
+#include "strl.h"
 #include "util.h"
 #include "version.h"
 

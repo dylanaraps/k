@@ -10,6 +10,10 @@ typedef struct package {
     char *ver;
     char *rel;
 
+    char *mak_dir;
+    char *pkg_dir;
+    char *tar_dir;
+
     struct package *next;
     struct package *prev;
 } package;

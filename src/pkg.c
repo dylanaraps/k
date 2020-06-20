@@ -19,7 +19,7 @@ void pkg_init(package **pkg, char *pkg_name) {
         .name = strdup(pkg_name),
     };
 
-    if (!pkg_name) {
+    if (!new->name) {
         die("Package name is null");
     }
 

@@ -4,8 +4,10 @@
 #include <unistd.h> /* getenv */
 #include <limits.h> /* PATH_MAX */
 #include <string.h> /* strlen, strchr */
+#include <ftw.h>    /* ntfw */
 
 #include "log.h"
+#include "strl.h"
 #include "util.h"
 #include "cache.h"
 
@@ -16,54 +18,54 @@ const char *caches[] = {
     "bin", 
     "logs", 
 };
+static const int cache_len = 3;
 
 const char *states[] = {
     "build", 
     "pkg", 
     "extract", 
 };
+static const int state_len = 3;
 
 void cache_init(void) {
-    int pid_len;
-    char* pid_str = 0;
-    pid_t pid;
+    char xdg[PATH_MAX];
+    pid_t pid = getpid();
     int ret;
 
-    xdg_cache_dir(CAC_DIR, PATH_MAX);
-    pid = getpid();
+    xdg_cache_dir(xdg, PATH_MAX);
+    ret = snprintf(CAC_DIR, PATH_MAX, "%s/%ul", xdg, pid);
+
+    if (ret == -1) {
+        die("Failed to construct cache directory");
+    }
+
+    if (ret > PATH_MAX) {
+        die("Cache directory exceeds PAGE_SIZE");
+    }
+
     mkdir_p(CAC_DIR);
 
     if (chdir(CAC_DIR) != 0) {
         die("Cache directory is not accessible");
     }
 
-    for (int i = 0; i < 3; i++) {
-       mkdir_p(caches[i]); 
+    for (ret = 0; ret < state_len; ret++) {
+        mkdir_p(states[ret]);
     }
 
-    pid_len = snprintf(NULL, 0,"%d", pid);
-    pid_str = xmalloc(pid_len + 1);
-    ret     = snprintf(pid_str, pid_len + 1, "%d", pid);
-
-    if (ret == -1) {
-        die("Failed to covert pid to string");
-    }
-
-    mkdir_p(pid_str);
-
-    if (chdir(pid_str) != 0) {
+    /* Drop PID portion */
+    if (chdir("..") != 0) {
         die("Cache directory is not accessible");
     }
 
-    for (int i = 0; i < 3; i++) {
-       mkdir_p(states[i]); 
+    for (ret = 0; ret < cache_len; ret++) {
+        mkdir_p(caches[ret]);
     }
 }
 
-void xdg_cache_dir(char *buf, size_t len) {
-    char *dir ;
-    int err;
-    size_t str_len;
+void xdg_cache_dir(char *buf, int len) {
+    char *dir;
+    int ret;
 
     dir = getenv("XDG_CACHE_HOME");
 
@@ -74,32 +76,51 @@ void xdg_cache_dir(char *buf, size_t len) {
             die("HOME is NULL"); 
         }
 
-        err = snprintf(buf, len, "%s/.cache/kiss", dir);
+        ret = snprintf(buf, len, "%s/.cache/kiss", dir);
 
-        if (err == -1) {
+        if (ret == -1) {
             die("Failed to construct cache directory");
+        }
+
+        if (ret > len) {
+            die("Path exceeds PATH_MAX");
         }
 
         return;
     }
 
-    str_len = strlen(dir);
-
     if (!strchr(dir, '/')) {
         die("Invalid XDG_CACHE_HOME");
     }
 
-    if (str_len > PATH_MAX) {
-        die("XDG_CACHE_HOME exceeds PATH_MAX");
+    ret = snprintf(buf, len, "%s/kiss", dir);
+
+    if (ret == -1) {
+        die("Failed to construct cache directory");
     }
 
-    err = snprintf(buf, len, "%s/kiss", dir);
-
-    if (err == -1) {
-        die("Failed to construct cache directory");
+    if (ret > len) {
+        die("XDG_CACHE_HOME exceeds PATH_MAX");
     }
 }
 
+static int rm(const char *fpath, const struct stat *sb, int tf, struct FTW *fb) {
+    int rv;
+
+    // Unused.
+    (void)(sb);
+    (void)(tf);
+    (void)(fb);
+
+    rv = remove(fpath);
+
+    if (rv) {
+        msg("warning: Failed to remove %s", fpath);
+    }
+
+    return rv;
+}
+
 void cache_destroy(void) {
-    
+    nftw(CAC_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
 }

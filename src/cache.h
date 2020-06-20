@@ -8,4 +8,4 @@ extern char CAC_DIR[PATH_MAX];
 
 void cache_init(void);
 void cache_destroy(void);
-void xdg_cache_dir(char *buf, size_t len);
+void xdg_cache_dir(char *buf, int len);

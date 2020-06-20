@@ -6,6 +6,7 @@
 #include <unistd.h> /* chdir */
 
 #include "log.h"
+#include "strl.h"
 #include "util.h"
 #include "repo.h"
 
