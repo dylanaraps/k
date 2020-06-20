@@ -8,7 +8,7 @@ void _msg(const char* type, const char *fmt, ...) {
 
     va_start(args, fmt);
 
-    printf("| [%s] ", type);
+    printf("%s ", type);
     vprintf(fmt, args);
     printf("\n");
 

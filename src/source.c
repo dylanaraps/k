@@ -108,7 +108,7 @@ static void source_resolve(package *pkg, char *src, char *dest) {
     }
 
     if (access(src, F_OK) != -1) {
-        msg("Found local source %s", src);
+        msg("Found  local source %s", src);
         err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path[0], src);
     }
 

@@ -45,28 +45,33 @@ int main (int argc, char *argv[]) {
 
     switch (argv[1][0]) {
         case 'c':
+            printf("\n\033[1mCHECKING SOURCES\033[m\n");
+            LINE;
+
             for (tmp = PKG; tmp; tmp = tmp->next) {
-                printf("| %s\n", tmp->name);
+                printf("\033[1m%s\033[m\n", tmp->name);
                 LINE;
                 pkg_source(PKG);
-                LINE;
-                printf("|\n\n");
+                printf("\n");
             }
+
+            printf("\n\033[1mGENERATING CHECKSUMS\033[m\n");
+            LINE;
+
             for (tmp = PKG; tmp; tmp = tmp->next) {
-                printf("| %s\n", tmp->name);
+                printf("\033[1m%s\033[m\n", tmp->name);
                 LINE;
                 pkg_checksums(PKG);
-                LINE;
-                printf("|\n\n");
+                printf("\n");
             }
             break;
 
         case 'd':
             for (tmp = PKG; tmp; tmp = tmp->next) {
-                printf("| %s\n", tmp->name);
+                printf("\033[1m%s\033[m\n", tmp->name);
                 LINE;
                 pkg_source(PKG);
-                LINE;
+                printf("\n");
             }
             break;
 
