@@ -97,6 +97,7 @@ static void source_resolve(package *pkg, char *src, char *dest) {
         die("[%s] Found git source (not yet supported) %s", src, pkg->name);
 
         /* libgit2? or... git commands directly. */
+        /* libgit2 requires cmake which is too much for core. */
     }
 
     if (chdir(pkg->path[0]) != 0) {

@@ -1,6 +1,3 @@
-#include <string.h>
-
-/*	$OpenBSD: strlcpy.c,v 1.16 2019/01/25 00:19:25 millert Exp $	*/
 /*
  * Copyright (c) 1998, 2015 Todd C. Miller <millert@openbsd.org>
  *
@@ -16,6 +13,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <string.h>
 
 /*
  * Copy string src to buffer dst of size dsize.  At most dsize-1

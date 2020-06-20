@@ -41,6 +41,12 @@ int main (int argc, char *argv[]) {
     atexit(pkg_destroy_all);
 
     switch (argv[1][0]) {
+        case 'c':
+            for (; PKG; PKG = PKG->next) {
+                pkg_source(PKG);
+            }
+            break;
+
         case 'd':
             for (; PKG; PKG = PKG->next) {
                 pkg_source(PKG);
@@ -53,7 +59,6 @@ int main (int argc, char *argv[]) {
                     printf("%s\n", PKG->path[i]);
                 }
             }
-
             break;
 
         case 'l':
@@ -65,7 +70,6 @@ int main (int argc, char *argv[]) {
                     pkg_list(PKG);
                 }
             }
-
             break;
 
         case 'v':
