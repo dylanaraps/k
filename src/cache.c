@@ -10,6 +10,7 @@
 #include "strl.h"
 #include "pkg.h"
 #include "util.h"
+#include "file.h"
 #include "cache.h"
 
 char CAC_DIR[PATH_MAX];
@@ -22,8 +23,8 @@ static const int cache_len = 2;
 
 const char *states[] = {
     "build",
-    "pkg",
     "extract",
+    "pkg",
 };
 static const int state_len = 3;
 

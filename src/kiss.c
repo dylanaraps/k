@@ -33,7 +33,7 @@ int main (int argc, char *argv[]) {
     }
 
     cache_init();
-    atexit(cache_destroy);
+    /* atexit(cache_destroy); */
     repo_init();
     atexit(repo_destroy);
 

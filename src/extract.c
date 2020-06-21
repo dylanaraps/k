@@ -9,50 +9,10 @@
 
 #include "log.h"
 #include "util.h"
+#include "file.h"
 #include "cache.h"
 #include "pkg.h"
 #include "extract.h"
-
-/* todo: move to general file for installation purposes */
-static void copy_file(char *src, char *des) {
-    FILE *r;
-    FILE *w;
-    int err;
-    char buf[BUFSIZ];
-
-    r = fopen(src, "rb");
-
-    if (!r) {
-        die("Failed to read file");
-    }
-
-    w = fopen(des, "wb");
-
-    if (!w) {
-        die("Failed to read file");
-    }
-
-    for (;;) {
-        err = fread(buf, 1, sizeof(BUFSIZ), r);
-
-        if (err == -1) {
-            die("File not accessible");
-        }
-
-        if (err == 0) {
-            break;
-        }
-
-        err = fwrite(buf, 1, err, w);
-
-        if (err == -1) {
-            die("Cannot copy file");
-        }
-    }
-
-    fclose(r);
-    fclose(w);
-}
 
 static void tar_copy(struct archive *ar, struct archive *aw) {
     const void *buf;
@@ -196,7 +156,7 @@ void pkg_extract(package *pkg) {
 
         } else if (access(pkg->src[i], F_OK) != -1) {
             msg("[%s] Copying %s", pkg->name, pkg->src[i]);
-            copy_file(pkg->src[i], basename(pkg->src[i]));
+            copy_file(pkg->src[i], "");
 
         } else {
             die("[%s] Source not found %s", pkg->name, pkg->src[i]);

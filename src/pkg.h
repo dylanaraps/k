@@ -17,6 +17,7 @@ typedef struct package {
     char mak_dir[PATH_MAX];
     char pkg_dir[PATH_MAX];
     char tar_dir[PATH_MAX];
+    char  db_dir[PATH_MAX];
 
     /* caches */
     char src_dir[PATH_MAX];

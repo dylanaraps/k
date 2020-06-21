@@ -3,8 +3,14 @@
 #include <limits.h>   /* PATH_MAX */
 #include <unistd.h>   /* access */
 #include <sys/wait.h> /* waitpid */
+#include <sys/stat.h> /* mkdir */
+#include <ftw.h>      /* ntfw */
+#include <errno.h>      /* ntfw */
+#include <libgen.h>   /* dirname */
 
 #include "extract.h"
+#include "strl.h"
+#include "file.h"
 #include "log.h"
 #include "pkg.h"
 #include "build.h"
@@ -52,4 +58,18 @@ void pkg_build(package *pkg) {
             die("[%s] Build failed", pkg->name);
         }
     }
+
+    err = snprintf(pkg->db_dir, PATH_MAX, \
+                   "%s/var/db/kiss/installed/%s", pkg->pkg_dir, pkg->name);
+
+    if (err < 1) {
+        die("[%s] Failed to construct DB directory", pkg->name);
+    }
+
+    if (err > PATH_MAX) {
+        die("[%s] DB path exceeds PATH_MAX", pkg->name);
+    }
+
+    mkdir_p(pkg->db_dir);
+    copy_dir(pkg->path[0], pkg->db_dir);
 }
