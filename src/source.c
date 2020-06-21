@@ -47,30 +47,6 @@ static void download(package *pkg, char *url) {
     curl_easy_cleanup(curl);
 }
 
-void source_init(package *pkg) {
-    char *tmp;
-
-    if (chdir(CAC_DIR) != 0) {
-        die("Cache directory is not accessible");
-    }
-
-    if (chdir("../sources") != 0) {
-        die("Source directory is not accessible");
-    }
-
-    mkdir_p(pkg->name);
-
-    if (chdir(pkg->name) != 0) {
-        die("Source directory is not accessible");
-    }
-
-    tmp = getcwd(pkg->src_dir, PATH_MAX);
-
-    if (!tmp) {
-        die("Failed to init source directory");
-    }
-}
-
 static void source_resolve(package *pkg, char *src, char *dest) {
     char *file = basename(src);
     int err = 0;
@@ -125,8 +101,6 @@ void pkg_source(package *pkg) {
     FILE *file;
     int i = 0;
     int err;
-
-    source_init(pkg);
 
     if (chdir(pkg->path[0]) != 0) {
         die("Repository is not accessible (%s)", pkg->path[0]);

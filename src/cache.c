@@ -8,6 +8,7 @@
 
 #include "log.h"
 #include "strl.h"
+#include "pkg.h"
 #include "util.h"
 #include "cache.h"
 
@@ -61,6 +62,31 @@ void cache_init(void) {
         mkdir_p(caches[ret]);
     }
 }
+
+void state_init(package *pkg, const char *type, char *buf) {
+    char *tmp;
+
+    if (chdir(CAC_DIR) != 0) {
+        die("Cache directory is not accessible");
+    }
+
+    if (chdir(type) != 0) {
+        die("Cache directory (%s) is not accessible", type);
+    }
+
+    mkdir_p(pkg->name);
+
+    if (chdir(pkg->name) != 0) {
+        die("Cache directory (%s) is not accessible", type);
+    }
+
+    tmp = getcwd(buf, PATH_MAX);
+
+    if (!tmp) {
+        die("Failed to init cache directory %s", type);
+    }
+}
+
 
 void xdg_cache_dir(char *buf, int len) {
     char *dir;

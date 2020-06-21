@@ -3,6 +3,8 @@
 #include <string.h> /* strlen */
 
 #include "log.h"
+#include "cache.h"
+#include "find.h"
 #include "find.h"
 #include "version.h"
 #include "util.h"
@@ -25,6 +27,14 @@ void pkg_init(package **pkg, char *pkg_name) {
 
     pkg_find(new);
     pkg_version(new);
+
+    state_init(new, "build",      new->mak_dir);
+    state_init(new, "extract",    new->tar_dir);
+    state_init(new, "pkg",        new->pkg_dir);
+    state_init(new, "../sources", new->src_dir);
+    state_init(new, "../bin",     new->bin_dir);
+
+/* void state_init(package *pkg, const char *type, char *buf); */
 
     if (!*pkg) {
         *pkg = new;
