@@ -39,7 +39,7 @@ void cache_init(void) {
         die("Failed to construct cache directory");
     }
 
-    if (ret > PATH_MAX) {
+    if (ret >= PATH_MAX) {
         die("Cache directory exceeds PATH_MAX");
     }
 
@@ -53,7 +53,7 @@ void cache_init(void) {
         mkdir_p(states[ret]);
     }
 
-    /* Drop PID portion */
+    /* drop PID portion */
     if (chdir("..") != 0) {
         die("Cache directory is not accessible");
     }
