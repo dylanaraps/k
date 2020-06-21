@@ -11,7 +11,9 @@
 #include "strl.h"
 #include "file.h"
 
-static char COPY_DEST[PATH_MAX];
+static char COPY_DES[PATH_MAX];
+static char COPY_SRC[PATH_MAX];
+static char COPY_END[PATH_MAX];
 
 void copy_file(const char *src, const char *des) {
     FILE *r;
@@ -54,21 +56,23 @@ void copy_file(const char *src, const char *des) {
 }
 
 static int copy(const char *fp, const struct stat *sb, int tf, struct FTW *fb) {
+    int err;
+
     /* unused */
     (void)(sb);
 
-    printf("Copying... %s\n", fp + fb->base);
+    err = snprintf(COPY_END, PATH_MAX, "%s/%s",
+                  COPY_DES, fp + strlen(COPY_SRC));
 
-    if (tf == FTW_D) {
-        tf = mkdir(fp + fb->base, S_IRWXU);
-
-        if (tf == -1 && errno != EEXIST) {
-            die("Failed to create directory %s", fp + fb->base);
-        }
+    if (err >= PATH_MAX || err < 1) {
+        die("Failed to construct path");
     }
 
-    if (tf == FTW_F) {
-        copy_file(fp, fp + fb->base);
+    if (tf == FTW_D) {
+        mkdir_p(COPY_END);
+
+    } else if (tf == FTW_F) {
+        copy_file(fp, COPY_END);
     }
 
     return 0;
@@ -77,10 +81,16 @@ static int copy(const char *fp, const struct stat *sb, int tf, struct FTW *fb) {
 void copy_dir(const char *src, const char *des) {
     int err;
 
-    err = strlcpy(COPY_DEST, des, PATH_MAX);
+    err = strlcpy(COPY_SRC, src, PATH_MAX);
 
-    if (err > PATH_MAX) {
-        die("strlcpy was truncated");
+    if (err >= PATH_MAX || err < 1) {
+        die("Failed to construct path");
+    }
+
+    err = strlcpy(COPY_DES, des, PATH_MAX);
+
+    if (err >= PATH_MAX || err < 1) {
+        die("Failed to construct path");
     }
 
     nftw(src, copy, 256, 0);
