@@ -48,9 +48,9 @@ int main (int argc, char *argv[]) {
             break;
 
         case 'c':
-            pkg_iter(PKG, pkg_source, "Checking sources");
-            pkg_iter(PKG, pkg_checksums, "Generating checksums");
-            pkg_iter(PKG, checksum_to_file, NULL);
+            pkg_iter(PKG, pkg_source,       "Checking sources");
+            pkg_iter(PKG, pkg_checksums,    "Generating checksums");
+            pkg_iter(PKG, checksum_to_file, "Saving checksums");
 
             break;
 
