@@ -6,17 +6,19 @@
 
 typedef struct package {
     char *name;
-
-    char **path;
-    int  path_l;
-
     char *ver;
     char *rel;
 
+    /* locations */
+    char **path;
+    int  path_l;
+
+    /* states */
     char mak_dir[PATH_MAX];
     char pkg_dir[PATH_MAX];
     char tar_dir[PATH_MAX];
 
+    /* caches */
     char src_dir[PATH_MAX];
     char bin_dir[PATH_MAX];
 

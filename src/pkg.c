@@ -34,8 +34,6 @@ void pkg_init(package **pkg, char *pkg_name) {
     state_init(new, "../sources", new->src_dir);
     state_init(new, "../bin",     new->bin_dir);
 
-/* void state_init(package *pkg, const char *type, char *buf); */
-
     if (!*pkg) {
         *pkg = new;
 
@@ -79,7 +77,6 @@ static void pkg_free(package *pkg) {
     }
     free(pkg->src);
     free(pkg->des);
-    free(pkg->src_dir);
 
     for (i = 0; i < pkg->sum_l; i++) {
         free(pkg->sum[i]);
