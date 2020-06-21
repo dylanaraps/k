@@ -46,6 +46,10 @@ void pkg_build(package *pkg) {
         break;
 
     default:
-        waitpid(err, NULL, 0);
+        waitpid(err, &err, 0);
+
+        if (err != 0) {
+            die("[%s] Build failed", pkg->name);
+        }
     }
 }
