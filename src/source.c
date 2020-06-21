@@ -138,12 +138,17 @@ void pkg_source(package *pkg) {
 
         pkg->src[i] = xmalloc(PATH_MAX);
         pkg->des[i] = xmalloc(PATH_MAX);
+
         source_resolve(pkg, tok, pkg->src[i]);
 
         tok = strtok(NULL, " 	\r\n");
+        tok = tok ? tok : "";
 
-        /* ensure optional field is not null */
-        err = strlcpy(pkg->des[i], tok ? tok : "", PATH_MAX);
+        if (tok[0] == '/') {
+            die("Destination must not be absolute");
+        }
+
+        err = strlcpy(pkg->des[i], tok, PATH_MAX);
 
         if (err > PATH_MAX) {
             die("strlcpy was truncated");

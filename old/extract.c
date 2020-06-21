@@ -43,7 +43,7 @@ void pkg_extract(package *pkg) {
             ends_with(pkg->src[i], ".zip",      src_len, 4) == 0 ||
             ends_with(pkg->src[i], ".txz",      src_len, 4) == 0 ||
             ends_with(pkg->src[i], ".tar.gz",   src_len, 7) == 0 ||
-            ends_with(pkg->src[i], ".tar.lz",   src_len, 7) == 0 || 
+            ends_with(pkg->src[i], ".tar.lz",   src_len, 7) == 0 ||
             ends_with(pkg->src[i], ".tar.xz",   src_len, 7) == 0 ||
             ends_with(pkg->src[i], ".tar.bz2",  src_len, 8) == 0 ||
             ends_with(pkg->src[i], ".tar.zst",  src_len, 8) == 0 ||
@@ -51,9 +51,9 @@ void pkg_extract(package *pkg) {
 
             msg("[%s] Extracting %s", pkg->name, pkg->src[i]);
 
-            extract(pkg->src[i], 1, 
-                ARCHIVE_EXTRACT_PERM | 
-                ARCHIVE_MATCH_MTIME | 
+            extract(pkg->src[i], 1,
+                ARCHIVE_EXTRACT_PERM |
+                ARCHIVE_MATCH_MTIME |
                 ARCHIVE_MATCH_CTIME |
                 ARCHIVE_EXTRACT_SECURE_NODOTDOT |
                 ARCHIVE_EXTRACT_TIME

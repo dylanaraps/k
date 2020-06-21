@@ -27,6 +27,7 @@ void *xmalloc(size_t n) {
     return p;
 }
 
+
 int cntchr(const char *str, int chr) {
     const char *tmp = str;
     int i = 0;
@@ -48,6 +49,14 @@ int cntlines(FILE *file) {
     rewind(file);
 
     return i;
+}
+
+int strsuf(const char *str, const char *suf, size_t str_len, size_t suf_len) {
+    if (!str || !suf || suf_len > str_len) {
+       return 0;
+    }
+
+    return !strncmp(str + str_len - suf_len, suf, suf_len);
 }
 
 void mkdir_p(const char *dir) {

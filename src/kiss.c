@@ -6,6 +6,7 @@
 #include "cache.h"
 #include "checksum.h"
 #include "source.h"
+#include "extract.h"
 #include "find.h"
 #include "list.h"
 #include "version.h"
@@ -43,8 +44,9 @@ int main (int argc, char *argv[]) {
 
     switch (argv[1][0]) {
         case 'b':
-            pkg_iter(PKG, pkg_source, "Checking sources");
-            pkg_iter(PKG, pkg_verify, "Verifying checksums");
+            pkg_iter(PKG, pkg_source,  "Checking sources");
+            pkg_iter(PKG, pkg_verify,  "Verifying checksums");
+            pkg_iter(PKG, pkg_extract, "Extracting sources");
             break;
 
         case 'c':
