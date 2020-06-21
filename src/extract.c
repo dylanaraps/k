@@ -10,7 +10,6 @@
 #include "extract.h"
 
 void pkg_extract(package *pkg) {
-    size_t src_len;
     int i;
 
     if (chdir(pkg->mak_dir) != 0) {
@@ -34,20 +33,28 @@ void pkg_extract(package *pkg) {
             }
         }
 
-        src_len = strlen(pkg->src[i]) + 1;
-
-        if (strsuf(pkg->src[i], ".tar",      src_len, 4) == 0 ||
-            strsuf(pkg->src[i], ".tgz",      src_len, 4) == 0 ||
-            strsuf(pkg->src[i], ".zip",      src_len, 4) == 0 ||
-            strsuf(pkg->src[i], ".txz",      src_len, 4) == 0 ||
-            strsuf(pkg->src[i], ".tar.gz",   src_len, 7) == 0 ||
-            strsuf(pkg->src[i], ".tar.lz",   src_len, 7) == 0 ||
-            strsuf(pkg->src[i], ".tar.xz",   src_len, 7) == 0 ||
-            strsuf(pkg->src[i], ".tar.bz2",  src_len, 8) == 0 ||
-            strsuf(pkg->src[i], ".tar.zst",  src_len, 8) == 0 ||
-            strsuf(pkg->src[i], ".tar.lzma", src_len, 9) == 0) {
+        if (strsuf(pkg->src[i], ".tar",      4) == 0 ||
+            strsuf(pkg->src[i], ".tgz",      4) == 0 ||
+            strsuf(pkg->src[i], ".zip",      4) == 0 ||
+            strsuf(pkg->src[i], ".txz",      4) == 0 ||
+            strsuf(pkg->src[i], ".tar.gz",   7) == 0 ||
+            strsuf(pkg->src[i], ".tar.lz",   7) == 0 ||
+            strsuf(pkg->src[i], ".tar.xz",   7) == 0 ||
+            strsuf(pkg->src[i], ".tar.bz2",  8) == 0 ||
+            strsuf(pkg->src[i], ".tar.zst",  8) == 0 ||
+            strsuf(pkg->src[i], ".tar.lzma", 9) == 0) {
 
             msg("[%s] Extracting %s", pkg->name, pkg->src[i]);
+
+        } else if (access(pkg->src[i], F_OK) != -1) {
+            msg("[%s] Copying %s", pkg->name, pkg->src[i]);
+
+        } else {
+            die("[%s] Source not found %s", pkg->name, pkg->src[i]);
+        }
+
+        if (chdir(pkg->mak_dir) != 0) {
+            die("Build directory not accessible");
         }
     }
 }

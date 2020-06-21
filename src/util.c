@@ -51,12 +51,12 @@ int cntlines(FILE *file) {
     return i;
 }
 
-int strsuf(const char *str, const char *suf, size_t str_len, size_t suf_len) {
-    if (!str || !suf || suf_len > str_len) {
-       return 0;
+int strsuf(const char *str, const char *suf, size_t suf_len) {
+    if (!str || !suf || !suf_len) {
+       return -1;
     }
 
-    return !strncmp(str + str_len - suf_len, suf, suf_len);
+    return strncmp(&str[strlen(str) - suf_len], suf, suf_len);
 }
 
 void mkdir_p(const char *dir) {
