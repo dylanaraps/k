@@ -61,7 +61,7 @@ static void tar_extract(const char *file) {
         ARCHIVE_EXTRACT_TIME
     );
 
-    archive_read_support_format_all(arc);
+    archive_read_support_format_tar(arc);
     archive_read_support_filter_all(arc);
 
     err = archive_read_open_filename(arc, file, 10240);

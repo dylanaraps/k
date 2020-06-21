@@ -65,11 +65,9 @@ void repo_init(void) {
     free(kiss_path);
 }
 
-void repo_destroy(void) {
-    int i;
-
-    for (i = 0; i < REPO_LEN; i++) {
-        free(REPOS[i]);
+void repo_destroy(int s) {
+    for (s = 0; s < REPO_LEN; s++) {
+        free(REPOS[s]);
     }
 
     free(REPOS);

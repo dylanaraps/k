@@ -133,6 +133,6 @@ void xdg_cache_dir(char *buf, int len) {
     }
 }
 
-void cache_destroy(void) {
+void cache_destroy(int s) {
     rm_dir(CAC_DIR);
 }

@@ -24,9 +24,10 @@ void *xmalloc(size_t n) {
         die("Failed to allocate memory");
     }
 
+    msg("Allocated %zx bytes.", n);
+
     return p;
 }
-
 
 int cntchr(const char *str, int chr) {
     const char *tmp = str;

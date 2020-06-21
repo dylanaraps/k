@@ -2,10 +2,12 @@
 #include <stdio.h>  /* printf */
 #include <stdlib.h> /* exit */
 #include <limits.h> /* PATH_MAX */
+#include <signal.h> /* */
 
 #include "cache.h"
 #include "checksum.h"
 #include "build.h"
+#include "signal.h"
 #include "source.h"
 #include "find.h"
 #include "list.h"
@@ -33,14 +35,14 @@ int main (int argc, char *argv[]) {
     }
 
     cache_init();
-    /* atexit(cache_destroy); */
+    sig_add(cache_destroy);
     repo_init();
-    atexit(repo_destroy);
+    sig_add(repo_destroy);
 
     for (int i = 2; i < argc; i++) {
         pkg_init(&PKG, argv[i]);
     }
-    atexit(pkg_destroy_all);
+    sig_add(pkg_destroy_all);
 
     switch (argv[1][0]) {
         case 'b':
