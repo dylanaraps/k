@@ -156,7 +156,7 @@ void pkg_extract(package *pkg) {
 
         } else if (access(pkg->src[i], F_OK) != -1) {
             msg("[%s] Copying %s", pkg->name, pkg->src[i]);
-            copy_file(pkg->src[i], basename(pkg->src[i]));
+            cp_file(pkg->src[i], basename(pkg->src[i]));
 
         } else {
             die("[%s] Source not found %s", pkg->name, pkg->src[i]);

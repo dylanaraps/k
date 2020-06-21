@@ -69,5 +69,5 @@ void pkg_build(package *pkg) {
         die("[%s] DB path exceeds PATH_MAX", pkg->name);
     }
 
-    copy_dir(pkg->path[0], pkg->db_dir);
+    cp_dir(pkg->path[0], pkg->db_dir);
 }

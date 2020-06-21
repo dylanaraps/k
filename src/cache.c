@@ -133,23 +133,6 @@ void xdg_cache_dir(char *buf, int len) {
     }
 }
 
-static int rm(const char *fpath, const struct stat *sb, int tf, struct FTW *fb) {
-    int rv;
-
-    // inused
-    (void)(sb);
-    (void)(tf);
-    (void)(fb);
-
-    rv = remove(fpath);
-
-    if (rv) {
-        msg("warning: Failed to remove %s", fpath);
-    }
-
-    return rv;
-}
-
 void cache_destroy(void) {
-    nftw(CAC_DIR, rm, 64, FTW_DEPTH | FTW_PHYS);
+    rm_dir(CAC_DIR);
 }

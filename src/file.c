@@ -15,7 +15,73 @@ static char COPY_DES[PATH_MAX];
 static char COPY_SRC[PATH_MAX];
 static char COPY_END[PATH_MAX];
 
-void copy_file(const char *src, const char *des) {
+static int cp(const char *fp, const struct stat *sb, int tf, struct FTW *fb) {
+    int err;
+
+    /* unused */
+    (void)(sb);
+    (void)(fb);
+
+    err = snprintf(COPY_END, PATH_MAX, "%s/%s",
+                   COPY_DES, fp + strlen(COPY_SRC));
+
+    if (err >= PATH_MAX) {
+        die("strlcpy failed");
+    }
+
+    if (tf == FTW_D) {
+        mkdir_p(COPY_END);
+    }
+
+    if (tf == FTW_F) {
+        cp_file(fp, COPY_END);
+    }
+
+    return 0;
+}
+
+static int rm(const char *fp, const struct stat *sb, int tf, struct FTW *fb) {
+    int rv;
+
+    // inused
+    (void)(sb);
+    (void)(tf);
+    (void)(fb);
+
+    rv = remove(fp);
+
+    if (rv) {
+        msg("warning: Failed to remove %s", fp);
+    }
+
+    return rv;
+}
+
+void rm_dir(const char *src) {
+    /* todo: magic 64 */
+    nftw(src, rm, 64, FTW_DEPTH | FTW_PHYS);
+}
+
+void cp_dir(const char *src, const char *des) {
+    int err;
+
+    err = strlcpy(COPY_SRC, src, PATH_MAX);
+
+    if (err >= PATH_MAX) {
+        die("strlcpy failed");
+    }
+
+    err = strlcpy(COPY_DES, des, PATH_MAX);
+
+    if (err >= PATH_MAX) {
+        die("strlcpy failed");
+    }
+
+    /* todo: magic 64 */
+    nftw(src, cp, 64, 0);
+}
+
+void cp_file(const char *src, const char *des) {
     FILE *r;
     FILE *w;
     int err;
@@ -53,49 +119,6 @@ void copy_file(const char *src, const char *des) {
 
     fclose(r);
     fclose(w);
-}
-
-static int copy(const char *fp, const struct stat *sb, int tf, struct FTW *fb) {
-    int err;
-
-    /* unused */
-    (void)(sb);
-    (void)(fb);
-
-    err = snprintf(COPY_END, PATH_MAX, "%s/%s",
-                   COPY_DES, fp + strlen(COPY_SRC));
-
-    if (err >= PATH_MAX) {
-        die("strlcpy failed");
-    }
-
-    if (tf == FTW_D) {
-        mkdir_p(COPY_END);
-    }
-
-    if (tf == FTW_F) {
-        copy_file(fp, COPY_END);
-    }
-
-    return 0;
-}
-
-void copy_dir(const char *src, const char *des) {
-    int err;
-
-    err = strlcpy(COPY_SRC, src, PATH_MAX);
-
-    if (err >= PATH_MAX) {
-        die("strlcpy failed");
-    }
-
-    err = strlcpy(COPY_DES, des, PATH_MAX);
-
-    if (err >= PATH_MAX) {
-        die("strlcpy failed");
-    }
-
-    nftw(src, copy, 256, 0);
 }
 
 void mkdir_p(const char *dir) {
