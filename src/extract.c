@@ -2,12 +2,160 @@
 #include <unistd.h> /* chdir */
 #include <limits.h> /* PATH_MAX */
 #include <string.h> /* strlen */
+#include <libgen.h> /* basename */
+
+#include <archive.h>       /* libarchive */
+#include <archive_entry.h> /* libarchive */
 
 #include "log.h"
 #include "util.h"
 #include "cache.h"
 #include "pkg.h"
 #include "extract.h"
+
+/* todo: move to general file for installation purposes */
+static void copy_file(char *src, char *des) {
+    FILE *r;
+    FILE *w;
+    int err;
+    int len = 4096;
+    char buf[len];
+
+    r = fopen(src, "r");
+
+    if (!r) {
+        die("Failed to read file");
+    }
+
+    w = fopen(des, "w");
+
+    if (!w) {
+        die("Failed to read file");
+    }
+
+    for (;;) {
+        err = fread(buf, 1, len, r);
+
+        if (err == -1) {
+            die("File not accessible");
+        }
+
+        if (err == 0) {
+            break;
+        }
+
+        err = fwrite(buf, 1, len, w);
+
+        if (err == -1) {
+            die("Cannot copy file");
+        }
+    }
+
+    fclose(r);
+    fclose(w);
+}
+
+static void tar_copy(struct archive *ar, struct archive *aw) {
+    const void *buf;
+    size_t len;
+    int64_t off;
+    int err;
+
+    for (;;) {
+        err = archive_read_data_block(ar, &buf, &len, &off);
+
+        if (err == ARCHIVE_EOF) {
+            return;
+        }
+
+        if (err != ARCHIVE_OK) {
+            die("Failed to extract archive");
+        }
+
+        err = archive_write_data_block(aw, buf, len, off);
+
+        if (err != ARCHIVE_OK) {
+            die("Failed to extract archive");
+        }
+    }
+}
+
+static void tar_extract(const char *file) {
+    struct archive *arc;
+    struct archive *ext;
+    struct archive_entry *ent;
+    const char *path;
+    int err;
+
+    if (!file) {
+        die("Invalid input to tar extraction");
+    }
+
+    arc = archive_read_new();
+    ext = archive_write_disk_new();
+
+    archive_write_disk_set_options(ext,
+        ARCHIVE_EXTRACT_PERM |
+        ARCHIVE_MATCH_MTIME |
+        ARCHIVE_MATCH_CTIME |
+        ARCHIVE_EXTRACT_SECURE_NODOTDOT |
+        ARCHIVE_EXTRACT_TIME
+    );
+
+    archive_read_support_format_all(arc);
+    archive_read_support_filter_all(arc);
+
+    err = archive_read_open_filename(arc, file, 10240);
+
+    if (err == ARCHIVE_FATAL) {
+        die("Failed to read tar archive");
+    }
+
+    for (;;) {
+        err = archive_read_next_header(arc, &ent);
+
+        if (err == ARCHIVE_EOF) {
+            break;
+        }
+
+        if (err != ARCHIVE_OK) {
+            die("Failed to read tar archive");
+        }
+
+        path = archive_entry_pathname(ent);
+
+        /* strip first path component */
+        if (path) {
+            path = strchr(path, '/');
+
+            if (path[0] == '/') {
+                ++path;
+            }
+
+            if (path) {
+                archive_entry_set_pathname(ent, path);
+            }
+        }
+
+        err = archive_write_header(ext, ent);
+
+        /* dying here if ERR causes all extractions to fail... */
+        if (err == ARCHIVE_OK) {
+            tar_copy(arc, ext);
+        }
+
+        err = archive_write_finish_entry(ext);
+
+        if (err != ARCHIVE_OK) {
+            die("Failed to read tar archive");
+        }
+    }
+
+    archive_read_close(arc);
+    archive_read_free(arc);
+    archive_write_close(ext);
+    archive_write_free(ext);
+}
 
 void pkg_extract(package *pkg) {
     int i;
@@ -45,9 +193,11 @@ void pkg_extract(package *pkg) {
             strsuf(pkg->src[i], ".tar.lzma", 9) == 0) {
 
             msg("[%s] Extracting %s", pkg->name, pkg->src[i]);
+            tar_extract(pkg->src[i]);
 
         } else if (access(pkg->src[i], F_OK) != -1) {
             msg("[%s] Copying %s", pkg->name, pkg->src[i]);
+            copy_file(pkg->src[i], basename(pkg->src[i]));
 
         } else {
             die("[%s] Source not found %s", pkg->name, pkg->src[i]);
