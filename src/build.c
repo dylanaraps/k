@@ -5,7 +5,7 @@
 #include <sys/wait.h> /* waitpid */
 #include <sys/stat.h> /* mkdir */
 #include <ftw.h>      /* ntfw */
-#include <errno.h>      /* ntfw */
+#include <errno.h>    /* errno */
 #include <libgen.h>   /* dirname */
 
 #include "extract.h"
