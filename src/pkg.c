@@ -7,7 +7,6 @@
 #include "find.h"
 #include "find.h"
 #include "version.h"
-#include "strl.h"
 #include "util.h"
 #include "pkg.h"
 

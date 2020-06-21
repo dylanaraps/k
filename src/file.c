@@ -65,8 +65,8 @@ static int copy(const char *fp, const struct stat *sb, int tf, struct FTW *fb) {
     err = snprintf(COPY_END, PATH_MAX, "%s/%s",
                    COPY_DES, fp + strlen(COPY_SRC));
 
-    if (err >= PATH_MAX || err < 1) {
-        die("Failed to construct path");
+    if (err >= PATH_MAX) {
+        die("strlcpy failed");
     }
 
     if (tf == FTW_D) {
@@ -85,14 +85,14 @@ void copy_dir(const char *src, const char *des) {
 
     err = strlcpy(COPY_SRC, src, PATH_MAX);
 
-    if (err >= PATH_MAX || err < 1) {
-        die("Failed to construct path");
+    if (err >= PATH_MAX) {
+        die("strlcpy failed");
     }
 
     err = strlcpy(COPY_DES, des, PATH_MAX);
 
-    if (err >= PATH_MAX || err < 1) {
-        die("Failed to construct path");
+    if (err >= PATH_MAX) {
+        die("strlcpy failed");
     }
 
     nftw(src, copy, 256, 0);
@@ -113,8 +113,8 @@ void mkdir_p(const char *dir) {
 
     err = strlcpy(tmp, dir, PATH_MAX);
 
-    if (err > PATH_MAX) {
-        die("strlcpy truncated PATH");
+    if (err >= PATH_MAX) {
+        die("strlcpy failed");
     }
 
     for (p = tmp + 1; *p; p++) {

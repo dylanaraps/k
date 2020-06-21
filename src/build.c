@@ -9,7 +9,6 @@
 #include <libgen.h>   /* dirname */
 
 #include "extract.h"
-#include "strl.h"
 #include "file.h"
 #include "log.h"
 #include "pkg.h"

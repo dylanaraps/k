@@ -33,28 +33,33 @@ void checksum_to_file(package *pkg) {
 }
 
 void pkg_checksums(package *pkg) {
-    unsigned char buf[1000];
+    unsigned char buf[BUFSIZ];
     unsigned char shasum[32];
     char base[PATH_MAX];
     sha256_ctx ctx;
     FILE *file;
-    int i;
+    int err;
 
     pkg->sum = xmalloc((pkg->src_l + 1) * sizeof(char *));
 
     for (pkg->sum_l = 0; pkg->sum_l < pkg->src_l; pkg->sum_l++) {
         file = fopen(pkg->src[pkg->sum_l], "rb");
-        strlcpy(base, basename(pkg->src[pkg->sum_l]), PATH_MAX);
 
         if (!file) {
             die("[%s] Failed to read source (%s)",
                 pkg->name, pkg->src[pkg->sum_l]);
         }
 
+        err = strlcpy(base, basename(pkg->src[pkg->sum_l]), PATH_MAX);
+
+        if (err >= PATH_MAX) {
+            die("strlcpy failed");
+        }
+
         sha256_init(&ctx);
 
-        while ((i = fread(buf, 1, sizeof(buf), file)) > 0) {
-            sha256_update(&ctx, buf, i);
+        while ((err = fread(buf, 1, sizeof(buf), file)) > 0) {
+            sha256_update(&ctx, buf, err);
         }
 
         sha256_final(shasum, &ctx);

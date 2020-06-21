@@ -3,11 +3,10 @@
 #include <stdio.h>  /* snprintf */
 #include <unistd.h> /* getenv */
 #include <limits.h> /* PATH_MAX */
-#include <string.h> /* strlen, strchr */
+#include <string.h> /* strchr */
 #include <ftw.h>    /* ntfw */
 
 #include "log.h"
-#include "strl.h"
 #include "pkg.h"
 #include "util.h"
 #include "file.h"

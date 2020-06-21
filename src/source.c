@@ -90,7 +90,7 @@ static void source_resolve(package *pkg, char *src, char *dest) {
         die("[%s] Source '%s' does not exist", pkg->name, file);
     }
 
-    if (err > PATH_MAX) {
+    if (err >= PATH_MAX) {
         die("[%s] Source path exceeds PATH_MAX", pkg->name);
     }
 }
@@ -100,7 +100,7 @@ void pkg_source(package *pkg) {
     char *tok;
     FILE *file;
     int i = 0;
-    int err;
+    size_t err;
 
     if (chdir(pkg->path[0]) != 0) {
         die("[%s] Repository is not accessible (%s)", pkg->name, pkg->path[0]);
@@ -150,8 +150,8 @@ void pkg_source(package *pkg) {
 
         err = strlcpy(pkg->des[i], tok, PATH_MAX);
 
-        if (err > PATH_MAX) {
-            die("strlcpy was truncated");
+        if (err >= PATH_MAX) {
+            die("strlcpy failed");
         }
 
         i++;

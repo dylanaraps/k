@@ -3,12 +3,12 @@
 
 #include "log.h"
 
-void _msg(const char* type, const char *fmt, ...) {
+void _msg(const char* t, const char *f, const int l, const char *fmt, ...) {
     va_list args;
 
     va_start(args, fmt);
 
-    printf("%s", type);
+    printf("%s (%s:%d) ", t, f, l);
     vprintf(fmt, args);
     printf("\n");
 

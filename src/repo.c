@@ -57,8 +57,8 @@ void repo_init(void) {
         REPOS[i] = xmalloc(PATH_MAX);
         err = strlcpy(REPOS[i], tmp, PATH_MAX);
 
-        if (err > PATH_MAX) {
-            die("strlcpy truncated path");
+        if (err >= PATH_MAX) {
+            die("strlcpy failed");
         }
     }
 

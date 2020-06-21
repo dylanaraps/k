@@ -43,8 +43,8 @@ void pkg_version(package *pkg) {
 
     err = strlcpy(pkg->ver, tok, len);
 
-    if (err > len) {
-        die("strlcpy was truncated");
+    if (err >= len) {
+        die("strlcpy failed");
     }
 
     tok = strtok(NULL, " 	\r\n");
@@ -58,8 +58,8 @@ void pkg_version(package *pkg) {
 
     err = strlcpy(pkg->rel, tok, len);
 
-    if (err > len) {
-        die("strlcpy was truncated");
+    if (err >= len) {
+        die("strlcpy failed");
     }
 
     free(line);
