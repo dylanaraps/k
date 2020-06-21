@@ -24,13 +24,13 @@ static void download(package *pkg, char *url) {
     FILE *file;
 
     if (chdir(pkg->src_dir) != 0) {
-        die("[%s] Source cache not accessible");
+        die("[%s] Source cache not accessible", pkg->name);
     }
 
     file = fopen(name, "wb");
 
     if (!file) {
-        die("Failed to open %s", name);
+        die("[%s] Failed to open %s", pkg->name, name);
     }
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -40,7 +40,7 @@ static void download(package *pkg, char *url) {
 
     if (curl_easy_perform(curl) != 0) {
         remove(name);
-        die("Failed to download source %s", url);
+        die("[%s] Failed to download source %s", pkg->name, url);
     }
 
     fclose(file);
@@ -53,21 +53,21 @@ static void source_resolve(package *pkg, char *src, char *dest) {
 
     if (strstr(src, "://")) {
         if (chdir(pkg->src_dir) != 0) {
-            die("Source directory is not accessible");
+            die("[%s] Source directory is not accessible", pkg->name);
         }
 
         if (access(file, F_OK) != -1) {
-            msg("Found cached source %s", src);
+            msg("[%s] Found cached source %s", pkg->name, src);
 
         } else {
-            msg("Downloading %s", src);
+            msg("[%s] Downloading %s", pkg->name, src);
             download(pkg, src);
         }
 
         err = snprintf(dest, PATH_MAX, "%s/%s", pkg->src_dir, file);
 
     } else if (strncmp(src, "git+", 4) == 0) {
-        die("Found git source (not yet supported) %s", src);
+        die("[%s] Found git source (not yet supported) %s", pkg->name, src);
 
         /* libgit2? or... git commands directly. */
         /* libgit2 requires cmake which is too much for core. */
@@ -77,21 +77,21 @@ static void source_resolve(package *pkg, char *src, char *dest) {
 
     } else {
         if (chdir(pkg->path[0]) != 0) {
-            die("Repository directory is not accessible");
+            die("[%s] Repository directory is not accessible", pkg->name);
         }
 
         if (access(src, F_OK) != -1) {
-            msg("Found  local source %s", src);
+            msg("[%s] Found  local source %s", pkg->name, src);
             err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path[0], src);
         }
     }
 
     if (err < 1) {
-        die("Source '%s' does not exist", file);
+        die("[%s] Source '%s' does not exist", pkg->name, file);
     }
 
     if (err > PATH_MAX) {
-        die("Source path exceeds PATH_MAX");
+        die("[%s] Source path exceeds PATH_MAX", pkg->name);
     }
 }
 
@@ -103,19 +103,19 @@ void pkg_source(package *pkg) {
     int err;
 
     if (chdir(pkg->path[0]) != 0) {
-        die("Repository is not accessible (%s)", pkg->path[0]);
+        die("[%s] Repository is not accessible (%s)", pkg->name, pkg->path[0]);
     }
 
     file = fopen("sources", "r");
 
     if (!file) {
-        die("Failed to open sources file");
+        die("[%s] Failed to open sources file", pkg->name);
     }
 
     pkg->src_l = cntlines(file);
 
     if (pkg->src_l == 0) {
-        die("Empty sources file");
+        die("[%s] Empty sources file", pkg->name);
     }
 
     pkg->src = xmalloc((pkg->src_l + 1) * sizeof(char *));
@@ -127,13 +127,13 @@ void pkg_source(package *pkg) {
         }
 
         if (i > pkg->src_l) {
-            die("Mismatch in source parser");
+            die("[%s] Mismatch in source parser", pkg->name);
         }
 
         tok = strtok(line, " 	\r\n");
 
         if (!tok) {
-            die("Invalid sources file");
+            die("[%s] Invalid sources file", pkg->name);
         }
 
         pkg->src[i] = xmalloc(PATH_MAX);
@@ -145,7 +145,7 @@ void pkg_source(package *pkg) {
         tok = tok ? tok : "";
 
         if (tok[0] == '/') {
-            die("Destination must not be absolute");
+            die("[%s] Destination must not be absolute", pkg->name);
         }
 
         err = strlcpy(pkg->des[i], tok, PATH_MAX);

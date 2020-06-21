@@ -67,23 +67,23 @@ void state_init(package *pkg, const char *type, char *buf) {
     char *tmp;
 
     if (chdir(CAC_DIR) != 0) {
-        die("Cache directory is not accessible");
+        die("[%s] Cache directory is not accessible", pkg->name);
     }
 
     if (chdir(type) != 0) {
-        die("Cache directory (%s) is not accessible", type);
+        die("[%s] Cache directory (%s) is not accessible", type, pkg->name);
     }
 
     mkdir_p(pkg->name);
 
     if (chdir(pkg->name) != 0) {
-        die("Cache directory (%s) is not accessible", type);
+        die("[%s] Cache directory (%s) is not accessible", type, pkg->name);
     }
 
     tmp = getcwd(buf, PATH_MAX);
 
     if (!tmp) {
-        die("Failed to init cache directory %s", type);
+        die("[%s] Failed to init cache directory %s", type, pkg->name);
     }
 }
 

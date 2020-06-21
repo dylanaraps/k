@@ -17,25 +17,25 @@ void pkg_version(package *pkg) {
     size_t err;
 
     if (chdir(pkg->path[0]) != 0) {
-        die("Package '%s' not installed", pkg->name);
+        die("[%s] Package not installed", pkg->name);
     }
 
     file = fopen("version", "r");
 
     if (!file) {
-        die("Version file does not exist");
+        die("[%s] Version file does not exist", pkg->name);
     }
 
     err = getline(&line, &(size_t){0}, file);
 
     if ((int) err == -1) {
-        die("Failed to read version file");
+        die("[%s] Failed to read version file", pkg->name);
     }
 
     tok = strtok(line, " 	");
 
     if (!tok) {
-        die("Invalid version file");
+        die("[%s] Invalid version file", pkg->name);
     }
 
     len = strlen(tok) + 1;
@@ -50,7 +50,7 @@ void pkg_version(package *pkg) {
     tok = strtok(NULL, " 	\r\n");
 
     if (!tok) {
-        die("Release field missing");
+        die("[%s] Release field missing", pkg->name);
     }
 
     len = strlen(tok) + 1;

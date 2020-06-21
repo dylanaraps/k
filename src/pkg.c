@@ -50,9 +50,10 @@ void pkg_init(package **pkg, char *pkg_name) {
 void pkg_iter(package *pkg, void (*f)(package *pkg), const char *msg) {
     package *tmp;
 
-    if (msg) {
-        printf("\n\033[1m%s\033[m\n", msg);
-    }
+    (void)(msg);
+    /* if (msg) { */
+    /*     printf("\n\033[1m%s\033[m\n", msg); */
+    /* } */
 
     for (tmp = pkg; tmp; tmp = tmp->next) {
         (*f)(tmp);

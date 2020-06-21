@@ -8,11 +8,11 @@
 void pkg_list(package *pkg) {
     /* todo: prepend KISS_PATH */
     if (chdir("/var/db/kiss/installed") != 0) {
-        die("Repository is not accessible");
+        die("[%s] Repository is not accessible", pkg->name);
     }
 
     if (chdir(pkg->name) != 0) {
-        die("Package '%s' not installed", pkg->name);
+        die("[%s] Package not installed", pkg->name);
     }
 
     printf("%s %s %s\n", pkg->name, pkg->ver, pkg->rel);

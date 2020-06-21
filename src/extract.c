@@ -13,23 +13,23 @@ void pkg_extract(package *pkg) {
     int i;
 
     if (chdir(pkg->mak_dir) != 0) {
-        die("Build directory not accessible");
+        die("[%s] Build directory not accessible", pkg->name);
     }
 
     if (pkg->src_l == 0) {
-        die("Empty sources file");
+        die("[%s] Empty sources file", pkg->name);
     }
 
     for (i = 0; i < pkg->src_l; i++) {
         if (!pkg->src[i]) {
-            die("Invalid sources file");
+            die("[%s] Invalid sources file", pkg->name);
         }
 
         if (pkg->des[i][0]) {
             mkdir_p(pkg->des[i]);
 
             if (chdir(pkg->des[i]) != 0) {
-                die("Source destination not accessible");
+                die("[%s] Source destination not accessible", pkg->name);
             }
         }
 
@@ -54,7 +54,7 @@ void pkg_extract(package *pkg) {
         }
 
         if (chdir(pkg->mak_dir) != 0) {
-            die("Build directory not accessible");
+            die("[%s] Build directory not accessible", pkg->name);
         }
     }
 }
