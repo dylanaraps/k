@@ -60,9 +60,10 @@ static int copy(const char *fp, const struct stat *sb, int tf, struct FTW *fb) {
 
     /* unused */
     (void)(sb);
+    (void)(fb);
 
     err = snprintf(COPY_END, PATH_MAX, "%s/%s",
-                  COPY_DES, fp + strlen(COPY_SRC));
+                   COPY_DES, fp + strlen(COPY_SRC));
 
     if (err >= PATH_MAX || err < 1) {
         die("Failed to construct path");
@@ -70,8 +71,9 @@ static int copy(const char *fp, const struct stat *sb, int tf, struct FTW *fb) {
 
     if (tf == FTW_D) {
         mkdir_p(COPY_END);
+    }
 
-    } else if (tf == FTW_F) {
+    if (tf == FTW_F) {
         copy_file(fp, COPY_END);
     }
 
