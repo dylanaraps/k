@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+#include <stdio.h>  /* getline */
 #include <libgen.h> /* basename */
 #include <string.h> /* strlen */
 #include <unistd.h> /* chdir */
@@ -9,7 +11,7 @@
 #include "checksum.h"
 #include "sha256.h"
 
-static void checksum_to_file(package *pkg) {
+void checksum_to_file(package *pkg) {
     FILE *file;
     int i;
 
@@ -77,6 +79,38 @@ x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
         msg("%s", pkg->sum[pkg->sum_l]);
         fclose(file);
     }
+}
 
-    checksum_to_file(pkg);
+void pkg_verify(package *pkg) {
+    FILE *file;
+    char *line = 0;
+    int i = 0;
+
+    msg("[%s] Verifying checksums", pkg->name);
+    pkg_checksums(pkg);
+
+    if (pkg->src_l == 0) {
+        die("Sources file does not exist");
+    }
+
+    if (chdir(pkg->path[0]) != 0) {
+        die("Repository directory not accessible");
+    }
+
+    file = fopen("checksums", "r");
+
+    while ((getline(&line, &(size_t){0}, file) != -1)) {
+        line[strcspn(line, "\n")] = 0;
+
+        if (i > pkg->src_l || strcmp(pkg->sum[i], line) != 0) {
+            die("Checksums mismatch'");
+        }
+
+        i++;
+    }
+
+    fclose(file);
+    free(line);
+
+    msg("[%s] Verified checksums", pkg->name);
 }

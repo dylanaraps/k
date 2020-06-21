@@ -42,9 +42,15 @@ int main (int argc, char *argv[]) {
     atexit(pkg_destroy_all);
 
     switch (argv[1][0]) {
+        case 'b':
+            pkg_iter(PKG, pkg_source, "Checking sources");
+            pkg_iter(PKG, pkg_verify, "Verifying checksums");
+            break;
+
         case 'c':
             pkg_iter(PKG, pkg_source, "Checking sources");
             pkg_iter(PKG, pkg_checksums, "Generating checksums");
+            pkg_iter(PKG, checksum_to_file, NULL);
 
             break;
 
