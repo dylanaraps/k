@@ -111,7 +111,7 @@ void xdg_cache_dir(char *buf, int len) {
             die("Failed to construct cache directory");
         }
 
-        if (ret > len) {
+        if (ret >= len) {
             die("Path exceeds PATH_MAX");
         }
 
@@ -128,7 +128,7 @@ void xdg_cache_dir(char *buf, int len) {
         die("Failed to construct cache directory");
     }
 
-    if (ret > len) {
+    if (ret >= len) {
         die("XDG_CACHE_HOME exceeds PATH_MAX");
     }
 }
