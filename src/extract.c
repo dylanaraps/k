@@ -18,23 +18,22 @@ static void copy_file(char *src, char *des) {
     FILE *r;
     FILE *w;
     int err;
-    int len = 4096;
-    char buf[len];
+    char buf[BUFSIZ];
 
-    r = fopen(src, "r");
+    r = fopen(src, "rb");
 
     if (!r) {
         die("Failed to read file");
     }
 
-    w = fopen(des, "w");
+    w = fopen(des, "wb");
 
     if (!w) {
         die("Failed to read file");
     }
 
     for (;;) {
-        err = fread(buf, 1, len, r);
+        err = fread(buf, 1, sizeof(BUFSIZ), r);
 
         if (err == -1) {
             die("File not accessible");
@@ -44,7 +43,7 @@ static void copy_file(char *src, char *des) {
             break;
         }
 
-        err = fwrite(buf, 1, len, w);
+        err = fwrite(buf, 1, err, w);
 
         if (err == -1) {
             die("Cannot copy file");
