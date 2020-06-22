@@ -6,6 +6,7 @@
 #include <sys/stat.h> /* mkdir */
 #include <errno.h>    /* errno, EEXIST, S_IRWXU */
 #include <unistd.h>   /* access */
+#include <fcntl.h>    /* open */
 
 #include "log.h"
 #include "strl.h"
@@ -57,4 +58,26 @@ int strsuf(const char *str, const char *suf, size_t suf_len) {
     }
 
     return strncmp(&str[strlen(str) - suf_len], suf, suf_len);
+}
+
+int exists_at(const char *path, const char *file, const int flags) {
+    int fd;
+    int re;
+
+    fd = open(path, O_RDONLY | O_DIRECTORY);
+
+    if (fd == -1) {
+        return 1;
+    }
+
+    re = openat(fd, file, O_RDONLY | flags);
+
+    close(fd);
+
+    if (re == -1) {
+        return 1;
+    }
+
+    close(re);
+    return 0;
 }

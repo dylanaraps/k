@@ -6,27 +6,11 @@
 
 #include "log.h"
 #include "pkg.h"
+#include "util.h"
 #include "list.h"
 
 int pkg_list(package *pkg) {
-    int fd;
-    int err;
-
-    fd = open("/var/db/kiss/installed", O_RDONLY | O_DIRECTORY);
-
-    if (fd == -1) {
-        die("[%s] Package DB not accessible", pkg->name);
-    }
-
-    err = openat(fd, pkg->name, O_RDONLY | O_DIRECTORY);
-    close(fd);
-
-    if (err == -1) {
-        return 1;
-    }
-
-    close(err);
-    return 0;
+    return exists_at("/var/db/kiss/installed", pkg->name, O_DIRECTORY);
 }
 
 void pkg_list_all(package *pkg) {

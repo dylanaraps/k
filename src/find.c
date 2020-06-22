@@ -13,21 +13,11 @@
 void pkg_find(package *pkg, const int all) {
     int i;
     int err;
-    int fd;
 
     for (i = 0; i < REPO_LEN; i++) {
-        fd = open(REPOS[i], O_RDONLY | O_DIRECTORY);
+        err = exists_at(REPOS[i], pkg->name, O_DIRECTORY);
 
-        if (fd == -1) {
-            die("[%s] Repository not accessible (%s)", pkg->name, REPOS[i]);
-        }
-
-        err = openat(fd, pkg->name, O_RDONLY | O_DIRECTORY);
-        close(fd);
-
-        if (err != -1) {
-            close(err);
-
+        if (err == 0) {
             err = snprintf(pkg->path, PATH_MAX, "%s/%s", REPOS[i], pkg->name);
 
             if (err >= PATH_MAX) {
