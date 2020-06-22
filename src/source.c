@@ -1,6 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
 #include <limits.h> /* PATH_MAX */
-#include <unistd.h> /* chdir */
 #include <string.h> /* strcspn */
 #include <libgen.h> /* basename */
 

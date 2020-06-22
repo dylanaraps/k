@@ -2,7 +2,6 @@
 #include <stdio.h>  /* getline */
 #include <libgen.h> /* basename */
 #include <string.h> /* strlen */
-#include <unistd.h> /* chdir */
 
 #include "log.h"
 #include "util.h"
