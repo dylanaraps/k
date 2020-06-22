@@ -5,37 +5,49 @@
 #include "log.h"
 #include "list.h"
 
-void pkg_list(package *pkg) {
+int pkg_list(package *pkg) {
     /* todo: prepend KISS_PATH */
     if (chdir("/var/db/kiss/installed") != 0) {
         die("[%s] Repository is not accessible", pkg->name);
     }
 
     if (chdir(pkg->name) != 0) {
-        die("[%s] Package not installed", pkg->name);
+        return 1;
     }
 
-    printf("%s %s %s\n", pkg->name, pkg->ver, pkg->rel);
+    return 0;
 }
 
 void pkg_list_all(package *pkg) {
     struct dirent  **list;
-    int tot;
+    int err;
+    int i;
 
-    /* todo: prepend KISS_PATH */
-    tot = scandir("/var/db/kiss/installed", &list, NULL, alphasort);
+    if (!pkg) {
+        /* todo: prepend KISS_PATH */
+        err = scandir("/var/db/kiss/installed", &list, NULL, alphasort);
 
-    if (tot == -1) {
-        die("Package DB not accessible");
+        if (err == -1) {
+            die("Package DB not accessible");
+        }
+
+        // '2' skips '.'/'..'.
+        for (i = 2; i < err; i++) {
+            pkg_init(&pkg, list[i]->d_name);
+            free(list[i]);
+        }
+
+        free(list);
     }
 
-    // '2' skips '.'/'..'.
-    for (int i = 2; i < tot; i++) {
-        pkg_init(&pkg, list[i]->d_name);
-        free(list[i]);
-    }
+    for (; pkg; pkg = pkg->next) {
+        err = pkg_list(pkg);
 
-    free(list);
-    pkg_iter(pkg, pkg_list, NULL);
+        if (err == 0) {
+            printf("%s %s %s\n", pkg->name, pkg->ver, pkg->rel);
+        } else {
+            die("[%s] Package not installed", pkg->name);
+        }
+    }
 }
 

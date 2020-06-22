@@ -8,7 +8,7 @@ void _msg(const char* t, const char *f, const int l, const char *fmt, ...) {
 
     va_start(args, fmt);
 
-    printf("%s (%s:%d) ", t, f, l);
+    printf("[%s] (%s:%d) ", t, f, l);
     vprintf(fmt, args);
     printf("\n");
 

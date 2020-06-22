@@ -30,7 +30,9 @@ void pkg_depends(package *pkg) {
 }
 
 void resolve_dep(package *pkg) {
+    if (pkg_have(pkg->name) != 0) {
 
+    }
 }
 /* pkg_depends() { */
 /*     # Resolve all dependencies and generate an ordered list. This does a */

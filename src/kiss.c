@@ -75,12 +75,7 @@ int main (int argc, char *argv[]) {
             break;
 
         case 'l':
-            if (argc == 2) {
-                pkg_list_all(PKG);
-
-            } else {
-                pkg_iter(PKG, pkg_list, NULL);
-            }
+            pkg_list_all(PKG);
             break;
 
         case 'v':
