@@ -14,7 +14,13 @@ package *PKG;
 
 void pkg_init(package **pkg, char *pkg_name) {
     package *tmp = *pkg;
-    package *new = xmalloc(sizeof(package));
+    package *new;
+
+    if (pkg_have(pkg_name) == 0) {
+        return;
+    }
+
+    new = xmalloc(sizeof(package));
 
     /* initializes all fields */
     *new = (package) {
@@ -28,11 +34,11 @@ void pkg_init(package **pkg, char *pkg_name) {
     pkg_find(new);
     pkg_version(new);
 
-    state_init(new, "build", new->mak_dir);
-    state_init(new, "extract", new->tar_dir);
-    state_init(new, "pkg", new->pkg_dir);
+    state_init(new, "build",      new->mak_dir);
+    state_init(new, "extract",    new->tar_dir);
+    state_init(new, "pkg",        new->pkg_dir);
     state_init(new, "../sources", new->src_dir);
-    state_init(new, "../bin", new->bin_dir);
+    state_init(new, "../bin",     new->bin_dir);
 
     if (!*pkg) {
         *pkg = new;
@@ -58,6 +64,20 @@ void pkg_iter(package *pkg, void (*f)(package *pkg), const char *msg) {
     for (tmp = pkg; tmp; tmp = tmp->next) {
         (*f)(tmp);
     }
+}
+
+int pkg_have(char *pkg_name) {
+    package *tmp = PKG;
+
+    while (tmp) {
+        if (strcmp(tmp->name, pkg_name) == 0) {
+            return 0;
+        }
+
+        tmp = tmp->next;
+    }
+
+    return 1;
 }
 
 static void pkg_free(package *pkg) {

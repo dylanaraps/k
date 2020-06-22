@@ -38,6 +38,7 @@ extern package *PKG;
 void pkg_init(package **pkg, char *pkg_name);
 void pkg_iter(package *pkg, void (*f)(package *pkg), const char *msg);
 void pkg_destroy(package *pkg);
+int pkg_have(char *pkg_name);
 
 #ifdef FREE_ON_EXIT
 void pkg_destroy_all(void);
