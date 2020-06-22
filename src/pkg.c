@@ -13,12 +13,12 @@
 
 static package *PKG;
 
-void pkg_init(package **pkg, char *pkg_name) {
+package *pkg_init(package **pkg, char *pkg_name, int front) {
     package *tmp = *pkg;
     package *new;
 
     if (pkg_have(pkg_name) == 0) {
-        return;
+        return NULL;
     }
 
     new = xmalloc(sizeof(package));
@@ -38,6 +38,11 @@ void pkg_init(package **pkg, char *pkg_name) {
     if (!*pkg) {
         *pkg = PKG = new;
 
+    } else if (front) {
+        new->next = tmp;
+        tmp->prev = new;
+        *pkg = PKG = new;
+
     } else {
         while (tmp->next) {
             tmp = tmp->next;
@@ -46,6 +51,8 @@ void pkg_init(package **pkg, char *pkg_name) {
         tmp->next = new;
         new->prev = tmp;
     }
+
+    return new;
 }
 
 void pkg_state_init(package *pkg) {
@@ -60,9 +67,6 @@ void pkg_iter(package *pkg, void (*f)(package *pkg), const char *msg) {
     package *tmp;
 
     (void)(msg);
-    /* if (msg) { */
-    /*     printf("\n\033[1m%s\033[m\n", msg); */
-    /* } */
 
     for (tmp = pkg; tmp; tmp = tmp->next) {
         (*f)(tmp);

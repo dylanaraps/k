@@ -16,10 +16,14 @@ void pkg_depends(package *pkg) {
     int i = 0;
     size_t ret;
 
+    if (exists_at(pkg->path, "depends", 0) != 0) {
+        return;
+    }
+
     file = fopenat(pkg->path, "depends", "r");
 
     if (!file) {
-        die("[%s] Failed to open depends file", pkg->name);
+        die("[%s] Failed to open depends file %s", pkg->name);
     }
 
     pkg->dep_l = cntlines(file);
@@ -71,13 +75,28 @@ void pkg_depends(package *pkg) {
     }
 
     free(line);
+    fclose(file);
 }
 
 void resolve_dep(package *pkg) {
-    if (pkg_have(pkg->name) != 0) {
-        if (pkg_list(pkg) == 0) {
-            return;
+    package *tmp;
+    int i;
+
+    printf("%s\n", pkg->name);
+
+    for (i = 0; i < pkg->dep_l; i++) {
+        if (pkg_have(pkg->dep[i]) == 0) {
+            continue;
         }
+
+        if (pkg_list(pkg->dep[i]) == 0) {
+            continue;
+        }
+
+        tmp = pkg_init(&pkg, pkg->dep[i], 1);
+        pkg_state_init(tmp);
+        resolve_dep(tmp);
+        pkg_depends(tmp);
     }
 }
 /* pkg_depends() { */

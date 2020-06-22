@@ -25,7 +25,7 @@ static void download(package *pkg, char *url) {
     file = fopenat(pkg->src_dir, name, "wb");
 
     if (!file) {
-        die("[%s] Failed to open %s", pkg->name, name);
+        die("[%s] Failed to open %s/%s", pkg->name, pkg->src_dir, name);
     }
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
