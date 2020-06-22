@@ -50,7 +50,7 @@ void repo_init(void) {
             die("Repository exceeds PATH_MAX");
         }
 
-        if (chdir(tmp) != 0) {
+        if (access(tmp, F_OK) != 0) {
             die("Repository is not accessible");
         }
 
