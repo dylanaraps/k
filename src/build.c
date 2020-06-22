@@ -21,7 +21,7 @@ void pkg_build(package *pkg) {
     /* extraction must occur this late */
     pkg_extract(pkg);
 
-    err = snprintf(build_file, PATH_MAX, "%s/build", pkg->path[0]);
+    err = snprintf(build_file, PATH_MAX, "%s/build", pkg->path);
 
     if (err < 1) {
         die("[%s] Failed to find build file", pkg->name);
@@ -69,5 +69,5 @@ void pkg_build(package *pkg) {
         die("[%s] DB path exceeds PATH_MAX", pkg->name);
     }
 
-    cp_dir(pkg->path[0], pkg->db_dir);
+    cp_dir(pkg->path, pkg->db_dir);
 }

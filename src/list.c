@@ -1,6 +1,6 @@
 #include <stdio.h>  /* printf */
 #include <unistd.h> /* chdir */
-#include <dirent.h> /* scandir, opendir */
+#include <dirent.h> /* scandir */
 
 #include "log.h"
 #include "pkg.h"
@@ -20,6 +20,7 @@ int pkg_list(package *pkg) {
 }
 
 void pkg_list_all(package *pkg) {
+    package *tmp = pkg;
     struct dirent  **list;
     int err;
     int i;
@@ -41,16 +42,13 @@ void pkg_list_all(package *pkg) {
         free(list);
     }
 
-    for (; pkg; pkg = pkg->next) {
-        err = pkg_list(pkg);
+    for (tmp = pkg; tmp; tmp = tmp->next) {
+        err = pkg_list(tmp);
 
         if (err == 0) {
-            printf("%s %s %s\n", pkg->name, pkg->ver, pkg->rel);
+            printf("%s %s %s\n", tmp->name, tmp->ver, tmp->rel);
         } else {
-            die("[%s] Package not installed", pkg->name);
+            die("[%s] Package not installed", tmp->name);
         }
     }
-
-    pkg_destroy_all();
 }
-

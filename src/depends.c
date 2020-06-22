@@ -17,8 +17,8 @@ void pkg_depends(package *pkg) {
     int i = 0;
     size_t ret;
 
-    if (chdir(pkg->path[0]) != 0) {
-        die("[%s] Repository is not accessible (%s)", pkg->name, pkg->path[0]);
+    if (chdir(pkg->path) != 0) {
+        die("[%s] Repository is not accessible (%s)", pkg->name, pkg->path);
     }
 
     if (access("depends", F_OK) == -1) {

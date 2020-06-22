@@ -15,7 +15,7 @@ void checksum_to_file(package *pkg) {
     FILE *file;
     int i;
 
-    if (chdir(pkg->path[0]) != 0) {
+    if (chdir(pkg->path) != 0) {
         die("[%s] Repository files not accessible", pkg->name);
     }
 
@@ -98,7 +98,7 @@ void pkg_verify(package *pkg) {
         die("[%s] Sources file does not exist", pkg->name);
     }
 
-    if (chdir(pkg->path[0]) != 0) {
+    if (chdir(pkg->path) != 0) {
         die("[%s] Repository directory not accessible", pkg->name);
     }
 

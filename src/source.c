@@ -76,13 +76,13 @@ static void source_resolve(package *pkg, char *src, char *dest) {
         /* https://github.com/libgit2/libgit2/issues/3058 */
 
     } else {
-        if (chdir(pkg->path[0]) != 0) {
+        if (chdir(pkg->path) != 0) {
             die("[%s] Repository directory is not accessible", pkg->name);
         }
 
         if (access(src, F_OK) != -1) {
             msg("[%s] Found  local source %s", pkg->name, src);
-            err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path[0], src);
+            err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path, src);
         }
     }
 
@@ -102,8 +102,8 @@ void pkg_source(package *pkg) {
     int i = 0;
     size_t err;
 
-    if (chdir(pkg->path[0]) != 0) {
-        die("[%s] Repository is not accessible (%s)", pkg->name, pkg->path[0]);
+    if (chdir(pkg->path) != 0) {
+        die("[%s] Repository is not accessible (%s)", pkg->name, pkg->path);
     }
 
     file = fopen("sources", "r");

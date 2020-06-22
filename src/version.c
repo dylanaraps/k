@@ -16,7 +16,7 @@ void pkg_version(package *pkg) {
     size_t len;
     size_t err;
 
-    if (chdir(pkg->path[0]) != 0) {
+    if (chdir(pkg->path) != 0) {
         die("[%s] Package not installed", pkg->name);
     }
 

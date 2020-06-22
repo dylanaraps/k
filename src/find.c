@@ -17,8 +17,6 @@ void pkg_find(package *pkg) {
     int i;
     size_t err;
 
-    pkg->path = xmalloc(REPO_LEN * sizeof(char *));
-
     for (i = 0; i < REPO_LEN; i++) {
        if (chdir(REPOS[i]) != 0) {
             die("[%s] Repository not accessible (%s)", pkg->name, REPOS[i]);
@@ -31,26 +29,23 @@ void pkg_find(package *pkg) {
                die("[%s] Repository not accessible (%s)", pkg->name, REPOS[i]);
            }
 
-           pkg->path[pkg->path_l] = xmalloc(PATH_MAX);
-           err = strlcpy(pkg->path[pkg->path_l], tmp, PATH_MAX);
+           err = strlcpy(pkg->path, tmp, PATH_MAX);
 
            if (err >= PATH_MAX) {
                die("strlcpy failed");
            }
 
-           pkg->path_l++;
+           return;
        }
     }
 
-    if (pkg->path_l == 0) {
-        die("Package '%s' does not exist", pkg->name);
-    }
+    die("Package '%s' does not exist", pkg->name);
 }
 
 void pkg_paths(package *pkg) {
     int i;
 
-    for (i = 0; i < pkg->path_l; i++) {
-        printf("%s\n", pkg->path[i]);
+    for (i = 0; i < REPO_LEN; i++) {
+        pkg_find(pkg);
     }
 }

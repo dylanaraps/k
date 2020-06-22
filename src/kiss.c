@@ -35,7 +35,6 @@ int main (int argc, char *argv[]) {
     }
 
     sig_init();
-    cache_init();
     repo_init();
 
     for (int i = 2; i < argc; i++) {
@@ -44,12 +43,16 @@ int main (int argc, char *argv[]) {
 
     switch (argv[1][0]) {
         case 'b':
+            cache_init();
+            pkg_iter(PKG, pkg_state_init, NULL);
             pkg_iter(PKG, pkg_source, "Checking sources");
             pkg_iter(PKG, pkg_verify, "Verifying checksums");
             pkg_iter(PKG, pkg_build,  "Building packages");
             break;
 
         case 'c':
+            cache_init();
+            pkg_iter(PKG, pkg_state_init, NULL);
             pkg_iter(PKG, pkg_source,       "Checking sources");
             pkg_iter(PKG, pkg_checksums,    "Generating checksums");
             pkg_iter(PKG, checksum_to_file, "Saving checksums");
@@ -57,6 +60,8 @@ int main (int argc, char *argv[]) {
             break;
 
         case 'd':
+            cache_init();
+            pkg_iter(PKG, pkg_state_init, NULL);
             pkg_iter(PKG, pkg_source, "Downloading sources");
 
             break;

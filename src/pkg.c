@@ -35,12 +35,6 @@ void pkg_init(package **pkg, char *pkg_name) {
     pkg_find(new);
     pkg_version(new);
 
-    state_init(new, "build",      new->mak_dir);
-    state_init(new, "extract",    new->tar_dir);
-    state_init(new, "pkg",        new->pkg_dir);
-    state_init(new, "../sources", new->src_dir);
-    state_init(new, "../bin",     new->bin_dir);
-
     if (!*pkg) {
         *pkg = new;
 
@@ -52,6 +46,14 @@ void pkg_init(package **pkg, char *pkg_name) {
         tmp->next = new;
         new->prev = tmp;
     }
+}
+
+void pkg_state_init(package *pkg) {
+    state_init(pkg, "build",      pkg->mak_dir);
+    state_init(pkg, "extract",    pkg->tar_dir);
+    state_init(pkg, "pkg",        pkg->pkg_dir);
+    state_init(pkg, "../sources", pkg->src_dir);
+    state_init(pkg, "../bin",     pkg->bin_dir);
 }
 
 void pkg_iter(package *pkg, void (*f)(package *pkg), const char *msg) {
@@ -87,10 +89,6 @@ static void pkg_free(package *pkg) {
     free(pkg->name);
     free(pkg->ver);
     free(pkg->rel);
-
-    for (i = 0; i < pkg->path_l; i++) {
-        free(pkg->path[i]);
-    }
     free(pkg->path);
 
     for (i = 0; i < pkg->src_l; i++) {

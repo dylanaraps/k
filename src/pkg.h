@@ -9,9 +9,8 @@ typedef struct package {
     char *ver;
     char *rel;
 
-    /* locations */
-    char **path;
-    int  path_l;
+    /* location */
+    char path[PATH_MAX];
 
     /* states */
     char mak_dir[PATH_MAX];
@@ -42,6 +41,7 @@ extern package *PKG;
 void pkg_init(package **pkg, char *pkg_name);
 void pkg_iter(package *pkg, void (*f)(package *pkg), const char *msg);
 int pkg_have(char *pkg_name);
+void pkg_state_init(package *pkg);
 void pkg_destroy(package *pkg);
 void pkg_destroy_all(void);
 
