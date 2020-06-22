@@ -107,14 +107,8 @@ void pkg_destroy(package *pkg) {
     pkg_free(pkg);
 }
 
-void pkg_destroy_all(int s) {
-    (void)(s);
-
+void pkg_destroy_all(void) {
     while (PKG) {
         pkg_destroy(PKG);
     }
-}
-
-void pkg_null(package *pkg) {
-    (void)(pkg);
 }

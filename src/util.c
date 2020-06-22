@@ -24,8 +24,6 @@ void *xmalloc(size_t n) {
         die("Failed to allocate memory");
     }
 
-    msg("Allocated %zx bytes.", n);
-
     return p;
 }
 

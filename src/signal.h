@@ -1,1 +1,2 @@
-void sig_add(void (*f)(int));
+void sig_init(void);
+void sig_hand(int i);

@@ -3,9 +3,14 @@
 #include <stdlib.h>
 #include <signal.h>
 
-void sig_add(void (*f)(int)) {
+#include "cache.h"
+#include "pkg.h"
+#include "repo.h"
+#include "signal.h"
+
+void sig_init(void) {
     struct sigaction sa = {
-        .sa_handler = f,
+        .sa_handler = sig_hand,
     };
 
     sigemptyset(&sa.sa_mask);
@@ -15,5 +20,15 @@ void sig_add(void (*f)(int)) {
     sigaction(SIGTERM, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
 
-    /* atexit(f); */
+    atexit(cache_destroy);
+    atexit(repo_destroy);
+    atexit(pkg_destroy_all);
+}
+
+void sig_hand(int i) {
+    (void)(i);
+
+    cache_destroy();
+    repo_destroy();
+    pkg_destroy_all();
 }
