@@ -35,12 +35,10 @@ void pkg_list_all(package *pkg) {
     }
 
     for (tmp = pkg; tmp; tmp = tmp->next) {
-        err = pkg_list(tmp);
-
-        if (err == 0) {
-            printf("%s %s %s\n", tmp->name, tmp->ver, tmp->rel);
-        } else {
+        if (pkg_list(tmp) != 0) {
             die("[%s] Package not installed", tmp->name);
         }
+
+        printf("%s %s %s\n", tmp->name, tmp->ver, tmp->rel);
     }
 }
