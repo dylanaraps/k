@@ -24,7 +24,7 @@ void pkg_find(package *pkg, const int all) {
             die("[%s] Repository not accessible (%s)", pkg->name, REPOS[i]);
         }
 
-        err = openat(fd, pkg->name, O_RDONLY);
+        err = openat(fd, pkg->name, O_RDONLY | O_DIRECTORY);
         close(fd);
 
         if (err != -1) {

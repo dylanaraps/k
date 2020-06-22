@@ -18,7 +18,7 @@ int pkg_list(package *pkg) {
         die("[%s] Package DB not accessible", pkg->name);
     }
 
-    err = openat(fd, pkg->name, O_RDONLY);
+    err = openat(fd, pkg->name, O_RDONLY | O_DIRECTORY);
     close(fd);
 
     if (err == -1) {
