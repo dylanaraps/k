@@ -1,21 +1,31 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>  /* printf */
 #include <unistd.h> /* chdir */
 #include <dirent.h> /* scandir */
+#include <fcntl.h>  /* open */
 
 #include "log.h"
 #include "pkg.h"
 #include "list.h"
 
 int pkg_list(package *pkg) {
-    /* todo: prepend KISS_PATH */
-    if (chdir("/var/db/kiss/installed") != 0) {
-        die("[%s] Repository is not accessible", pkg->name);
+    int fd;
+    int err;
+
+    fd = open("/var/db/kiss/installed", O_RDONLY | O_DIRECTORY);
+
+    if (fd == -1) {
+        die("[%s] Package DB not accessible", pkg->name);
     }
 
-    if (chdir(pkg->name) != 0) {
+    err = openat(fd, pkg->name, O_RDONLY);
+    close(fd);
+
+    if (err == -1) {
         return 1;
     }
 
+    close(err);
     return 0;
 }
 
@@ -26,7 +36,6 @@ void pkg_list_all(package *pkg) {
     int i;
 
     if (!pkg) {
-        /* todo: prepend KISS_PATH */
         err = scandir("/var/db/kiss/installed", &list, NULL, alphasort);
 
         if (err == -1) {

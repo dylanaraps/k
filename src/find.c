@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include <limits.h> /* PATH_MAX */
 #include <unistd.h> /* chdir */
+#include <fcntl.h>  /* openat */
 
 #include "log.h"
 #include "repo.h"
@@ -12,31 +13,31 @@
 /* todo: globbing */
 
 void pkg_find(package *pkg) {
-    char cwd[PATH_MAX];
-    char *tmp;
     int i;
-    size_t err;
+    int err;
+    int fd;
 
     for (i = 0; i < REPO_LEN; i++) {
-       if (chdir(REPOS[i]) != 0) {
+        fd = open(REPOS[i], O_RDONLY | O_DIRECTORY);
+
+        if (fd == -1) {
             die("[%s] Repository not accessible (%s)", pkg->name, REPOS[i]);
-       }
+        }
 
-       if (chdir(pkg->name) == 0) {
-           tmp = getcwd(cwd, PATH_MAX);
+        err = openat(fd, pkg->name, O_RDONLY);
+        close(fd);
 
-           if (!tmp) {
-               die("[%s] Repository not accessible (%s)", pkg->name, REPOS[i]);
-           }
+        if (err != -1) {
+            close(err);
 
-           err = strlcpy(pkg->path, tmp, PATH_MAX);
+            err = snprintf(pkg->path, PATH_MAX, "%s/%s", REPOS[i], pkg->name);
 
-           if (err >= PATH_MAX) {
-               die("strlcpy failed");
-           }
+            if (err >= PATH_MAX) {
+                die("strlcpy failed");
+            }
 
-           return;
-       }
+            return;
+        }
     }
 
     die("Package '%s' does not exist", pkg->name);
