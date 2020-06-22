@@ -40,12 +40,16 @@ int main (int argc, char *argv[]) {
     atexit(cache_destroy);
 
     repo_init();
+#ifdef DEBUG
     atexit(repo_destroy);
+#endif
 
     for (int i = 2; i < argc; i++) {
         pkg_init(&PKG, argv[i]);
     }
+#ifdef DEBUG
     atexit(pkg_destroy_all);
+#endif
 
     switch (argv[1][0]) {
         case 'b':

@@ -13,7 +13,6 @@
 
 void *xmalloc(size_t n) {
     void *p;
-    static size_t sum;
 
     if (n == 0) {
         die("Empty memory allocation");
@@ -24,9 +23,6 @@ void *xmalloc(size_t n) {
     if (!p) {
         die("Failed to allocate memory");
     }
-
-    sum += n;
-    msg("Allocated total %zx bytes", sum);
 
     return p;
 }
