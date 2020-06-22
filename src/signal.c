@@ -21,14 +21,10 @@ void sig_init(void) {
     sigaction(SIGQUIT, &sa, NULL);
 
     atexit(cache_destroy);
-    atexit(repo_destroy);
-    atexit(pkg_destroy_all);
 }
 
 void sig_hand(int i) {
     (void)(i);
 
     cache_destroy();
-    repo_destroy();
-    pkg_destroy_all();
 }
