@@ -10,12 +10,27 @@ ________________________________________________________________________________
 - C99 compiler
 - POSIX libc
 - libarchive (gzip, xz, bzip2, whatever)
+- curl (whatever SSL library)
 
 
 todo
 ________________________________________________________________________________
 
-Just the nitpicky stuff.
+
+Big things.
+
+- [ ] Finishing 'kiss b'.
+    - [ ] Manifest generation.
+    - [ ] Binary stripping.
+    - [ ] Dependency finder.
+    - [ ] Dependency support.
+- [ ] 'kiss i'
+- [ ] 'kiss r'
+- [ ] 'kiss a'
+- [ ] 'kiss u'
+
+
+The nitpicky stuff.
 
 - [ ] Add support for KISS_PATH.
 - [ ] Add support for meta-packages.
