@@ -46,6 +46,7 @@ int cntlines(FILE *file) {
         }
     }
     rewind(file);
+    free(line);
 
     return i;
 }

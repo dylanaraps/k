@@ -3,6 +3,7 @@
 #include <string.h> /* strlen */
 
 #include "log.h"
+#include "depends.h"
 #include "cache.h"
 #include "find.h"
 #include "find.h"
@@ -104,6 +105,13 @@ static void pkg_free(package *pkg) {
     }
     free(pkg->sum);
 
+    for (i = 0; i < pkg->dep_l; i++) {
+        free(pkg->dep[i]);
+        free(pkg->dep_type[i]);
+    }
+    free(pkg->dep);
+    free(pkg->dep_type);
+
     free(pkg);
 }
 
@@ -127,10 +135,8 @@ void pkg_destroy(package *pkg) {
     pkg_free(pkg);
 }
 
-#ifdef FREE_ON_EXIT
 void pkg_destroy_all(void) {
     while (PKG) {
         pkg_destroy(PKG);
     }
 }
-#endif

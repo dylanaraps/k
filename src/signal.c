@@ -19,6 +19,10 @@ void sig_init(void) {
     sigaction(SIGINT,  &sa, NULL);
     sigaction(SIGTERM, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
+
+    atexit(cache_destroy);
+    atexit(repo_destroy);
+    atexit(pkg_destroy_all);
 }
 
 void sig_hand(int i) {

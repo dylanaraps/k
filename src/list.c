@@ -3,6 +3,7 @@
 #include <dirent.h> /* scandir, opendir */
 
 #include "log.h"
+#include "pkg.h"
 #include "list.h"
 
 int pkg_list(package *pkg) {
@@ -49,5 +50,7 @@ void pkg_list_all(package *pkg) {
             die("[%s] Package not installed", pkg->name);
         }
     }
+
+    pkg_destroy_all();
 }
 

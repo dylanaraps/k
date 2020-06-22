@@ -10,7 +10,7 @@
 #include "util.h"
 #include "repo.h"
 
-char **REPOS = {0};
+char **REPOS;
 int REPO_LEN = 0;
 
 void repo_init(void) {
@@ -65,7 +65,6 @@ void repo_init(void) {
     free(kiss_path);
 }
 
-#ifdef FREE_ON_EXIT
 void repo_destroy(void) {
     int i;
 
@@ -79,4 +78,3 @@ void repo_destroy(void) {
 
     free(REPOS);
 }
-#endif

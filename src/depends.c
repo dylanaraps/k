@@ -1,37 +1,92 @@
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>  /* fopen, FILE */
-#include <unistd.h> /* chdir */
+#include <unistd.h> /* chdir, access */
+#include <string.h> /* strtok */
 
 #include "log.h"
+#include "list.h"
 #include "util.h"
+#include "strl.h"
 #include "pkg.h"
 #include "depends.h"
 
 void pkg_depends(package *pkg) {
-    package *tmp;
+    char *line = 0;
+    char *tok;
     FILE *file;
-    int  len;
+    int i = 0;
+    size_t ret;
 
     if (chdir(pkg->path[0]) != 0) {
         die("[%s] Repository is not accessible (%s)", pkg->name, pkg->path[0]);
     }
 
+    if (access("depends", F_OK) == -1) {
+        return;
+    }
+
     file = fopen("depends", "r");
 
     if (!file) {
-        die("[%s] Failed to open sources file", pkg->name);
+        die("[%s] Failed to open depends file", pkg->name);
     }
 
-    len = cntlines(file);
+    pkg->dep_l = cntlines(file);
 
-    if (len == 0) {
+    if (pkg->dep_l == 0) {
         return;
     }
+
+    pkg->dep      = xmalloc((pkg->dep_l + 1) * sizeof(char *));
+    pkg->dep_type = xmalloc((pkg->dep_l + 1) * sizeof(char *));
+
+    while (getline(&line, &(size_t){0}, file) != -1) {
+        if (line[0] == '#' || line[0] == '\n') {
+            continue;
+        }
+
+        if (i > pkg->dep_l) {
+            die("[%s] Mismatch in depends parser", pkg->name);
+        }
+
+        tok = strtok(line, " 	\r\n");
+
+        if (!tok) {
+            die("[%s] Invalid depends file", pkg->name);
+        }
+
+        ret = strlen(tok) + 1;
+        pkg->dep[i] = xmalloc(ret);
+
+        ret = strlcpy(pkg->dep[i], tok, ret);
+
+        if (ret >= PATH_MAX) {
+            die("strlcpy failed");
+        }
+
+        tok = strtok(NULL, " 	\r\n");
+        tok = tok ? tok : "";
+
+        ret = strlen(tok) + 1;
+        pkg->dep_type[i] = xmalloc(ret);
+
+        ret = strlcpy(pkg->dep_type[i], tok, ret);
+
+        if (ret >= PATH_MAX) {
+            die("strlcpy failed");
+        }
+
+        i++;
+    }
+
+    free(line);
 }
 
 void resolve_dep(package *pkg) {
     if (pkg_have(pkg->name) != 0) {
-
+        if (pkg_list(pkg) == 0) {
+            return;
+        }
     }
 }
 /* pkg_depends() { */
