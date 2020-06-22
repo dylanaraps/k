@@ -17,15 +17,7 @@ void pkg_depends(package *pkg) {
     int i = 0;
     size_t ret;
 
-    if (chdir(pkg->path) != 0) {
-        die("[%s] Repository is not accessible (%s)", pkg->name, pkg->path);
-    }
-
-    if (access("depends", F_OK) == -1) {
-        return;
-    }
-
-    file = fopen("depends", "r");
+    file = fopenat(pkg->path, "depends", "r");
 
     if (!file) {
         die("[%s] Failed to open depends file", pkg->name);

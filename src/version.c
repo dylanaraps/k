@@ -16,11 +16,7 @@ void pkg_version(package *pkg) {
     size_t len;
     size_t err;
 
-    if (chdir(pkg->path) != 0) {
-        die("[%s] Package not installed", pkg->name);
-    }
-
-    file = fopen("version", "r");
+    file = fopenat(pkg->path, "version", "r");
 
     if (!file) {
         die("[%s] Version file does not exist", pkg->name);

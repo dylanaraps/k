@@ -15,11 +15,7 @@ void checksum_to_file(package *pkg) {
     FILE *file;
     int i;
 
-    if (chdir(pkg->path) != 0) {
-        die("[%s] Repository files not accessible", pkg->name);
-    }
-
-    file = fopen("checksums", "w");
+    file = fopenat(pkg->path, "checksums", "w");
 
     if (!file) {
         die("[%s] Failed to open checksums file", pkg->name);
@@ -98,11 +94,7 @@ void pkg_verify(package *pkg) {
         die("[%s] Sources file does not exist", pkg->name);
     }
 
-    if (chdir(pkg->path) != 0) {
-        die("[%s] Repository directory not accessible", pkg->name);
-    }
-
-    file = fopen("checksums", "r");
+    file = fopenat(pkg->path, "checksums", "r");
 
     while ((getline(&line, &(size_t){0}, file) != -1)) {
         line[strcspn(line, "\n")] = 0;

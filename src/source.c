@@ -23,11 +23,7 @@ static void download(package *pkg, char *url) {
     char *name = basename(url);
     FILE *file;
 
-    if (chdir(pkg->src_dir) != 0) {
-        die("[%s] Source cache not accessible", pkg->name);
-    }
-
-    file = fopen(name, "wb");
+    file = fopenat(pkg->src_dir, name, "wb");
 
     if (!file) {
         die("[%s] Failed to open %s", pkg->name, name);
@@ -52,11 +48,7 @@ static void source_resolve(package *pkg, char *src, char *dest) {
     int err = 0;
 
     if (strstr(src, "://")) {
-        if (chdir(pkg->src_dir) != 0) {
-            die("[%s] Source directory is not accessible", pkg->name);
-        }
-
-        if (access(file, F_OK) != -1) {
+        if (exists_at(pkg->src_dir, file, 0) == 0) {
             msg("[%s] Found cached source %s", pkg->name, src);
 
         } else {
@@ -76,11 +68,7 @@ static void source_resolve(package *pkg, char *src, char *dest) {
         /* https://github.com/libgit2/libgit2/issues/3058 */
 
     } else {
-        if (chdir(pkg->path) != 0) {
-            die("[%s] Repository directory is not accessible", pkg->name);
-        }
-
-        if (access(src, F_OK) != -1) {
+        if (exists_at(pkg->path, src, 0) == 0) {
             msg("[%s] Found  local source %s", pkg->name, src);
             err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path, src);
         }
@@ -102,11 +90,7 @@ void pkg_source(package *pkg) {
     int i = 0;
     size_t err;
 
-    if (chdir(pkg->path) != 0) {
-        die("[%s] Repository is not accessible (%s)", pkg->name, pkg->path);
-    }
-
-    file = fopen("sources", "r");
+    file = fopenat(pkg->path, "sources", "r");
 
     if (!file) {
         die("[%s] Failed to open sources file", pkg->name);

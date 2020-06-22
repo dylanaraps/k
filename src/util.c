@@ -61,23 +61,43 @@ int strsuf(const char *str, const char *suf, size_t suf_len) {
 }
 
 int exists_at(const char *path, const char *file, const int flags) {
-    int fd;
-    int re;
+    int dfd;
+    int ffd;
 
-    fd = open(path, O_RDONLY | O_DIRECTORY);
+    dfd = open(path, O_RDONLY | O_DIRECTORY);
 
-    if (fd == -1) {
+    if (dfd == -1) {
         return 1;
     }
 
-    re = openat(fd, file, O_RDONLY | flags);
+    ffd = openat(dfd, file, O_RDONLY | flags);
 
-    close(fd);
+    close(dfd);
 
-    if (re == -1) {
+    if (ffd == -1) {
         return 1;
     }
 
-    close(re);
+    close(ffd);
     return 0;
+}
+
+FILE *fopenat(const char *path, const char *file, const char *mode) {
+    int dfd;
+    int ffd;
+
+    dfd = open(path, O_RDONLY | O_DIRECTORY);
+
+    if (dfd == -1) {
+        return NULL;
+    }
+
+    ffd = openat(dfd, file, O_RDONLY);
+    close(dfd);
+
+    if (ffd == -1) {
+        return NULL;
+    }
+
+    return fdopen(ffd, mode);
 }
