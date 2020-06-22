@@ -65,7 +65,7 @@ void repo_init(void) {
     free(kiss_path);
 }
 
-#ifdef DEBUG
+#ifdef FREE_ON_EXIT
 void repo_destroy(void) {
     int i;
 

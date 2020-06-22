@@ -60,7 +60,6 @@ void pkg_iter(package *pkg, void (*f)(package *pkg), const char *msg) {
     }
 }
 
-#ifdef DEBUG
 static void pkg_free(package *pkg) {
     int i;
 
@@ -108,8 +107,8 @@ void pkg_destroy(package *pkg) {
     pkg_free(pkg);
 }
 
+#ifdef FREE_ON_EXIT
 void pkg_destroy_all(void) {
-    msg("HELLLO");
     while (PKG) {
         pkg_destroy(PKG);
     }
