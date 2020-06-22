@@ -32,7 +32,7 @@ void pkg_init(package **pkg, char *pkg_name) {
         die("Package name is null");
     }
 
-    pkg_find(new);
+    pkg_find(new, 0);
     pkg_version(new);
 
     if (!*pkg) {

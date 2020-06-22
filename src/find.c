@@ -12,7 +12,7 @@
 
 /* todo: globbing */
 
-void pkg_find(package *pkg) {
+void pkg_find(package *pkg, const int all) {
     int i;
     int err;
     int fd;
@@ -36,17 +36,19 @@ void pkg_find(package *pkg) {
                 die("strlcpy failed");
             }
 
-            return;
+            if (all) {
+                printf("%s\n", pkg->path);
+            } else {
+                return;
+            }
         }
     }
 
-    die("Package '%s' does not exist", pkg->name);
+    if (!all) {
+        die("Package '%s' does not exist", pkg->name);
+    }
 }
 
 void pkg_paths(package *pkg) {
-    int i;
-
-    for (i = 0; i < REPO_LEN; i++) {
-        pkg_find(pkg);
-    }
+    pkg_find(pkg, 1);
 }

@@ -1,7 +1,7 @@
 .POSIX:
 
 PREFIX=/usr/local
-ALL_CFLAGS=$(CFLAGS) -static -std=c99 -Wall -Wextra -Wpedantic -W
+ALL_CFLAGS=$(CFLAGS) -std=c99 -Wall -Wextra -Wpedantic -W
 ALL_LDFLAGS=$(LDFLAGS) -larchive -llzma -lbz2 -lcurl -lssl -lcrypto -lcrypto -lz
 
 OBJ=\
