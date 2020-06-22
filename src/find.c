@@ -10,8 +10,6 @@
 #include "pkg.h"
 #include "find.h"
 
-/* todo: globbing */
-
 void pkg_find(package *pkg, const int all) {
     int i;
     int err;

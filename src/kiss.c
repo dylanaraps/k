@@ -30,6 +30,8 @@ static void usage(void) {
 }
 
 int main (int argc, char *argv[]) {
+    package *pkg;
+
     if (argc == 1) {
         usage();
     }
@@ -38,40 +40,40 @@ int main (int argc, char *argv[]) {
     repo_init();
 
     for (int i = 2; i < argc; i++) {
-        pkg_init(&PKG, argv[i]);
+        pkg_init(&pkg, argv[i]);
     }
 
     switch (argv[1][0]) {
         case 'b':
             cache_init();
-            pkg_iter(PKG, pkg_state_init, NULL);
-            pkg_iter(PKG, pkg_source, "Checking sources");
-            pkg_iter(PKG, pkg_verify, "Verifying checksums");
-            pkg_iter(PKG, pkg_build,  "Building packages");
+            pkg_iter(pkg, pkg_state_init, NULL);
+            pkg_iter(pkg, pkg_source, "Checking sources");
+            pkg_iter(pkg, pkg_verify, "Verifying checksums");
+            pkg_iter(pkg, pkg_build,  "Building packages");
             break;
 
         case 'c':
             cache_init();
-            pkg_iter(PKG, pkg_state_init, NULL);
-            pkg_iter(PKG, pkg_source,       "Checking sources");
-            pkg_iter(PKG, pkg_checksums,    "Generating checksums");
-            pkg_iter(PKG, checksum_to_file, "Saving checksums");
+            pkg_iter(pkg, pkg_state_init, NULL);
+            pkg_iter(pkg, pkg_source,       "Checking sources");
+            pkg_iter(pkg, pkg_checksums,    "Generating checksums");
+            pkg_iter(pkg, checksum_to_file, "Saving checksums");
 
             break;
 
         case 'd':
             cache_init();
-            pkg_iter(PKG, pkg_state_init, NULL);
-            pkg_iter(PKG, pkg_source, "Downloading sources");
+            pkg_iter(pkg, pkg_state_init, NULL);
+            pkg_iter(pkg, pkg_source, "Downloading sources");
 
             break;
 
         case 's':
-            pkg_iter(PKG, pkg_paths, NULL);
+            pkg_iter(pkg, pkg_paths, NULL);
             break;
 
         case 'l':
-            pkg_list_all(PKG);
+            pkg_list_all(pkg);
             break;
 
         case 'v':

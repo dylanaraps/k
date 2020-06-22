@@ -11,7 +11,7 @@
 #include "util.h"
 #include "pkg.h"
 
-package *PKG;
+static package *PKG;
 
 void pkg_init(package **pkg, char *pkg_name) {
     package *tmp = *pkg;
@@ -36,7 +36,7 @@ void pkg_init(package **pkg, char *pkg_name) {
     pkg_version(new);
 
     if (!*pkg) {
-        *pkg = new;
+        *pkg = PKG = new;
 
     } else {
         while (tmp->next) {
