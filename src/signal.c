@@ -19,8 +19,6 @@ void sig_init(void) {
     sigaction(SIGINT,  &sa, NULL);
     sigaction(SIGTERM, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
-
-    atexit(cache_destroy);
 }
 
 void sig_hand(int i) {

@@ -35,12 +35,17 @@ int main (int argc, char *argv[]) {
     }
 
     sig_init();
+
     cache_init();
+    atexit(cache_destroy);
+
     repo_init();
+    atexit(repo_destroy);
 
     for (int i = 2; i < argc; i++) {
         pkg_init(&PKG, argv[i]);
     }
+    atexit(pkg_destroy_all);
 
     switch (argv[1][0]) {
         case 'b':
