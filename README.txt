@@ -13,6 +13,27 @@ ________________________________________________________________________________
 - curl (whatever SSL library)
 
 
+building
+________________________________________________________________________________
+
+$ make
+$ make DESTDIR="..." PREFIX="/usr" install
+
+
+    Options (via CFLAGS).
+    ____________________________________________________________________________
+
+    -static          - Statically build the package manager (3MB statically
+                       linked with musl) (44KB dynamically linked). This option
+                       is recommended as it removes reliance on the system's
+                       overall health.
+
+    -DFREE_ON_EXIT   - Free memory at exit() and SIGTERM/SIGINT SIGQUIT. Modern
+                       operating systems will free all memory regardless. Enable
+                       this for more safety at the cost of exit efficiency. Also
+                       useful for debugging memory issues during development.
+
+
 todo
 ________________________________________________________________________________
 

@@ -1,7 +1,7 @@
 .POSIX:
 
 PREFIX=/usr/local
-ALL_CFLAGS=$(CFLAGS) -std=c99 -static -Wall -Wextra -Wpedantic -W
+ALL_CFLAGS=$(CFLAGS) -std=c99 -Wall -Wextra -Wpedantic -W
 ALL_LDFLAGS=$(LDFLAGS) -larchive -llzma -lbz2 -lcurl -lssl -lcrypto -lcrypto -lz
 
 OBJ=\
@@ -43,7 +43,7 @@ HDR=\
 	$(CC) $(ALL_CFLAGS) -c -o $@ $<
 
 kiss: $(OBJ)
-	$(CC) -DCURL_STATICLIB $(ALL_CFLAGS) -o $@ $(OBJ) $(ALL_LDFLAGS)
+	$(CC) $(ALL_CFLAGS) -o $@ $(OBJ) $(ALL_LDFLAGS)
 
 $(OBJ): $(HDR)
 
