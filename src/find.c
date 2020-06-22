@@ -36,11 +36,11 @@ void pkg_find(package *pkg, const int all) {
                 die("strlcpy failed");
             }
 
-            if (all) {
-                printf("%s\n", pkg->path);
-            } else {
+            if (!all) {
                 return;
             }
+
+            printf("%s\n", pkg->path);
         }
     }
 
