@@ -30,7 +30,7 @@ static void usage(void) {
 }
 
 int main (int argc, char *argv[]) {
-    package *pkg;
+    package *pkg = {0};
 
     if (argc == 1) {
         usage();

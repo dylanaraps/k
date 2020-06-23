@@ -37,7 +37,7 @@ package *pkg_init(package **pkg, char *pkg_name) {
     pkg_version(new);
 
     if (!*pkg) {
-        *pkg = PKG = new;
+        *pkg = new;
 
     } else {
         while (tmp->next) {

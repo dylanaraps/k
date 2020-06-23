@@ -34,12 +34,10 @@ static const int state_len = 3;
 void cache_init(void) {
     char xdg[PATH_MAX];
     char tmp[PATH_MAX];
-    char *dir;
     pid_t pid = getpid();
     int i;
 
     xdg_cache_dir(xdg, PATH_MAX);
-
     xsnprintf(CAC_DIR, PATH_MAX, "%s/%u", xdg, pid);
     mkdir_p(CAC_DIR);
 
@@ -49,24 +47,19 @@ void cache_init(void) {
     }
 
     for (i = 0; i < cache_len; i++) {
-        dir = dirname(strdup(CAC_DIR));
-
-        printf("%s\n", CAC_DIR);
-        xsnprintf(tmp, PATH_MAX, "%s/%s", dir, caches[i]);
+        xsnprintf(tmp, PATH_MAX, "%s/%s", xdg, caches[i]);
         mkdir_p(tmp);
-
-        free(dir);
     }
 }
 
 void state_init(package *pkg, const char *type, char *buf) {
     xsnprintf(buf, PATH_MAX, "%s/%s/%s", CAC_DIR, type, pkg->name);
 
-    mkdir_p(buf);
-
     if (!buf) {
         die("[%s] Failed to init cache directory %s", type, pkg->name);
     }
+
+    mkdir_p(buf);
 }
 
 void xdg_cache_dir(char *buf, int len) {
