@@ -14,13 +14,14 @@
 
 char CAC_DIR[PATH_MAX];
 
-const char *caches[] = {
+static const char *caches[] = {
     "sources",
     "bin",
+    "logs",
 };
-static const int cache_len = 2;
+static const int cache_len = 3;
 
-const char *states[] = {
+static const char *states[] = {
     "build",
     "extract",
     "pkg",

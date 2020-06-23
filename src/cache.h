@@ -3,9 +3,6 @@
 
 #include "pkg.h"
 
-extern const char *caches[];
-extern const char *states[];
-
 extern char CAC_DIR[PATH_MAX];
 
 void cache_init(void);

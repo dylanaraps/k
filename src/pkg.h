@@ -4,6 +4,8 @@
 #define _POSIX_C_SOURCE 200809L
 #include <limits.h> /* PATH_MAX */
 
+extern const char *DB_DIR;
+
 typedef struct package {
     char *name;
     char *ver;

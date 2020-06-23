@@ -1,18 +1,32 @@
 #define _POSIX_C_SOURCE 200809L
-#include <stdio.h>    /* snprintf */
+#include <stdio.h>    /* snprintf, fork */
 #include <limits.h>   /* PATH_MAX */
-#include <unistd.h>   /* access */
+#include <unistd.h>   /* access, execvp */
 #include <sys/wait.h> /* waitpid */
-#include <sys/stat.h> /* mkdir */
-#include <ftw.h>      /* ntfw */
-#include <errno.h>    /* errno */
-#include <libgen.h>   /* dirname */
 
 #include "extract.h"
 #include "file.h"
 #include "log.h"
 #include "pkg.h"
 #include "build.h"
+
+static int exec_file(const char *file, char *args[]) {
+    int err = fork();
+
+    switch (err) {
+    case -1:
+        die("fork() failed");
+
+    case 0:
+        execvp(file, args);
+        break;
+
+    default:
+        waitpid(err, &err, 0);
+    }
+
+    return err;
+}
 
 void pkg_build(package *pkg) {
     char build_file[PATH_MAX];
@@ -37,29 +51,22 @@ void pkg_build(package *pkg) {
 
     msg("[%s] Starting build", pkg->name);
 
-    switch (err = fork()) {
-    case -1:
-        die("fork() failed");
+    err = exec_file(build_file, (char*[]){
+        build_file,
+        pkg->pkg_dir,
+        pkg->ver,
+        NULL
+    });
 
-    case 0:
-        execvp(build_file, (char*[]){
-            build_file,
-            pkg->pkg_dir,
-            pkg->ver,
-            NULL
-        });
-        break;
-
-    default:
-        waitpid(err, &err, 0);
-
-        if (err != 0) {
-            die("[%s] Build failed", pkg->name);
-        }
+    if (err != 0) {
+        die("[%s] Build failed", pkg->name);
     }
 
-    err = snprintf(pkg->db_dir, PATH_MAX, \
-                   "%s/var/db/kiss/installed/%s", pkg->pkg_dir, pkg->name);
+    err = snprintf(pkg->db_dir, PATH_MAX, "%s/%s/%s",
+       pkg->pkg_dir,
+       DB_DIR,
+       pkg->name
+    );
 
     if (err < 1) {
         die("[%s] Failed to construct DB directory", pkg->name);
