@@ -34,15 +34,7 @@ void cache_init(void) {
     int ret;
 
     xdg_cache_dir(xdg, PATH_MAX);
-    ret = snprintf(CAC_DIR, PATH_MAX, "%s/%ul", xdg, pid);
-
-    if (ret == -1) {
-        die("Failed to construct cache directory");
-    }
-
-    if (ret >= PATH_MAX) {
-        die("Cache directory exceeds PATH_MAX");
-    }
+    xsnprintf(CAC_DIR, PATH_MAX, "%s/%ul", xdg, pid);
 
     mkdir_p(CAC_DIR);
 
@@ -91,7 +83,6 @@ void state_init(package *pkg, const char *type, char *buf) {
 
 void xdg_cache_dir(char *buf, int len) {
     char *dir;
-    int ret;
 
     dir = getenv("XDG_CACHE_HOME");
 
@@ -106,15 +97,7 @@ void xdg_cache_dir(char *buf, int len) {
             die("HOME is NULL");
         }
 
-        ret = snprintf(buf, len, "%s/.cache/kiss", dir);
-
-        if (ret == -1) {
-            die("Failed to construct cache directory");
-        }
-
-        if (ret >= len) {
-            die("Path exceeds PATH_MAX");
-        }
+        xsnprintf(buf, len, "%s/.cache/kiss", dir);
 
         return;
     }
@@ -123,15 +106,7 @@ void xdg_cache_dir(char *buf, int len) {
         die("Invalid XDG_CACHE_HOME");
     }
 
-    ret = snprintf(buf, len, "%s/kiss", dir);
-
-    if (ret == -1) {
-        die("Failed to construct cache directory");
-    }
-
-    if (ret >= len) {
-        die("XDG_CACHE_HOME exceeds PATH_MAX");
-    }
+    xsnprintf(buf, len, "%s/kiss", dir);
 }
 
 void cache_destroy(void) {

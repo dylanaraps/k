@@ -7,6 +7,7 @@
 #include "extract.h"
 #include "file.h"
 #include "log.h"
+#include "util.h"
 #include "pkg.h"
 #include "build.h"
 
@@ -35,15 +36,7 @@ void pkg_build(package *pkg) {
     /* extraction must occur this late */
     pkg_extract(pkg);
 
-    err = snprintf(build_file, PATH_MAX, "%s/build", pkg->path);
-
-    if (err < 1) {
-        die("[%s] Failed to find build file", pkg->name);
-    }
-
-    if (err > PATH_MAX) {
-        die("[%s] Build file exceeds PATH_MAX", pkg->name);
-    }
+    xsnprintf(build_file, PATH_MAX, "%s/build", pkg->path);
 
     if (access(build_file, X_OK) == -1) {
         die("[%s] Build file not executable", pkg->name);
@@ -62,19 +55,13 @@ void pkg_build(package *pkg) {
         die("[%s] Build failed", pkg->name);
     }
 
-    err = snprintf(pkg->db_dir, PATH_MAX, "%s/%s/%s",
+    msg("[%s] Successfully built package", pkg->name);
+
+    xsnprintf(pkg->db_dir, PATH_MAX, "%s/%s/%s",
        pkg->pkg_dir,
        DB_DIR,
        pkg->name
     );
-
-    if (err < 1) {
-        die("[%s] Failed to construct DB directory", pkg->name);
-    }
-
-    if (err > PATH_MAX) {
-        die("[%s] DB path exceeds PATH_MAX", pkg->name);
-    }
 
     cp_dir(pkg->path, pkg->db_dir);
 }

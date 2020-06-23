@@ -44,7 +44,6 @@ static void download(package *pkg, char *url) {
 
 static void source_resolve(package *pkg, char *src, char *dest) {
     char *file = basename(src);
-    int err = 0;
 
     if (strstr(src, "://")) {
         if (exists_at(pkg->src_dir, file, 0) == 0) {
@@ -55,7 +54,7 @@ static void source_resolve(package *pkg, char *src, char *dest) {
             download(pkg, src);
         }
 
-        err = snprintf(dest, PATH_MAX, "%s/%s", pkg->src_dir, file);
+        xsnprintf(dest, PATH_MAX, "%s/%s", pkg->src_dir, file);
 
     } else if (strncmp(src, "git+", 4) == 0) {
         die("[%s] Found git source (not yet supported) %s", pkg->name, src);
@@ -69,16 +68,11 @@ static void source_resolve(package *pkg, char *src, char *dest) {
     } else {
         if (exists_at(pkg->path, src, 0) == 0) {
             msg("[%s] Found  local source %s", pkg->name, src);
-            err = snprintf(dest, PATH_MAX, "%s/%s", pkg->path, src);
+            xsnprintf(dest, PATH_MAX, "%s/%s", pkg->path, src);
+
+        } else {
+            die("[%s] Source '%s' does not exist", pkg->name, file);
         }
-    }
-
-    if (err < 1) {
-        die("[%s] Source '%s' does not exist", pkg->name, file);
-    }
-
-    if (err >= PATH_MAX) {
-        die("[%s] Source path exceeds PATH_MAX", pkg->name);
     }
 }
 

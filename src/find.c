@@ -17,11 +17,7 @@ void pkg_find(package *pkg, const int all) {
         err = exists_at(REPOS[i], pkg->name, O_DIRECTORY);
 
         if (err == 0) {
-            err = snprintf(pkg->path, PATH_MAX, "%s/%s", REPOS[i], pkg->name);
-
-            if (err >= PATH_MAX) {
-                die("strlcpy failed");
-            }
+            xsnprintf(pkg->path, PATH_MAX, "%s/%s", REPOS[i], pkg->name);
 
             if (!all) {
                 return;

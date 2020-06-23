@@ -62,7 +62,7 @@ void pkg_checksums(package *pkg) {
         /* 67 == 64 (shasum) + 2 ('  ') + 1 ('\0') */
         pkg->sum[pkg->sum_l] = xmalloc(67 + strlen(base));
 
-        snprintf(pkg->sum[pkg->sum_l], 67 + strlen(base), "%02x%02x%02x%02x%02\
+        xsnprintf(pkg->sum[pkg->sum_l], 67 + strlen(base), "%02x%02x%02x%02x%02\
 x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
 %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x  %s",
             shasum[0],  shasum[1],  shasum[2],  shasum[3],

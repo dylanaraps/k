@@ -9,6 +9,7 @@
 
 #include "log.h"
 #include "strl.h"
+#include "util.h"
 #include "file.h"
 
 static char COPY_DES[PATH_MAX];
@@ -16,18 +17,10 @@ static char COPY_SRC[PATH_MAX];
 static char COPY_END[PATH_MAX];
 
 static int cp(const char *fp, const struct stat *sb, int tf, struct FTW *fb) {
-    int err;
-
-    /* unused */
     (void)(sb);
     (void)(fb);
 
-    err = snprintf(COPY_END, PATH_MAX, "%s/%s",
-                   COPY_DES, fp + strlen(COPY_SRC));
-
-    if (err >= PATH_MAX) {
-        die("strlcpy failed");
-    }
+    xsnprintf(COPY_END, PATH_MAX, "%s/%s", COPY_DES, fp + strlen(COPY_SRC));
 
     if (tf == FTW_D) {
         mkdir_p(COPY_END);
