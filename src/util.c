@@ -130,7 +130,7 @@ FILE *fopenat(const char *path, const char *file, const char *mode) {
     return fdopen(ffd, mode);
 }
 
-int split_in_two(char *line, const char *delim, char **one, char **two) {
+void split_in_two(char *line, const char *delim, char **one, char **two) {
     char *tok;
     size_t len;
     int i;
@@ -139,7 +139,7 @@ int split_in_two(char *line, const char *delim, char **one, char **two) {
         tok = strtok(i ? NULL : line, delim);
 
         if (!tok) {
-            return -1;
+            tok = "";
         }
 
         len = strlen(tok) + 1;
@@ -147,6 +147,4 @@ int split_in_two(char *line, const char *delim, char **one, char **two) {
         *(i ? two : one) = xmalloc(len);
         xstrlcpy(i ? *two : *one, tok, len);
     }
-
-    return 0;
 }

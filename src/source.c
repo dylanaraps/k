@@ -43,7 +43,7 @@ static void download(package *pkg, char *url) {
     curl_easy_cleanup(curl);
 }
 
-static void source_resolve(package *pkg, char *src, char *dest) {
+static void source_resolve(package *pkg, char *src, char **dest) {
     char *file = basename(src);
 
     if (strstr(src, "://")) {
@@ -55,7 +55,8 @@ static void source_resolve(package *pkg, char *src, char *dest) {
             download(pkg, src);
         }
 
-        xsnprintf(dest, PATH_MAX, "%s/%s", pkg->src_dir, file);
+        *dest = xmalloc(PATH_MAX);
+        xsnprintf(*dest, PATH_MAX, "%s/%s", pkg->src_dir, file);
 
     } else if (strncmp(src, "git+", 4) == 0) {
         die("[%s] Found git source (not yet supported) %s", pkg->name, src);
@@ -69,7 +70,8 @@ static void source_resolve(package *pkg, char *src, char *dest) {
     } else {
         if (exists_at(pkg->path, src, 0) == 0) {
             msg("[%s] Found  local source %s", pkg->name, src);
-            xsnprintf(dest, PATH_MAX, "%s/%s", pkg->path, src);
+            *dest = xmalloc(PATH_MAX);
+            xsnprintf(*dest, PATH_MAX, "%s/%s", pkg->path, src);
 
         } else {
             die("[%s] Source '%s' does not exist", pkg->name, file);
@@ -79,7 +81,7 @@ static void source_resolve(package *pkg, char *src, char *dest) {
 
 void pkg_source(package *pkg) {
     char *line = 0;
-    char *tok;
+    char *tmp;
     FILE *file;
     int i = 0;
 
@@ -107,25 +109,18 @@ void pkg_source(package *pkg) {
             die("[%s] Mismatch in source parser", pkg->name);
         }
 
-        tok = strtok(line, " 	\r\n");
+        split_in_two(line, " 	\r\n", &tmp, &pkg->des[i]);
 
-        if (!tok) {
+        if (!tmp) {
             die("[%s] Invalid sources file", pkg->name);
         }
 
-        pkg->src[i] = xmalloc(PATH_MAX);
-        pkg->des[i] = xmalloc(PATH_MAX);
-
-        source_resolve(pkg, tok, pkg->src[i]);
-
-        tok = strtok(NULL, " 	\r\n");
-        tok = tok ? tok : "";
-
-        if (tok[0] == '/') {
+        if (pkg->des[i][0] == '/') {
             die("[%s] Destination must not be absolute", pkg->name);
         }
 
-        xstrlcpy(pkg->des[i], tok, PATH_MAX);
+        source_resolve(pkg, tmp, &pkg->src[i]);
+        free(tmp);
 
         i++;
     }
