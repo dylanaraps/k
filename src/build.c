@@ -1,5 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
-#include <stdio.h>    /* snprintf, fork */
+#include <stdio.h>    /* fork */
 #include <limits.h>   /* PATH_MAX */
 #include <unistd.h>   /* access, execvp */
 #include <sys/wait.h> /* waitpid */
