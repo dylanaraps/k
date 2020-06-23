@@ -70,12 +70,11 @@ int cntlines(FILE *file) {
     int i = 0;
 
     while (getline(&line, &(size_t){0}, file) != -1) {
-        if (line[0] != '#' && line[0] != '\n') {
-           i++;
-        }
+       i += (line[0] != '#' && line[0] != '\n');
     }
-    rewind(file);
+
     free(line);
+    rewind(file);
 
     return i;
 }
@@ -99,7 +98,6 @@ int exists_at(const char *path, const char *file, const int flags) {
     }
 
     ffd = openat(dfd, file, O_RDONLY | flags);
-
     close(dfd);
 
     if (ffd == -1) {
@@ -127,6 +125,7 @@ FILE *fopenat(const char *path, const char *file, const char *mode) {
         return NULL;
     }
 
+    /* fclose() by caller also closes the open()'d fd here */
     return fdopen(ffd, mode);
 }
 
