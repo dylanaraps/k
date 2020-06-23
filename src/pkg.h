@@ -36,7 +36,7 @@ typedef struct package {
     struct package *prev;
 } package;
 
-package *pkg_init(package **pkg, char *pkg_name, int loc);
+package *pkg_init(package **pkg, char *pkg_name);
 void pkg_iter(package *pkg, void (*f)(package *pkg), const char *msg);
 int pkg_have(char *pkg_name);
 void pkg_state_init(package *pkg);

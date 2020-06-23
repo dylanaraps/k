@@ -6,7 +6,6 @@
 
 #include "cache.h"
 #include "checksum.h"
-#include "depends.h"
 #include "build.h"
 #include "signal.h"
 #include "source.h"
@@ -41,21 +40,13 @@ int main (int argc, char *argv[]) {
     repo_init();
 
     for (int i = 2; i < argc; i++) {
-        pkg_init(&pkg, argv[i], 0);
+        pkg_init(&pkg, argv[i]);
     }
-    package *tmp;
 
     switch (argv[1][0]) {
         case 'b':
             cache_init();
             pkg_iter(pkg, pkg_state_init, NULL);
-            pkg_iter(pkg, pkg_depends, "Checking sources");
-            pkg_iter(pkg, resolve_dep, "Checking sources");
-
-            for (tmp = pkg; tmp; tmp = tmp->next) {
-                printf("%s\n", tmp->name);
-            }
-            exit(0);
             pkg_iter(pkg, pkg_source,  "Checking sources");
             pkg_iter(pkg, pkg_verify,  "Verifying checksums");
             pkg_iter(pkg, pkg_build,   "Building packages");

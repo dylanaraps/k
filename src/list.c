@@ -27,7 +27,7 @@ void pkg_list_all(package *pkg) {
 
         // '2' skips '.'/'..'.
         for (i = 2; i < err; i++) {
-            pkg_init(&pkg, list[i]->d_name, 0);
+            pkg_init(&pkg, list[i]->d_name);
             free(list[i]);
         }
 

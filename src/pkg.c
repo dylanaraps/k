@@ -3,7 +3,6 @@
 #include <string.h> /* strlen */
 
 #include "log.h"
-#include "depends.h"
 #include "cache.h"
 #include "find.h"
 #include "find.h"
@@ -13,8 +12,8 @@
 
 static package *PKG;
 
-package *pkg_init(package **pkg, char *pkg_name, int front) {
-    package *tmp = *pkg;
+package *pkg_init(package **pkg, char *pkg_name) {
+    package *tmp = PKG;
     package *new;
 
     if (pkg_have(pkg_name) == 0) {
@@ -36,11 +35,6 @@ package *pkg_init(package **pkg, char *pkg_name, int front) {
     pkg_version(new);
 
     if (!*pkg) {
-        *pkg = PKG = new;
-
-    } else if (front) {
-        new->next = tmp;
-        tmp->prev = new;
         *pkg = PKG = new;
 
     } else {
