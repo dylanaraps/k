@@ -129,3 +129,24 @@ FILE *fopenat(const char *path, const char *file, const char *mode) {
 
     return fdopen(ffd, mode);
 }
+
+int split_in_two(char *line, const char *delim, char **one, char **two) {
+    char *tok;
+    size_t len;
+    int i;
+
+    for (i = 0; i < 2; i++) {
+        tok = strtok(i ? NULL : line, delim);
+
+        if (!tok) {
+            return -1;
+        }
+
+        len = strlen(tok) + 1;
+
+        *(i ? two : one) = xmalloc(len);
+        xstrlcpy(i ? *two : *one, tok, len);
+    }
+
+    return 0;
+}

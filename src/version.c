@@ -12,9 +12,7 @@
 void pkg_version(package *pkg) {
     char *line = 0;
     FILE *file;
-    char *tok;
-    size_t len;
-    size_t err;
+    int err;
 
     file = fopenat(pkg->path, "version", "r");
 
@@ -24,29 +22,15 @@ void pkg_version(package *pkg) {
 
     err = getline(&line, &(size_t){0}, file);
 
-    if ((int) err == -1) {
+    if (err == -1) {
         die("[%s] Failed to read version file", pkg->name);
     }
 
-    tok = strtok(line, " 	");
+    err = split_in_two(line, " 	\r\n", &pkg->ver, &pkg->rel);
 
-    if (!tok) {
-        die("[%s] Invalid version file", pkg->name);
+    if (err == -1) {
+        die("Failed to read or invalid version file");
     }
-
-    len = strlen(tok) + 1;
-    pkg->ver = xmalloc(len);
-    xstrlcpy(pkg->ver, tok, len);
-
-    tok = strtok(NULL, " 	\r\n");
-
-    if (!tok) {
-        die("[%s] Release field missing", pkg->name);
-    }
-
-    len = strlen(tok) + 1;
-    pkg->rel = xmalloc(len);
-    xstrlcpy(pkg->rel, tok, len);
 
     free(line);
     fclose(file);
