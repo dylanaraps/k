@@ -56,19 +56,8 @@ void rm_dir(const char *src) {
 }
 
 void cp_dir(const char *src, const char *des) {
-    int err;
-
-    err = strlcpy(COPY_SRC, src, PATH_MAX);
-
-    if (err >= PATH_MAX) {
-        die("strlcpy failed");
-    }
-
-    err = strlcpy(COPY_DES, des, PATH_MAX);
-
-    if (err >= PATH_MAX) {
-        die("strlcpy failed");
-    }
+    xstrlcpy(COPY_SRC, src, PATH_MAX);
+    xstrlcpy(COPY_DES, des, PATH_MAX);
 
     /* todo: magic 64 */
     nftw(src, cp, 64, 0);
@@ -127,11 +116,7 @@ void mkdir_p(const char *dir) {
         return;
     }
 
-    err = strlcpy(tmp, dir, PATH_MAX);
-
-    if (err >= PATH_MAX) {
-        die("strlcpy failed");
-    }
+    xstrlcpy(tmp, dir, PATH_MAX);
 
     for (p = tmp + 1; *p; p++) {
        if (*p == '/') {

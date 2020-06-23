@@ -7,7 +7,7 @@
 #include <errno.h>    /* errno, EEXIST, S_IRWXU */
 #include <unistd.h>   /* access */
 #include <fcntl.h>    /* open */
-#include <stdarg.h>  /* va_list, va_start, va_end */
+#include <stdarg.h>   /* va_list, va_start, va_end */
 
 #include "log.h"
 #include "strl.h"
@@ -27,6 +27,33 @@ void *xmalloc(size_t n) {
     }
 
     return p;
+}
+
+void xsnprintf(char *str, size_t size, const char *fmt, ...) {
+    va_list va;
+    unsigned int err;
+
+    va_start(va, fmt);
+    err = vsnprintf(str, size, fmt, va);
+    va_end(va);
+
+    if (err < 1) {
+        die("snprintf failed to construct string");
+    }
+
+    if (err > size) {
+        die("snprintf result exceeds buffer size");
+    }
+}
+
+void xstrlcpy(char *dst, const char *src, size_t dsize) {
+    size_t err;
+
+    err = strlcpy(dst, src, dsize);
+
+    if (err >= dsize) {
+        die("strlcpy failed");
+    }
 }
 
 int cntchr(const char *str, int chr) {
@@ -59,23 +86,6 @@ int strsuf(const char *str, const char *suf, size_t suf_len) {
     }
 
     return strncmp(&str[strlen(str) - suf_len], suf, suf_len);
-}
-
-void xsnprintf(char *str, size_t size, const char *fmt, ...) {
-    va_list va;
-    unsigned int err;
-
-    va_start(va, fmt);
-    err = vsnprintf(str, size, fmt, va);
-    va_end(va);
-
-    if (err < 1) {
-        die("snprintf failed to construct string");
-    }
-
-    if (err > size) {
-        die("snprintf result exceeds buffer size");
-    }
 }
 
 int exists_at(const char *path, const char *file, const int flags) {

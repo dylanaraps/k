@@ -46,11 +46,7 @@ void pkg_checksums(package *pkg) {
                 pkg->name, pkg->src[pkg->sum_l]);
         }
 
-        err = strlcpy(base, basename(pkg->src[pkg->sum_l]), PATH_MAX);
-
-        if (err >= PATH_MAX) {
-            die("strlcpy failed");
-        }
+        xstrlcpy(base, basename(pkg->src[pkg->sum_l]), PATH_MAX);
 
         sha256_init(&ctx);
 

@@ -82,7 +82,6 @@ void pkg_source(package *pkg) {
     char *tok;
     FILE *file;
     int i = 0;
-    size_t err;
 
     file = fopenat(pkg->path, "sources", "r");
 
@@ -126,11 +125,7 @@ void pkg_source(package *pkg) {
             die("[%s] Destination must not be absolute", pkg->name);
         }
 
-        err = strlcpy(pkg->des[i], tok, PATH_MAX);
-
-        if (err >= PATH_MAX) {
-            die("strlcpy failed");
-        }
+        xstrlcpy(pkg->des[i], tok, PATH_MAX);
 
         i++;
     }

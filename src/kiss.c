@@ -46,30 +46,30 @@ int main (int argc, char *argv[]) {
     switch (argv[1][0]) {
         case 'b':
             cache_init();
-            pkg_iter(pkg, pkg_state_init, NULL);
-            pkg_iter(pkg, pkg_source,  "Checking sources");
-            pkg_iter(pkg, pkg_verify,  "Verifying checksums");
-            pkg_iter(pkg, pkg_build,   "Building packages");
+            pkg_iter(pkg, pkg_state_init);
+            pkg_iter(pkg, pkg_source);
+            pkg_iter(pkg, pkg_verify);
+            pkg_iter(pkg, pkg_build);
             break;
 
         case 'c':
             cache_init();
-            pkg_iter(pkg, pkg_state_init, NULL);
-            pkg_iter(pkg, pkg_source,       "Checking sources");
-            pkg_iter(pkg, pkg_checksums,    "Generating checksums");
-            pkg_iter(pkg, checksum_to_file, "Saving checksums");
+            pkg_iter(pkg, pkg_state_init);
+            pkg_iter(pkg, pkg_source);
+            pkg_iter(pkg, pkg_checksums);
+            pkg_iter(pkg, checksum_to_file);
 
             break;
 
         case 'd':
             cache_init();
-            pkg_iter(pkg, pkg_state_init, NULL);
-            pkg_iter(pkg, pkg_source, "Downloading sources");
+            pkg_iter(pkg, pkg_state_init);
+            pkg_iter(pkg, pkg_source);
 
             break;
 
         case 's':
-            pkg_iter(pkg, pkg_paths, NULL);
+            pkg_iter(pkg, pkg_paths);
             break;
 
         case 'l':

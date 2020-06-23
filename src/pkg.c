@@ -59,10 +59,8 @@ void pkg_state_init(package *pkg) {
     state_init(pkg, "../bin",     pkg->bin_dir);
 }
 
-void pkg_iter(package *pkg, void (*f)(package *pkg), const char *msg) {
+void pkg_iter(package *pkg, void (*f)(package *pkg)) {
     package *tmp;
-
-    (void)(msg);
 
     for (tmp = pkg; tmp; tmp = tmp->next) {
         (*f)(tmp);

@@ -36,12 +36,7 @@ void pkg_version(package *pkg) {
 
     len = strlen(tok) + 1;
     pkg->ver = xmalloc(len);
-
-    err = strlcpy(pkg->ver, tok, len);
-
-    if (err >= len) {
-        die("strlcpy failed");
-    }
+    xstrlcpy(pkg->ver, tok, len);
 
     tok = strtok(NULL, " 	\r\n");
 
@@ -51,12 +46,7 @@ void pkg_version(package *pkg) {
 
     len = strlen(tok) + 1;
     pkg->rel = xmalloc(len);
-
-    err = strlcpy(pkg->rel, tok, len);
-
-    if (err >= len) {
-        die("strlcpy failed");
-    }
+    xstrlcpy(pkg->rel, tok, len);
 
     free(line);
     fclose(file);

@@ -39,7 +39,7 @@ typedef struct package {
 } package;
 
 package *pkg_init(package **pkg, char *pkg_name);
-void pkg_iter(package *pkg, void (*f)(package *pkg), const char *msg);
+void pkg_iter(package *pkg, void (*f)(package *pkg));
 int pkg_have(char *pkg_name);
 void pkg_state_init(package *pkg);
 void pkg_destroy(package *pkg);
