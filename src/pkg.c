@@ -17,6 +17,10 @@ package *pkg_init(package **pkg, char *pkg_name) {
     package *tmp = PKG;
     package *new;
 
+    if (!pkg_name) {
+        die("Package name is null");
+    }
+
     if (pkg_have(pkg_name) == 0) {
         return NULL;
     }
