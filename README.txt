@@ -20,9 +20,21 @@ $ make
 $ make DESTDIR="..." PREFIX="/usr" install
 
 
+    options (via CFLAGS)
+    ____________________________________________________________________________
+
+    -DFREE_ON_EXIT  -  Free memory kept around till process end instead of
+                       letting the OS handle it. Enable this if debugging
+                       memory issues (via valgrind for example) or if using an
+                       OS which doesn't free memory on process exit.
+
+    -static         -  Statically build the package manager (recommended). This
+                       adds 2-3MB to the resulting binary but removes its
+                       reliance on overall system health.
+
+
 todo
 ________________________________________________________________________________
-
 
 Big things.
 
@@ -41,7 +53,6 @@ Big things.
 - [x] 'kiss c'
 - [x] 'kiss v'
 - [ ] Elevation of privileges.
-
 
 The nitpicky stuff.
 
