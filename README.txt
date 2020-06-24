@@ -1,7 +1,7 @@
 k
 ________________________________________________________________________________
 
-kiss pkg man written in c
+kiss pkg man written in C99.
 
 
 dependencies
@@ -30,11 +30,17 @@ Big things.
     - [ ] Manifest generation.
     - [ ] Binary stripping.
     - [ ] Dependency finder.
-    - [ ] Dependency support.
+    - [ ] Dependency resolution.
 - [ ] 'kiss i'
 - [ ] 'kiss r'
 - [ ] 'kiss a'
 - [ ] 'kiss u'
+- [x] 'kiss s'
+- [x] 'kiss l'
+- [x] 'kiss d'
+- [x] 'kiss c'
+- [x] 'kiss v'
+- [ ] Elevation of privileges.
 
 
 The nitpicky stuff.
@@ -43,3 +49,4 @@ The nitpicky stuff.
 - [ ] Add support for meta-packages.
 - [ ] Add support for Git sources.
 - [ ] Find a better sha256 implementation.
+- [ ] Add support for globbing in 'kiss s'.
