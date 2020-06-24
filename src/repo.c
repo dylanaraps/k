@@ -8,6 +8,7 @@
 #include "log.h"
 #include "strl.h"
 #include "util.h"
+#include "pkg.h"
 #include "repo.h"
 
 char **REPOS;
@@ -36,7 +37,7 @@ void repo_init(void) {
 
         /* add fallback */
         if (!tmp) {
-            tmp = "/var/db/kiss/installed";
+            tmp = DB_DIR;
 
             /* todo: prepend KISS_ROOT */
         }

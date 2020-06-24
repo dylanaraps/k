@@ -10,8 +10,7 @@
 #include "util.h"
 #include "pkg.h"
 
-const char *DB_DIR = "/var/db/kiss/installed";
-
+char DB_DIR[PATH_MAX] = "/var/db/kiss/installed";
 static package *PKG;
 
 package *pkg_init(package **pkg, char *pkg_name) {

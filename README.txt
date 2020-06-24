@@ -1,7 +1,7 @@
 k
 ________________________________________________________________________________
 
-kiss pkg man written in C99.
+kiss pkg man written in C99. [wip]
 
 
 dependencies
@@ -43,6 +43,7 @@ Big things.
     - [ ] Binary stripping.
     - [ ] Dependency finder.
     - [ ] Dependency resolution.
+    - [ ] Tarball creation.
 - [ ] 'kiss i'
 - [ ] 'kiss r'
 - [ ] 'kiss a'
@@ -61,3 +62,6 @@ The nitpicky stuff.
 - [ ] Add support for Git sources.
 - [ ] Find a better sha256 implementation.
 - [ ] Add support for globbing in 'kiss s'.
+- [ ] Log build output to file (via dup() or dup2()).
+- [ ] Permission support in (src/file.c).
+- [ ] Figure out how messages should be displayed.

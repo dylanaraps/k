@@ -9,7 +9,7 @@
 #include "list.h"
 
 int pkg_list(const char *pkg_name) {
-    return exists_at("/var/db/kiss/installed", pkg_name, O_DIRECTORY);
+    return exists_at(DB_DIR, pkg_name, O_DIRECTORY);
 }
 
 void pkg_list_all(package *pkg) {
@@ -19,7 +19,7 @@ void pkg_list_all(package *pkg) {
     int i;
 
     if (!pkg) {
-        err = scandir("/var/db/kiss/installed", &list, NULL, alphasort);
+        err = scandir(DB_DIR, &list, NULL, alphasort);
 
         if (err == -1) {
             die("Package DB not accessible");
