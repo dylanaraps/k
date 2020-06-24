@@ -20,8 +20,9 @@ void sig_init(void) {
     sigaction(SIGTERM, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
 
-#ifdef FREE_ON_EXIT
     atexit(cache_destroy);
+
+#ifdef FREE_ON_EXIT
     atexit(repo_destroy);
     atexit(pkg_destroy_all);
 #endif
