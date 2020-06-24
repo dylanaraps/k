@@ -63,5 +63,6 @@ void pkg_build(package *pkg) {
        pkg->name
     );
 
+    /* copy repository files to /var/db/kiss/installed */
     cp_dir(pkg->path, pkg->db_dir);
 }

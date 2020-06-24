@@ -31,6 +31,35 @@ static const char *states[] = {
 };
 static const int state_len = 3;
 
+
+static void xdg_cache_dir(char *buf, int len) {
+    char *dir;
+
+    dir = getenv("XDG_CACHE_HOME");
+
+    if (!len) {
+        die("Failed to construct cache directory");
+    }
+
+    if (!dir) {
+        dir = getenv("HOME");
+
+        if (!dir) {
+            die("HOME is NULL");
+        }
+
+        xsnprintf(buf, len, "%s/.cache/kiss", dir);
+
+        return;
+    }
+
+    if (!strchr(dir, '/')) {
+        die("XDG_CACHE_HOME must be absolute");
+    }
+
+    xsnprintf(buf, len, "%s/kiss", dir);
+}
+
 void cache_init(void) {
     char xdg[PATH_MAX];
     char tmp[PATH_MAX];
@@ -62,34 +91,7 @@ void state_init(package *pkg, const char *type, char *buf) {
     mkdir_p(buf);
 }
 
-void xdg_cache_dir(char *buf, int len) {
-    char *dir;
-
-    dir = getenv("XDG_CACHE_HOME");
-
-    if (!dir || !len) {
-        die("Failed to construct cache directory");
-    }
-
-    if (!dir) {
-        dir = getenv("HOME");
-
-        if (!dir) {
-            die("HOME is NULL");
-        }
-
-        xsnprintf(buf, len, "%s/.cache/kiss", dir);
-
-        return;
-    }
-
-    if (!strchr(dir, '/')) {
-        die("Invalid XDG_CACHE_HOME");
-    }
-
-    xsnprintf(buf, len, "%s/kiss", dir);
-}
-
 void cache_destroy(void) {
     rm_dir(CAC_DIR);
 }
+
