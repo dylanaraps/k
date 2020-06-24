@@ -20,6 +20,7 @@ static int exec_file(const char *file, char *args[]) {
 
     case 0:
         execvp(file, args);
+        exit(1);
         break;
 
     default:
