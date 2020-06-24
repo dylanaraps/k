@@ -12,7 +12,7 @@
 #include "build.h"
 
 static int exec_file(const char *file, char *args[]) {
-    int err = fork();
+    pid_t err = fork();
 
     switch (err) {
     case -1:
