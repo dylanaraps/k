@@ -35,16 +35,16 @@ static const int state_len = 3;
 static void xdg_cache_dir(char *buf, int len) {
     char *dir;
 
-    dir = getenv("XDG_CACHE_HOME");
-
     if (!len) {
         die("Failed to construct cache directory");
     }
 
-    if (!dir) {
+    dir = getenv("XDG_CACHE_HOME");
+
+    if (!dir || !dir[0]) {
         dir = getenv("HOME");
 
-        if (!dir) {
+        if (!dir || !dir[0]) {
             die("HOME is NULL");
         }
 
