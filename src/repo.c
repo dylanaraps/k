@@ -15,13 +15,17 @@ char **REPOS;
 int REPO_LEN = 0;
 
 void repo_init(void) {
-    char *kiss_path = strdup(getenv("KISS_PATH"));
+    char *kiss_path;
     char *tmp = 0;
     int i;
 
-    if (!kiss_path) {
+    tmp = getenv("KISS_PATH");
+
+    if (!tmp || !tmp[0]) {
         die("KISS_PATH must be set");
     }
+
+    kiss_path = strdup(tmp);
 
     if (!strchr(kiss_path, '/')) {
         die("Invalid KISS_PATH");
