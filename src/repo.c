@@ -6,7 +6,6 @@
 #include <unistd.h> /* chdir */
 
 #include "log.h"
-#include "strl.h"
 #include "util.h"
 #include "pkg.h"
 #include "repo.h"
@@ -59,7 +58,7 @@ void repo_init(void) {
         }
 
         REPOS[i] = xmalloc(PATH_MAX);
-        xstrlcpy(REPOS[i], tmp, PATH_MAX);
+        xmemcpy(REPOS[i], tmp, PATH_MAX);
     }
 
     free(kiss_path);

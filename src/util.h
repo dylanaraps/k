@@ -2,7 +2,7 @@
 #include <stdio.h>  /* FILE */
 
 void *xmalloc(size_t n);
-void xstrlcpy(char *dst, const char *src, size_t dsize);
+void xmemcpy(char *dst, const char *src, size_t dsize);
 void xsnprintf(char *str, size_t size, const char *fmt, ...);
 int cntchr(const char *str, int chr);
 int cntlines(FILE *file);

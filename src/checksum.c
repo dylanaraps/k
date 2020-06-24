@@ -6,7 +6,6 @@
 
 #include "log.h"
 #include "util.h"
-#include "strl.h"
 #include "pkg.h"
 #include "checksum.h"
 #include "sha256.h"
@@ -46,7 +45,7 @@ void pkg_checksums(package *pkg) {
                 pkg->name, pkg->src[pkg->sum_l]);
         }
 
-        xstrlcpy(base, basename(pkg->src[pkg->sum_l]), PATH_MAX);
+        xmemcpy(base, basename(pkg->src[pkg->sum_l]), PATH_MAX);
 
         sha256_init(&ctx);
 

@@ -4,7 +4,6 @@
 
 #include "log.h"
 #include "repo.h"
-#include "strl.h"
 #include "util.h"
 #include "pkg.h"
 #include "find.h"

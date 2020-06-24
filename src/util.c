@@ -10,7 +10,6 @@
 #include <stdarg.h>   /* va_list, va_start, va_end */
 
 #include "log.h"
-#include "strl.h"
 #include "util.h"
 
 void *xmalloc(size_t n) {
@@ -29,6 +28,22 @@ void *xmalloc(size_t n) {
     return p;
 }
 
+void xmemcpy(char *dst, const char *src, size_t dsize) {
+    if (dsize == 0) {
+        die("Empty allocation");
+    }
+
+    if (!dst || !src) {
+        die("Empty input to memcpy()");
+    }
+
+    if ((strlen(src)) > dsize) {
+        die("Size not large enough for allocation.");
+    }
+
+    memcpy(dst, src, dsize);
+}
+
 void xsnprintf(char *str, size_t size, const char *fmt, ...) {
     va_list va;
     unsigned int err;
@@ -43,16 +58,6 @@ void xsnprintf(char *str, size_t size, const char *fmt, ...) {
 
     if (err > size) {
         die("snprintf result exceeds buffer size");
-    }
-}
-
-void xstrlcpy(char *dst, const char *src, size_t dsize) {
-    size_t err;
-
-    err = strlcpy(dst, src, dsize);
-
-    if (err >= dsize) {
-        die("strlcpy failed");
     }
 }
 
@@ -144,6 +149,6 @@ void split_in_two(char *line, const char *delim, char **one, char **two) {
         len = strlen(tok) + 1;
 
         *(i ? two : one) = xmalloc(len);
-        xstrlcpy(i ? *two : *one, tok, len);
+        xmemcpy(i ? *two : *one, tok, len);
     }
 }

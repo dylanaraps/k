@@ -4,11 +4,11 @@
 #include <unistd.h>   /* access */
 #include <sys/stat.h> /* mkdir */
 #include <ftw.h>      /* ntfw */
+#include <string.h>   /* strlen */
 #include <errno.h>    /* errno */
 #include <libgen.h>   /* dirname */
 
 #include "log.h"
-#include "strl.h"
 #include "util.h"
 #include "file.h"
 
@@ -56,8 +56,8 @@ void rm_dir(const char *src) {
 }
 
 void cp_dir(const char *src, const char *des) {
-    xstrlcpy(COPY_SRC, src, PATH_MAX);
-    xstrlcpy(COPY_DES, des, PATH_MAX);
+    xmemcpy(COPY_SRC, src, PATH_MAX);
+    xmemcpy(COPY_DES, des, PATH_MAX);
 
     /* todo: magic 64 */
     nftw(src, cp, 64, 0);
@@ -116,7 +116,7 @@ void mkdir_p(const char *dir) {
         return;
     }
 
-    xstrlcpy(tmp, dir, PATH_MAX);
+    xmemcpy(tmp, dir, PATH_MAX);
 
     for (p = tmp + 1; *p; p++) {
        if (*p == '/') {

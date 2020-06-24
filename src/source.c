@@ -8,7 +8,6 @@
 
 #include "log.h"
 #include "util.h"
-#include "strl.h"
 #include "pkg.h"
 #include "cache.h"
 #include "source.h"

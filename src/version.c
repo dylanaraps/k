@@ -5,7 +5,6 @@
 #include <fcntl.h>  /* O_RDONLY */
 
 #include "log.h"
-#include "strl.h"
 #include "util.h"
 #include "version.h"
 
