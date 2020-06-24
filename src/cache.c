@@ -54,7 +54,7 @@ static void xdg_cache_dir(char *buf, int len) {
     }
 
     if (!strchr(dir, '/')) {
-        die("XDG_CACHE_HOME must be absolute");
+        die("XDG_CACHE_HOME and HOME must be absolute");
     }
 
     xsnprintf(buf, len, "%s/kiss", dir);
