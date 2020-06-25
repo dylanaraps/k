@@ -65,3 +65,4 @@ The nitpicky stuff.
 - [ ] Log build output to file (via dup() or dup2()).
 - [ ] Permission support in (src/file.c).
 - [ ] Figure out how messages should be displayed.
+- [ ] Drop nftw() as it is XSI and not POSIX.
