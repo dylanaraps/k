@@ -94,7 +94,7 @@ void cache_dir_init(package *pkg, const char *type, char *buf) {
     char cac_dir[PATH_MAX];
     char *path;
 
-    xmemcpy(cac_dir, CAC_DIR, PATH_MAX);
+    xstrlcpy(cac_dir, CAC_DIR, PATH_MAX);
 
     path = dirname(cac_dir);
 

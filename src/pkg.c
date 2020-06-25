@@ -90,7 +90,6 @@ static void pkg_free(package *pkg) {
     free(pkg->name);
     free(pkg->ver);
     free(pkg->rel);
-    free(pkg->path);
 
     for (i = 0; i < pkg->src_l; i++) {
         free(pkg->src[i]);

@@ -33,7 +33,7 @@ static void download(package *pkg, char *url) {
         die("Failed to initialize curl");
     }
 
-    xmemcpy(tmp, url, PATH_MAX);
+    xstrlcpy(tmp, url, PATH_MAX);
     name = basename(tmp);
 
     if (!name) {

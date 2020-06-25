@@ -1,2 +1,3 @@
 kiss
 src/*.o
+.ccls-cache

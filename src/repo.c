@@ -15,19 +15,20 @@ int REPO_LEN = 0;
 
 void repo_init(void) {
     char *kiss_path;
-    char *tmp = 0;
+    char *env;
+    char *tmp;
     int i;
 
-    tmp = getenv("KISS_PATH");
+    env = getenv("KISS_PATH");
 
-    if (!tmp || !tmp[0]) {
+    if (!env || !env[0]) {
         die("KISS_PATH must be set");
     }
 
-    kiss_path = strdup(tmp);
+    kiss_path = strdup(env);
 
     if (!kiss_path || !kiss_path[0]) {
-        die("KISS_PATH must be set");
+        die("Failed to allocate memory");
     }
 
     if (!strchr(kiss_path, '/')) {
@@ -62,7 +63,7 @@ void repo_init(void) {
         }
 
         REPOS[i] = xmalloc(PATH_MAX);
-        xmemcpy(REPOS[i], tmp, PATH_MAX);
+        xstrlcpy(REPOS[i], tmp, PATH_MAX);
     }
 
     free(kiss_path);

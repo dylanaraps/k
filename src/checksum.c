@@ -45,7 +45,7 @@ void pkg_checksums(package *pkg) {
                 pkg->name, pkg->src[pkg->sum_l]);
         }
 
-        xmemcpy(base, basename(pkg->src[pkg->sum_l]), PATH_MAX);
+        xstrlcpy(base, basename(pkg->src[pkg->sum_l]), PATH_MAX);
 
         sha256_init(&ctx);
 
