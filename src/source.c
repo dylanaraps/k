@@ -19,6 +19,7 @@ static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) {
 
 static void download(package *pkg, char *url) {
     CURL *curl;
+    char tmp[PATH_MAX];
     char *name;
     FILE *file;
 
@@ -32,10 +33,11 @@ static void download(package *pkg, char *url) {
         die("Failed to initialize curl");
     }
 
-    name = strdup(basename(url));
+    xmemcpy(tmp, url, PATH_MAX);
+    name = basename(tmp);
 
     if (!name) {
-        die("Failed to allocate memory");
+        die("Failed to construct basename");
     }
 
     file = fopenat(pkg->src_dir, name, O_RDWR | O_CREAT, "wb");

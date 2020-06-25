@@ -127,7 +127,7 @@ FILE *fopenat(const char *d, const char *f, const int o, const char *m) {
         return NULL;
     }
 
-    ffd = openat(dfd, f, o);
+    ffd = openat(dfd, f, o, 0644);
     close(dfd);
 
     if (ffd == -1) {
