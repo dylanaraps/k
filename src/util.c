@@ -28,7 +28,7 @@ void *xmalloc(size_t n) {
     return p;
 }
 
-void xmemcpy(char *dst, const char *src, size_t dsize) {
+void xmemcpy(void *dst, const void *src, size_t dsize) {
     if (dsize == 0) {
         die("Empty allocation");
     }
