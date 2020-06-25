@@ -26,7 +26,7 @@ void repo_init(void) {
 
     kiss_path = strdup(tmp);
 
-    if (!tmp || !tmp[0]) {
+    if (!kiss_path || !kiss_path[0]) {
         die("KISS_PATH must be set");
     }
 

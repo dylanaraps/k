@@ -55,11 +55,11 @@ package *pkg_init(package **pkg, char *pkg_name) {
 }
 
 void pkg_state_init(package *pkg) {
-    state_init(pkg, "build",      pkg->mak_dir);
-    state_init(pkg, "extract",    pkg->tar_dir);
-    state_init(pkg, "pkg",        pkg->pkg_dir);
-    state_init(pkg, "../sources", pkg->src_dir);
-    state_init(pkg, "../bin",     pkg->bin_dir);
+    state_dir_init(pkg, "build",   pkg->mak_dir);
+    state_dir_init(pkg, "extract", pkg->tar_dir);
+    state_dir_init(pkg, "pkg",     pkg->pkg_dir);
+    cache_dir_init(pkg, "sources", pkg->src_dir);
+    cache_dir_init(pkg, "bin",     pkg->bin_dir);
 }
 
 void pkg_iter(package *pkg, void (*f)(package *pkg)) {

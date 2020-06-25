@@ -20,9 +20,8 @@ char CAC_DIR[PATH_MAX];
 static const char *caches[] = {
     "sources",
     "bin",
-    "logs",
 };
-static const int cache_len = 3;
+static const int cache_len = 2;
 
 static const char *states[] = {
     "build",
@@ -81,8 +80,29 @@ void cache_init(void) {
     }
 }
 
-void state_init(package *pkg, const char *type, char *buf) {
+void state_dir_init(package *pkg, const char *type, char *buf) {
     xsnprintf(buf, PATH_MAX, "%s/%s/%s", CAC_DIR, type, pkg->name);
+
+    if (!buf) {
+        die("[%s] Failed to init cache directory %s", type, pkg->name);
+    }
+
+    mkdir_p(buf);
+}
+
+void cache_dir_init(package *pkg, const char *type, char *buf) {
+    char cac_dir[PATH_MAX];
+    char *path;
+
+    xmemcpy(cac_dir, CAC_DIR, PATH_MAX);
+
+    path = dirname(cac_dir);
+
+    if (!path) {
+        die("Failed to construct cache directory");
+    }
+
+    xsnprintf(buf, PATH_MAX, "%s/%s/%s", path, type, pkg->name);
 
     if (!buf) {
         die("[%s] Failed to init cache directory %s", type, pkg->name);

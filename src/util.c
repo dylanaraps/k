@@ -42,6 +42,10 @@ void xmemcpy(char *dst, const char *src, size_t dsize) {
     }
 
     memcpy(dst, src, dsize);
+
+    if (!dst) {
+        die("Failed to copy memoru");
+    }
 }
 
 void xsnprintf(char *str, size_t size, const char *fmt, ...) {
@@ -113,17 +117,17 @@ int exists_at(const char *path, const char *file, const int flags) {
     return 0;
 }
 
-FILE *fopenat(const char *path, const char *file, const char *mode) {
+FILE *fopenat(const char *d, const char *f, const int o, const char *m) {
     int dfd;
     int ffd;
 
-    dfd = open(path, O_RDONLY | O_DIRECTORY);
+    dfd = open(d, o | O_SEARCH);
 
     if (dfd == -1) {
         return NULL;
     }
 
-    ffd = openat(dfd, file, O_RDONLY);
+    ffd = openat(dfd, f, o);
     close(dfd);
 
     if (ffd == -1) {
@@ -131,7 +135,7 @@ FILE *fopenat(const char *path, const char *file, const char *mode) {
     }
 
     /* fclose() by caller also closes the open()'d fd here */
-    return fdopen(ffd, mode);
+    return fdopen(ffd, m);
 }
 
 void split_in_two(char *line, const char *delim, char **one, char **two) {

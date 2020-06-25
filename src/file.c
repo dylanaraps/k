@@ -123,7 +123,7 @@ void mkdir_p(const char *dir) {
        if (*p == '/') {
            *p = 0;
 
-           err = mkdir(tmp, S_IRWXU);
+           err = mkdir(tmp, 0755);
 
            if (err == -1 && errno != EEXIST) {
                die("Failed to create directory %s", tmp);
@@ -133,7 +133,7 @@ void mkdir_p(const char *dir) {
        }
     }
 
-    err = mkdir(tmp, S_IRWXU);
+    err = mkdir(tmp, 0755);
 
     if (err == -1 && errno != EEXIST) {
         die("Failed to create directory %s", tmp);

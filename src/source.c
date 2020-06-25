@@ -18,20 +18,51 @@ static size_t file_write(void *ptr, size_t size, size_t nmemb, void *stream) {
 }
 
 static void download(package *pkg, char *url) {
-    CURL *curl = curl_easy_init();
-    char *name = basename(url);
+    CURL *curl;
+    char *name;
     FILE *file;
 
-    file = fopenat(pkg->src_dir, name, "wb");
+    if (!url) {
+        die("null url");
+    }
+
+    curl = curl_easy_init();
+
+    if (!curl) {
+        die("Failed to initialize curl");
+    }
+
+    name = strdup(basename(url));
+
+    if (!name) {
+        die("Failed to allocate memory");
+    }
+
+    file = fopenat(pkg->src_dir, name, O_RDWR | O_CREAT, "wb");
 
     if (!file) {
         die("[%s] Failed to open %s/%s", pkg->name, pkg->src_dir, name);
     }
 
-    curl_easy_setopt(curl, CURLOPT_URL, url);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, file_write);
-    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+    if (curl_easy_setopt(curl, CURLOPT_URL, url) != 0) {
+        die("Failed to set CURLOPT_URL");
+    }
+
+    if (curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, file_write) != 0) {
+        die("Failed to set CURLOPT_WRITEFUNCTION");
+    }
+
+    if (curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L) != 0) {
+        die("Failed to set CURLOPT_NOPROGRESS");
+    }
+
+    if (curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L) != 0) {
+        die("Failed to set CURLOPT_FOLLOWLOCATION");
+    }
+
+    if (curl_easy_setopt(curl, CURLOPT_WRITEDATA, file) != 0) {
+        die("Failed to set CURLOPT_WRITEDATA");
+    }
 
     if (curl_easy_perform(curl) != 0) {
         remove(name);
@@ -84,7 +115,7 @@ void pkg_source(package *pkg) {
     FILE *file;
     int i = 0;
 
-    file = fopenat(pkg->path, "sources", "r");
+    file = fopenat(pkg->path, "sources", O_RDONLY, "r");
 
     if (!file) {
         die("[%s] Failed to open sources file", pkg->name);

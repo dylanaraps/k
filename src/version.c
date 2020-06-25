@@ -13,7 +13,7 @@ void pkg_version(package *pkg) {
     FILE *file;
     int err;
 
-    file = fopenat(pkg->path, "version", "r");
+    file = fopenat(pkg->path, "version", O_RDONLY, "r");
 
     if (!file) {
         die("[%s] Version file does not exist", pkg->name);

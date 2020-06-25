@@ -14,7 +14,7 @@ void checksum_to_file(package *pkg) {
     FILE *file;
     int i;
 
-    file = fopenat(pkg->path, "checksums", "w");
+    file = fopenat(pkg->path, "checksums", O_RDWR | O_CREAT, "w");
 
     if (!file) {
         die("[%s] Failed to open checksums file", pkg->name);
@@ -89,7 +89,7 @@ void pkg_verify(package *pkg) {
         die("[%s] Sources file does not exist", pkg->name);
     }
 
-    file = fopenat(pkg->path, "checksums", "r");
+    file = fopenat(pkg->path, "checksums", O_RDONLY, "r");
 
     while ((getline(&line, &(size_t){0}, file) != -1)) {
         line[strcspn(line, "\n")] = 0;
