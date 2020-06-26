@@ -37,11 +37,12 @@ int main (int argc, char *argv[]) {
     }
 
     repo_init();
-
     sig_init();
-    atexit(repo_destroy);
+
+    /* called in reverse order */
     atexit(pkg_destroy_all);
     atexit(cache_destroy);
+    atexit(repo_destroy);
 
     for (int i = 2; i < argc; i++) {
         pkg_init(&pkg, argv[i]);
