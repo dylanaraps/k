@@ -4,6 +4,8 @@
 #include <signal.h>
 #include <stdarg.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "vec.h"
 #include "pkg.h"
@@ -21,6 +23,16 @@ static void _m(const char* t, const char *f, const int l, const char *fmt, ...) 
     printf("\n");
 
     va_end(args);
+}
+
+static void *xmalloc(size_t n) {
+    void *p = malloc(n);
+
+    if (!p) {
+        die("Failed to allocate memory");
+    }
+
+    return p;
 }
 
 static char *xstrdup(const char *s) {
@@ -43,6 +55,15 @@ static char *xgetenv(const char *s) {
     return xstrdup(p);
 }
 
+static int exists_at(const char *d, const char *f, const int m) {
+    int dfd = open(d, O_RDONLY | O_DIRECTORY);
+    int ffd = openat(dfd, f, O_RDONLY | m);
+
+    close(dfd);
+
+    return close(ffd);
+}
+
 static char **repo_init(void) {
     char *tmp;
     char *env;
@@ -50,10 +71,6 @@ static char **repo_init(void) {
     int i = 0;
 
     env = xgetenv("KISS_PATH");
-
-    if (!strchr(env, '/')) {
-        die("Invalid KISS_PATH");
-    }
 
     while ((tmp = strtok(i++ ? NULL : env, ":"))) {
         vec_push_back(repos, xstrdup(tmp));
@@ -63,6 +80,16 @@ static char **repo_init(void) {
     free(env);
 
     return repos;
+}
+
+static char *pkg_find(const char *name, char **repos) {
+    for (size_t j = 0; j < vec_size(repos); ++j) {
+        if (exists_at(repos[j], name, O_DIRECTORY) == 0) {
+            return repos[j];
+        }
+    }
+
+    die("Package '%s' not in any repository", name);
 }
 
 static package pkg_new(char *name) {
@@ -114,14 +141,12 @@ int main (int argc, char *argv[]) {
         usage();
     }
 
-    for (int i = 2; i < argc; i++) {
-        vec_push_back(pkgs, pkg_new(argv[i]));
-    }
-
     repos = repo_init();
 
-    for (size_t i = 0; i < vec_size(repos); ++i) {
-        printf("v[%lu] = %s\n", i, repos[i]);
+    for (int i = 2; i < argc; i++) {
+        vec_push_back(pkgs, pkg_new(argv[i]));
+
+        pkgs[i - 2].path = pkg_find(pkgs[i - 2].name, repos);
     }
 
     switch (argv[1][0]) {
