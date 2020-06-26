@@ -56,12 +56,24 @@ static char *xgetenv(const char *s) {
 }
 
 static int exists_at(const char *d, const char *f, const int m) {
-    int dfd = open(d, O_RDONLY | O_DIRECTORY);
-    int ffd = openat(dfd, f, O_RDONLY | m);
+    int dfd;
+    int ffd;
 
+    dfd = open(d, O_RDONLY | O_DIRECTORY);
+
+    if (dfd == -1) {
+        return -1;
+    }
+
+    ffd = openat(dfd, f, O_RDONLY | m);
     close(dfd);
 
-    return close(ffd);
+    if (ffd == -1) {
+        return -1;
+    }
+
+    close(ffd);
+    return 0;
 }
 
 static char **repo_init(void) {
