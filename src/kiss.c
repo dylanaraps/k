@@ -7,7 +7,6 @@
 #include "cache.h"
 #include "checksum.h"
 #include "build.h"
-#include "signal.h"
 #include "source.h"
 #include "find.h"
 #include "list.h"
@@ -30,6 +29,7 @@ static void usage(void) {
 }
 
 int main (int argc, char *argv[]) {
+    struct sigaction sa;
     package *pkg = {0};
 
     if (argc == 1) {
@@ -37,9 +37,15 @@ int main (int argc, char *argv[]) {
     }
 
     repo_init();
-    sig_init();
 
-    /* called in reverse order */
+    sa.sa_handler = exit;
+    sigemptyset(&sa.sa_mask);
+    sigaddset(&sa.sa_mask, SIGINT);
+
+    sigaction(SIGINT,  &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGQUIT, &sa, NULL);
+
     atexit(pkg_destroy_all);
     atexit(cache_destroy);
     atexit(repo_destroy);

@@ -7,7 +7,6 @@ ALL_LDFLAGS = $(LDFLAGS) $(LIBS)
 
 OBJ = \
 	src/build.o \
-	src/signal.o \
 	src/file.o \
 	src/extract.o \
 	src/source.o \
@@ -25,7 +24,6 @@ OBJ = \
 
 HDR = \
 	src/build.h \
-	src/signal.h \
 	src/file.h \
 	src/extract.h \
 	src/source.h \
