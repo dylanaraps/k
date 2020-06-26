@@ -23,11 +23,6 @@ $ make DESTDIR="..." PREFIX="/usr" install
     options (via CFLAGS)
     ____________________________________________________________________________
 
-    -DFREE_ON_EXIT  -  Free memory kept around till process end instead of
-                       letting the OS handle it. Enable this if debugging
-                       memory issues (via valgrind for example) or if using an
-                       OS which doesn't free memory on process exit.
-
     -static         -  Statically build the package manager (recommended). This
                        adds 2-3MB to the resulting binary but removes its
                        reliance on overall system health.
@@ -63,7 +58,7 @@ The nitpicky stuff.
 - [ ] Find a better sha256 implementation.
 - [ ] Add support for globbing in 'kiss s'.
 - [ ] Log build output to file (via dup() or dup2()).
-- [ ] Permission support in (src/file.c).
+- [ ] Permission and ownership support in (src/file.c).
 - [ ] Figure out how messages should be displayed.
 - [ ] Drop nftw() as it is XSI and not POSIX.
 - [ ] Swap to vector instead of linked list.

@@ -19,17 +19,12 @@ void sig_init(void) {
     sigaction(SIGINT,  &sa, NULL);
     sigaction(SIGTERM, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
-
-    atexit(cache_destroy);
-
-#ifdef FREE_ON_EXIT
-    atexit(repo_destroy);
-    atexit(pkg_destroy_all);
-#endif
 }
 
 void sig_hand(int i) {
     (void)(i);
 
     cache_destroy();
+    repo_destroy();
+    pkg_destroy_all();
 }

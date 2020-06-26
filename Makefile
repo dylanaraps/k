@@ -1,10 +1,11 @@
 .POSIX:
 
-PREFIX=/usr/local
-ALL_CFLAGS=$(CFLAGS) $(CPPFLAGS) -std=c99 -Wall -Wextra -Wpedantic -Wmissing-prototypes -Wstrict-prototypes
-ALL_LDFLAGS=$(LDFLAGS) -larchive -llzma -lbz2 -lcurl -lssl -lcrypto -lz
+PREFIX = /usr/local
+LIBS != pkg-config --libs --static libcurl libarchive
+ALL_CFLAGS = $(CFLAGS) $(CPPFLAGS) -std=c99 -Wall -Wextra -pedantic -Wmissing-prototypes -Wstrict-prototypes
+ALL_LDFLAGS = $(LDFLAGS) $(LIBS)
 
-OBJ=\
+OBJ = \
 	src/build.o \
 	src/signal.o \
 	src/file.o \
@@ -22,7 +23,7 @@ OBJ=\
 	src/pkg.o \
 	src/kiss.o
 
-HDR=\
+HDR = \
 	src/build.h \
 	src/signal.h \
 	src/file.h \

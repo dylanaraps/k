@@ -36,8 +36,12 @@ int main (int argc, char *argv[]) {
         usage();
     }
 
-    sig_init();
     repo_init();
+
+    sig_init();
+    atexit(repo_destroy);
+    atexit(pkg_destroy_all);
+    atexit(cache_destroy);
 
     for (int i = 2; i < argc; i++) {
         pkg_init(&pkg, argv[i]);
