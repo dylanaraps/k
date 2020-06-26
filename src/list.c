@@ -16,7 +16,6 @@ void pkg_list_all(package *pkg) {
     package *tmp = pkg;
     struct dirent  **list;
     int err;
-    int i;
 
     if (!pkg) {
         err = scandir(DB_DIR, &list, NULL, alphasort);
@@ -25,8 +24,11 @@ void pkg_list_all(package *pkg) {
             die("Package DB not accessible");
         }
 
-        // '2' skips '.'/'..'.
-        for (i = 2; i < err; i++) {
+        for (int i = 0; i < err; i++) {
+            if (list[i]->d_name[0] == '.') {
+                continue;
+            }
+
             pkg_init(&pkg, list[i]->d_name);
             free(list[i]);
         }
