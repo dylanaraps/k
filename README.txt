@@ -67,3 +67,4 @@ The nitpicky stuff.
 - [ ] Figure out how messages should be displayed.
 - [ ] Drop nftw() as it is XSI and not POSIX.
 - [ ] Swap to vector instead of linked list.
+- [ ] Move away from libarchive.
