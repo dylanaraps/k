@@ -66,3 +66,4 @@ The nitpicky stuff.
 - [ ] Permission support in (src/file.c).
 - [ ] Figure out how messages should be displayed.
 - [ ] Drop nftw() as it is XSI and not POSIX.
+- [ ] Swap to vector instead of linked list.
