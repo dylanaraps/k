@@ -6,13 +6,13 @@
 
 #include "log.h"
 #include "util.h"
+#include "vec.h"
 #include "pkg.h"
 #include "checksum.h"
 #include "sha256.h"
 
 void checksum_to_file(package *pkg) {
     FILE *file;
-    int i;
 
     file = fopenat(pkg->path, "checksums", O_RDWR | O_CREAT, "w");
 
@@ -20,7 +20,7 @@ void checksum_to_file(package *pkg) {
         die("[%s] Failed to open checksums file", pkg->name);
     }
 
-    for (i = 0; i < pkg->src_l; i++) {
+    for (size_t i = 0; i < vec_size(pkg->sum); i++) {
         fprintf(file, "%s\n", pkg->sum[i]);
     }
 
@@ -31,21 +31,20 @@ void pkg_checksums(package *pkg) {
     unsigned char buf[BUFSIZ];
     unsigned char shasum[32];
     char base[PATH_MAX];
+    char *shastr;
     sha256_ctx ctx;
     FILE *file;
     int err;
 
-    pkg->sum = xmalloc((pkg->src_l + 1) * sizeof(char *));
-
-    for (pkg->sum_l = 0; pkg->sum_l < pkg->src_l; pkg->sum_l++) {
-        file = fopen(pkg->src[pkg->sum_l], "rb");
+    for (size_t i = 0; i < vec_size(pkg->src); i++) {
+        file = fopen(pkg->src[i], "rb");
 
         if (!file) {
             die("[%s] Failed to read source (%s)",
-                pkg->name, pkg->src[pkg->sum_l]);
+                pkg->name, pkg->src[i]);
         }
 
-        xstrlcpy(base, basename(pkg->src[pkg->sum_l]), PATH_MAX);
+        xstrlcpy(base, basename(pkg->src[i]), PATH_MAX);
 
         sha256_init(&ctx);
 
@@ -56,14 +55,15 @@ void pkg_checksums(package *pkg) {
         sha256_final(shasum, &ctx);
 
         /* 67 == 64 (shasum) + 2 ('  ') + 1 ('\0') */
-        pkg->sum[pkg->sum_l] = xmalloc(67 + strlen(base));
+        shastr = xmalloc(67 + strlen(base));
 
-        for (int i = 0; i < 32; i++) {
-            xsnprintf(&pkg->sum[pkg->sum_l][i * 2], 64, "%02x", shasum[i]);
+        for (int j = 0; j < 32; j++) {
+            xsnprintf(&shastr[j * 2], 64, "%02x", shasum[j]);
         }
-        xsnprintf(&pkg->sum[pkg->sum_l][64], strlen(base) + 3, "  %s", base);
+        xsnprintf(&shastr[64], strlen(base) + 3, "  %s", base);
+        vec_push_back(pkg->sum, shastr);
 
-        msg("%s", pkg->sum[pkg->sum_l]);
+        msg("%s", pkg->sum[i]);
         fclose(file);
     }
 }
@@ -71,21 +71,18 @@ void pkg_checksums(package *pkg) {
 void pkg_verify(package *pkg) {
     FILE *file;
     char *line = 0;
-    int i = 0;
+    size_t i = 0;
+    size_t src_l = vec_size(pkg->src);
 
     msg("[%s] Verifying checksums", pkg->name);
     pkg_checksums(pkg);
-
-    if (pkg->src_l == 0) {
-        die("[%s] Sources file does not exist", pkg->name);
-    }
 
     file = fopenat(pkg->path, "checksums", O_RDONLY, "r");
 
     while ((getline(&line, &(size_t){0}, file) != -1)) {
         line[strcspn(line, "\n")] = 0;
 
-        if (i > pkg->src_l || strcmp(pkg->sum[i], line) != 0) {
+        if (i > src_l || strcmp(pkg->sum[i], line) != 0) {
             die("[%s] Checksums mismatch", pkg->name);
         }
 

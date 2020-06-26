@@ -11,6 +11,7 @@
 #include "util.h"
 #include "file.h"
 #include "cache.h"
+#include "vec.h"
 #include "pkg.h"
 #include "extract.h"
 
@@ -117,17 +118,11 @@ static void tar_extract(const char *file) {
 }
 
 void pkg_extract(package *pkg) {
-    int i;
-
     if (chdir(pkg->mak_dir) != 0) {
         die("[%s] Build directory not accessible", pkg->name);
     }
 
-    if (pkg->src_l == 0) {
-        die("[%s] Empty sources file", pkg->name);
-    }
-
-    for (i = 0; i < pkg->src_l; i++) {
+    for (size_t i = 0; i < vec_size(pkg->src); i++) {
         if (!pkg->src[i]) {
             die("[%s] Invalid sources file", pkg->name);
         }

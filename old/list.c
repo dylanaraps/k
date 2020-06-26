@@ -5,6 +5,7 @@
 
 #include "log.h"
 #include "pkg.h"
+#include "vec.h"
 #include "util.h"
 #include "list.h"
 
@@ -29,18 +30,23 @@ void pkg_list_all(package *pkg) {
                 continue;
             }
 
-            pkg_init(&pkg, list[i]->d_name);
+            vec_push_back(tmp, pkg_init(list[i]->d_name));
             free(list[i]);
         }
 
         free(list);
     }
 
-    for (tmp = pkg; tmp; tmp = tmp->next) {
-        if (pkg_list(tmp->name) != 0) {
-            die("[%s] Package not installed", tmp->name);
-        }
+    if (tmp) {
+        /* yucky global for atexit :( */
+        PKG = tmp;
 
-        printf("%s %s %s\n", tmp->name, tmp->ver, tmp->rel);
+        for (size_t i = 0; i < vec_size(tmp); ++i) {
+            if (pkg_list(tmp->name) != 0) {
+                die("[%s] Package not installed", tmp[i].name);
+            }
+
+            printf("%s %s %s\n", tmp[i].name, tmp[i].ver, tmp[i].rel);
+        }
     }
 }

@@ -26,11 +26,11 @@ void pkg_version(package *pkg) {
     }
 
     split_in_two(line, " 	\r\n", &pkg->ver, &pkg->rel);
+    free(line);
 
     if (!pkg->ver || !pkg->rel[0]) {
         die("[%s] Failed to read or invalid version file", pkg->name);
     }
 
-    free(line);
     fclose(file);
 }

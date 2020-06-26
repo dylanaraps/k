@@ -9,6 +9,7 @@
 #include "log.h"
 #include "util.h"
 #include "pkg.h"
+#include "vec.h"
 #include "cache.h"
 #include "source.h"
 
@@ -75,8 +76,18 @@ static void download(package *pkg, char *url) {
     curl_easy_cleanup(curl);
 }
 
-static void source_resolve(package *pkg, char *src, char **dest) {
-    char *file = basename(src);
+static char *source_resolve(package *pkg, char *src) {
+    char *tmp;
+    char *file;
+    char *ret;
+
+    tmp = strdup(src);
+
+    if (!tmp) {
+        die("Failed to construct file name");
+    }
+
+    file = basename(tmp);
 
     if (strstr(src, "://")) {
         if (exists_at(pkg->src_dir, file, 0) == 0) {
@@ -87,8 +98,8 @@ static void source_resolve(package *pkg, char *src, char **dest) {
             download(pkg, src);
         }
 
-        *dest = xmalloc(PATH_MAX);
-        xsnprintf(*dest, PATH_MAX, "%s/%s", pkg->src_dir, file);
+        ret = xmalloc(PATH_MAX);
+        xsnprintf(ret, PATH_MAX, "%s/%s", pkg->src_dir, file);
 
     } else if (strncmp(src, "git+", 4) == 0) {
         die("[%s] Found git source (not yet supported) %s", pkg->name, src);
@@ -102,20 +113,24 @@ static void source_resolve(package *pkg, char *src, char **dest) {
     } else {
         if (exists_at(pkg->path, src, 0) == 0) {
             msg("[%s] Found  local source %s", pkg->name, src);
-            *dest = xmalloc(PATH_MAX);
-            xsnprintf(*dest, PATH_MAX, "%s/%s", pkg->path, src);
+            ret = xmalloc(PATH_MAX);
+            xsnprintf(ret, PATH_MAX, "%s/%s", pkg->path, src);
 
         } else {
             die("[%s] Source '%s' does not exist", pkg->name, file);
         }
     }
+
+    free(tmp);
+    return ret;
 }
 
 void pkg_source(package *pkg) {
     char *line = 0;
-    char *tmp;
+    char *tmp_src;
+    char *tmp_des;
     FILE *file;
-    int i = 0;
+    size_t i = 0;
 
     file = fopenat(pkg->path, "sources", O_RDONLY, "r");
 
@@ -123,36 +138,23 @@ void pkg_source(package *pkg) {
         die("[%s] Failed to open sources file", pkg->name);
     }
 
-    pkg->src_l = cntlines(file);
-
-    if (pkg->src_l == 0) {
-        die("[%s] Empty sources file", pkg->name);
-    }
-
-    pkg->src = xmalloc((pkg->src_l + 1) * sizeof(char *));
-    pkg->des = xmalloc((pkg->src_l + 1) * sizeof(char *));
-
     while (getline(&line, &(size_t){0}, file) != -1) {
         if (line[0] == '#' || line[0] == '\n') {
             continue;
         }
 
-        if (i > pkg->src_l) {
-            die("[%s] Mismatch in source parser", pkg->name);
-        }
+        split_in_two(line, " 	\r\n", &tmp_src, &tmp_des);
 
-        split_in_two(line, " 	\r\n", &tmp, &pkg->des[i]);
-
-        if (!tmp) {
+        if (!tmp_src) {
             die("[%s] Invalid sources file", pkg->name);
         }
 
-        if (pkg->des[i][0] == '/') {
+        if (tmp_des[0] == '/') {
             die("[%s] Destination must not be absolute", pkg->name);
         }
 
-        source_resolve(pkg, tmp, &pkg->src[i]);
-        free(tmp);
+        vec_push_back(pkg->src, source_resolve(pkg, tmp_src));
+        vec_push_back(pkg->des, tmp_des);
 
         i++;
     }
