@@ -25,7 +25,7 @@ void pkg_list_all(package *pkg) {
         }
 
         for (int i = 0; i < err; i++) {
-            if (list[i]->d_name[0] == '.') {
+            if (list[i]->d_name[0] == '.' && !list[i]->d_name[2]) {
                 continue;
             }
 
