@@ -29,7 +29,7 @@ static void usage(void) {
 }
 
 int main (int argc, char *argv[]) {
-    struct sigaction sa;
+    struct sigaction sa = {0};
     package *pkg = {0};
 
     if (argc == 1) {
