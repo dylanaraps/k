@@ -1,5 +1,5 @@
-#include <stdio.h>  /* vfprintf, fprintf */
-#include <stdarg.h> /* va_list, va_start, va_end */
+#include <stdio.h>
+#include <stdarg.h>
 
 #include "log.h"
 

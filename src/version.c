@@ -1,8 +1,8 @@
 #define _POSIX_C_SOURCE 200809L
-#include <stdio.h>  /* FILE */
-#include <limits.h> /* LINE_MAX */
-#include <string.h> /* strchr */
-#include <fcntl.h>  /* O_RDONLY */
+#include <stdio.h>
+#include <limits.h>
+#include <string.h>
+#include <fcntl.h>
 
 #include "log.h"
 #include "util.h"

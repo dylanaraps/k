@@ -1,7 +1,7 @@
 /* Public domain sha256 implementation */
 /* Original author unknown(?) */
 
-#include <string.h>    /* memcpy */
+#include <string.h>
 #include <arpa/inet.h> /* htonl */
 
 #include "sha256.h"

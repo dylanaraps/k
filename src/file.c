@@ -1,13 +1,13 @@
 #define _POSIX_C_SOURCE 200809L
-#define _XOPEN_SOURCE 700 /* nftw */
+#define _XOPEN_SOURCE 700
 #include <stdio.h>
-#include <limits.h>   /* PATH_MAX */
-#include <unistd.h>   /* access */
-#include <sys/stat.h> /* mkdir */
-#include <ftw.h>      /* ntfw */
-#include <string.h>   /* strlen */
-#include <errno.h>    /* errno */
-#include <libgen.h>   /* dirname */
+#include <limits.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <ftw.h>
+#include <string.h>
+#include <errno.h>
+#include <libgen.h>
 
 #include "log.h"
 #include "util.h"

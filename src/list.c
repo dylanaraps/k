@@ -1,7 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
-#include <stdio.h>  /* printf */
-#include <dirent.h> /* scandir */
-#include <fcntl.h>  /* open */
+#include <stdio.h>
+#include <dirent.h>
+#include <fcntl.h>
 
 #include "log.h"
 #include "pkg.h"

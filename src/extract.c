@@ -1,11 +1,11 @@
 #define _POSIX_C_SOURCE 200809L
-#include <unistd.h> /* chdir */
-#include <limits.h> /* PATH_MAX */
-#include <string.h> /* strlen */
-#include <libgen.h> /* basename */
+#include <unistd.h>
+#include <limits.h>
+#include <string.h>
+#include <libgen.h>
 
-#include <archive.h>       /* libarchive */
-#include <archive_entry.h> /* libarchive */
+#include <archive.h>
+#include <archive_entry.h>
 
 #include "log.h"
 #include "util.h"

@@ -1,13 +1,13 @@
 #define _POSIX_C_SOURCE 200809L
-#include <stdlib.h>   /* malloc, size_t */
-#include <stdio.h>    /* printf */
-#include <limits.h>   /* PATH_MAX  */
-#include <string.h>   /* strncpy */
-#include <sys/stat.h> /* mkdir */
-#include <errno.h>    /* errno, EEXIST, S_IRWXU */
-#include <unistd.h>   /* access */
-#include <fcntl.h>    /* open */
-#include <stdarg.h>   /* va_list, va_start, va_end */
+#include <stdlib.h>
+#include <stdio.h>
+#include <limits.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdarg.h>
 
 #include "log.h"
 #include "strlcpy.h"

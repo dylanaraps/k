@@ -1,8 +1,8 @@
 #define _POSIX_C_SOURCE 200809L
-#include <stdio.h>  /* getline */
-#include <libgen.h> /* basename */
-#include <string.h> /* strlen */
-#include <fcntl.h>  /* O_RDONLY */
+#include <stdio.h>
+#include <libgen.h>
+#include <string.h>
+#include <fcntl.h>
 
 #include "log.h"
 #include "util.h"

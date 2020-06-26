@@ -1,13 +1,13 @@
 #define _POSIX_C_SOURCE 200809L
-#include <stdlib.h> /* size_t */
-#include <stdio.h>  /* snprintf */
-#include <unistd.h> /* getenv */
-#include <limits.h> /* PATH_MAX */
-#include <string.h> /* strchr */
-#include <libgen.h> /* dirname */
-#include <errno.h>  /* errno */
-#include <fcntl.h>  /* O_CREAT */
-#include <ftw.h>    /* ntfw */
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <limits.h>
+#include <string.h>
+#include <libgen.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ftw.h>
 
 #include "log.h"
 #include "pkg.h"

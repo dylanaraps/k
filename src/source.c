@@ -1,8 +1,8 @@
 #define _POSIX_C_SOURCE 200809L
-#include <limits.h> /* PATH_MAX */
-#include <string.h> /* strcspn */
-#include <libgen.h> /* basename */
-#include <fcntl.h>  /* O_RDONLY */
+#include <limits.h>
+#include <string.h>
+#include <libgen.h>
+#include <fcntl.h>
 
 #include <curl/curl.h>
 

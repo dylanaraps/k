@@ -1,6 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
-#include <string.h> /* strlen */
+#include <string.h>
 
 #include "log.h"
 #include "cache.h"

@@ -1,9 +1,9 @@
 #define _POSIX_C_SOURCE 200809L
-#include <stdlib.h> /* getenv, size_t */
-#include <string.h> /* strdup, strlen, strtok */
-#include <limits.h> /* PATH_MAX */
-#include <stdio.h>  /* printf */
-#include <unistd.h> /* chdir */
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+#include <stdio.h>
+#include <unistd.h>
 
 #include "log.h"
 #include "util.h"
