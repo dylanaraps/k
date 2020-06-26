@@ -58,19 +58,10 @@ void pkg_checksums(package *pkg) {
         /* 67 == 64 (shasum) + 2 ('  ') + 1 ('\0') */
         pkg->sum[pkg->sum_l] = xmalloc(67 + strlen(base));
 
-        xsnprintf(pkg->sum[pkg->sum_l], 67 + strlen(base), "%02x%02x%02x%02x%02\
-x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\
-%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x  %s",
-            shasum[0],  shasum[1],  shasum[2],  shasum[3],
-            shasum[4],  shasum[5],  shasum[6],  shasum[7],
-            shasum[8],  shasum[9],  shasum[10], shasum[11],
-            shasum[12], shasum[13], shasum[14], shasum[15],
-            shasum[16], shasum[17], shasum[18], shasum[19],
-            shasum[20], shasum[21], shasum[22], shasum[23],
-            shasum[24], shasum[25], shasum[26], shasum[27],
-            shasum[28], shasum[29], shasum[30], shasum[31],
-            base
-        );
+        for (int i = 0; i < 32; i++) {
+            xsnprintf(&pkg->sum[pkg->sum_l][i * 2], 64, "%02x", shasum[i]);
+        }
+        xsnprintf(&pkg->sum[pkg->sum_l][64], strlen(base) + 3, "  %s", base);
 
         msg("%s", pkg->sum[pkg->sum_l]);
         fclose(file);
