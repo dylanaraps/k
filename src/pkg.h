@@ -1,7 +1,9 @@
 typedef struct package {
     char *name;
     char *ver[2];
-    char *path;
+
+    /* index to repository */
+    int  path;
 
     char **sum;
     char **src;

@@ -94,14 +94,22 @@ static char **repo_init(void) {
     return repos;
 }
 
-static char *pkg_find(const char *name, char **repos) {
+static int pkg_find(const char *name, char **repos, const int all) {
     for (size_t j = 0; j < vec_size(repos); ++j) {
         if (exists_at(repos[j], name, O_DIRECTORY) == 0) {
-            return repos[j];
+            if (!all) {
+                return j;
+            }
+
+            printf("%s/%s\n", repos[j], name);
         }
     }
 
-    die("Package '%s' not in any repository", name);
+    if (!all) {
+        die("Package '%s' not in any repository", name);
+    }
+
+    return 0;
 }
 
 static package pkg_new(char *name) {
@@ -157,8 +165,6 @@ int main (int argc, char *argv[]) {
 
     for (int i = 2; i < argc; i++) {
         vec_push_back(pkgs, pkg_new(argv[i]));
-
-        pkgs[i - 2].path = pkg_find(pkgs[i - 2].name, repos);
     }
 
     switch (argv[1][0]) {
@@ -167,6 +173,9 @@ int main (int argc, char *argv[]) {
         case 'd':
         case 'l':
         case 's':
+            for (size_t i = 0; i < vec_size(pkgs); ++i) {
+                pkg_find(pkgs[i].name, repos, 1);
+            }
             break;
 
         default:
