@@ -141,9 +141,9 @@ static char *cache_init(void) {
     pid = getpid();
     xdg = xdg_dir();
     len = snprintf(NULL, 0, "%s/%u", xdg, pid);
-    cac = xmalloc(len);
+    cac = xmalloc(len + 1);
 
-    xsnprintf(cac, len, "%s/%u", xdg, pid);
+    xsnprintf(cac, len + 1, "%s/%u", xdg, pid);
     free(xdg);
     mkdir_p(cac, 0755);
 
