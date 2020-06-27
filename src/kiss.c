@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
+#include <assert.h>
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,21 +36,14 @@ static void xsnprintf(char *str, size_t size, const char *fmt, ...) {
     err = vsnprintf(str, size, fmt, va);
     va_end(va);
 
-    if (err < 1) {
-        die("snprintf failed to construct string");
-    }
-
-    if (err > size) {
-        die("snprintf result exceeds buffer size");
-    }
+    assert(err > 1);
+    assert(err < size);
 }
 
 static char *xstrdup(const char *s) {
     char *p = strdup(s);
 
-    if (!p) {
-        die("Failed to allocate memory");
-    }
+    assert(p);
 
     return p;
 }
@@ -150,9 +144,7 @@ static void pkg_version(package *pkg, char *repo) {
 }
 
 static package pkg_new(char *name) {
-    if (!name) {
-        die("Package name is null");
-    }
+    assert(name);
 
     return (package) {
         .name = name,
