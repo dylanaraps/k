@@ -1,12 +1,14 @@
 #define _POSIX_C_SOURCE 200809L
 #include <assert.h>
 #include <dirent.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "vec.h"
 #include "pkg.h"
@@ -24,6 +26,14 @@ static void _m(const char* t, const char *f, const int l, const char *fmt, ...) 
     printf("\n");
 
     va_end(args);
+}
+
+static void *xmalloc(size_t n) {
+    void *p = malloc(n);
+
+    assert(p);
+
+    return p;
 }
 
 static void xsnprintf(char *str, size_t size, const char *fmt, ...) {
@@ -50,10 +60,32 @@ static char *xgetenv(const char *s) {
     char *p = getenv(s);
 
     if (!p || !p[0]) {
-        die("%s must be set", s);
+        return NULL;
     }
 
     return xstrdup(p);
+}
+
+static void mkdir_p(const char *dir, const int mod) {
+    char *tmp;
+    char *p = 0;
+
+    assert(dir);
+    tmp = xstrdup(dir);
+
+    for (p = tmp + 1; *p; p++) {
+        if (*p == '/') {
+            *p = 0;
+
+            if ((mkdir(tmp, mod) == -1) && errno != EEXIST) {
+               die("Failed to create directory %s", tmp);
+            }
+
+            *p = '/';
+        }
+    }
+
+    free(tmp);
 }
 
 static FILE *fopenat(const char *d, const char *f, const int o, const char *m) {
@@ -77,13 +109,52 @@ static FILE *fopenat(const char *d, const char *f, const int o, const char *m) {
     return fdopen(ffd, m);
 }
 
+static char *xdg_dir(void) {
+    char *env;
+    char *dir;
+    char *tmp = "kiss";
+    size_t len;
+
+    env = xgetenv("XDG_CACHE_HOME");
+
+    if (!env) {
+       env = xgetenv("HOME");
+       tmp = ".cache/kiss";
+    }
+
+    assert(env);
+
+    /* 2 == '/' + '\0' */
+    len = strlen(env) + strlen(tmp) + 2;
+    dir = xmalloc(len);
+
+    xsnprintf(dir, len, "%s/%s", env, tmp);
+    free(env);
+
+    return dir;
+}
+
+static void cache_init(void) {
+    char *xdg;
+    pid_t pid;
+
+    pid = getpid();
+    xdg = xdg_dir();
+
+    mkdir_p(xdg, 0755);
+
+    free(xdg);
+}
+
 static char **repo_init(void) {
     char *tmp;
     char *env;
     char **repos = NULL;
     int i = 0;
 
-    env = xgetenv("KISS_PATH");
+    if (!(env = xgetenv("KISS_PATH"))) {
+        die("KISS_PATH must be set");
+    }
 
     while ((tmp = strtok(i++ ? NULL : env, ":"))) {
         vec_push_back(repos, xstrdup(tmp));
@@ -188,12 +259,13 @@ static void usage(void) {
 
 int main (int argc, char *argv[]) {
     package *pkgs = NULL;
-    char  **repos = NULL;
+    char **repos  = NULL;
 
     if (argc == 1) {
         usage();
     }
 
+    cache_init();
     repos = repo_init();
 
     for (int i = 2; i < argc; i++) {
