@@ -11,8 +11,6 @@
 #include "vec.h"
 #include "pkg.h"
 
-#define pkg_iter(p) for (size_t i = 0; i < vec_size(p); ++i)
-
 #define die(...) _m(":(", __FILE__, __LINE__, __VA_ARGS__),exit(1)
 #define msg(...) _m("OK", __FILE__, __LINE__, __VA_ARGS__)
 
@@ -90,9 +88,8 @@ static char **repo_init(void) {
     while ((tmp = strtok(i++ ? NULL : env, ":"))) {
         vec_push_back(repos, xstrdup(tmp));
     }
-    vec_push_back(repos, "/var/db/kiss/installed");
-
     free(env);
+    vec_push_back(repos, "/var/db/kiss/installed");
 
     return repos;
 }
@@ -220,6 +217,10 @@ int main (int argc, char *argv[]) {
             pkg_iter(pkgs) {
                 pkg_find(pkgs[i].name, repos, 1);
             }
+            break;
+
+        case 'v':
+            printf("0.0.1\n");
             break;
 
         default:
