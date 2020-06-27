@@ -2,7 +2,6 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
 #include <stdarg.h>
 #include <string.h>
 #include <fcntl.h>
@@ -186,19 +185,6 @@ static void pkg_list(package *pkg) {
     }
 }
 
-static void sig_init(void) {
-    struct sigaction sa = {
-        .sa_handler = exit,
-    };
-
-    sigemptyset(&sa.sa_mask);
-    sigaddset(&sa.sa_mask, SIGINT);
-
-    sigaction(SIGINT,  &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGQUIT, &sa, NULL);
-}
-
 static void usage(void) {
     printf("kiss [b|c|d|l|s|v] [pkg]...\n");
     printf("build:        Build a package\n");
@@ -214,8 +200,6 @@ static void usage(void) {
 int main (int argc, char *argv[]) {
     package *pkgs = NULL;
     char  **repos = NULL;
-
-    sig_init();
 
     if (argc == 1) {
         usage();
