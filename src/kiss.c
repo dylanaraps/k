@@ -151,17 +151,13 @@ static void pkg_version(package *pkg, char *repo) {
 }
 
 static package pkg_new(char *name) {
-    package new;
-
     if (!name) {
         die("Package name is null");
     }
 
-    new = (package) {
+    return (package) {
         .name = name,
     };
-
-    return new;
 }
 
 static void pkg_list(package *pkg) {

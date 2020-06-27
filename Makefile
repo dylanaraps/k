@@ -1,13 +1,11 @@
 .POSIX:
 
-PREFIX = /usr/local
-LIBS != pkg-config --libs --static libcurl libarchive
-ALL_CFLAGS = $(CFLAGS) $(CPPFLAGS) -static -std=c99 -Wall -Wextra -pedantic -Wmissing-prototypes -Wstrict-prototypes
-ALL_LDFLAGS = $(LDFLAGS) $(LIBS)
+PREFIX       = /usr/local
+ALL_WARNINGS = -Wall -Wextra -pedantic -Wmissing-prototypes -Wstrict-prototypes
+ALL_CFLAGS   = $(CFLAGS) $(CPPFLAGS) -static -std=c99 $(ALL_WARNINGS)
+ALL_LDFLAGS  = $(LDFLAGS) $(LIBS)
 
-OBJ = \
-	src/kiss.o
-
+OBJ = src/kiss.o
 HDR =
 
 .c.o:
@@ -20,7 +18,7 @@ $(OBJ): $(HDR)
 
 install: kiss
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	cp kiss $(DESTDIR)$(PREFIX)/bin/
+	cp kiss  $(DESTDIR)$(PREFIX)/bin/
 
 clean:
 	rm -f kiss $(OBJ)
