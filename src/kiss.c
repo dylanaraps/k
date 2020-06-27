@@ -36,16 +36,18 @@ static void *xmalloc(size_t n) {
     return p;
 }
 
-static void xsnprintf(char *str, size_t size, const char *fmt, ...) {
+static int xsnprintf(char *str, size_t size, const char *fmt, ...) {
     va_list va;
-    unsigned int err;
+    int len;
 
     va_start(va, fmt);
-    err = vsnprintf(str, size, fmt, va);
+    len = vsnprintf(str, size, fmt, va);
     va_end(va);
 
-    assert(err > 1);
-    assert(err < size);
+    assert(len > 1);
+    assert(len <= (int) size);
+
+    return len;
 }
 
 static char *xstrdup(const char *s) {
@@ -59,11 +61,7 @@ static char *xstrdup(const char *s) {
 static char *xgetenv(const char *s) {
     char *p = getenv(s);
 
-    if (!p || !p[0]) {
-        return NULL;
-    }
-
-    return xstrdup(p);
+    return p[0] ? xstrdup(p) : NULL;
 }
 
 static void mkdir_p(const char *dir, const int mod) {
@@ -134,16 +132,22 @@ static char *xdg_dir(void) {
     return dir;
 }
 
-static void cache_init(void) {
-    char *xdg;
+static char *cache_init(void) {
+    char  *xdg;
     pid_t pid;
+    size_t len;
+    char  *cac;
 
     pid = getpid();
     xdg = xdg_dir();
+    len = snprintf(NULL, 0, "%s/%u", xdg, pid);
+    cac = xmalloc(len);
 
-    mkdir_p(xdg, 0755);
-
+    xsnprintf(cac, len, "%s/%u", xdg, pid);
     free(xdg);
+    mkdir_p(cac, 0755);
+
+    return cac;
 }
 
 static char **repo_init(void) {
@@ -260,13 +264,14 @@ static void usage(void) {
 int main (int argc, char *argv[]) {
     package *pkgs = NULL;
     char **repos  = NULL;
+    char *cac_dir;
 
     if (argc == 1) {
         usage();
     }
 
-    cache_init();
-    repos = repo_init();
+    cac_dir = cache_init();
+    repos   = repo_init();
 
     for (int i = 2; i < argc; i++) {
         vec_push_back(pkgs, pkg_new(argv[i]));
