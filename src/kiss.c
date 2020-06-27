@@ -264,13 +264,12 @@ static void usage(void) {
 int main (int argc, char *argv[]) {
     package *pkgs = NULL;
     char **repos  = NULL;
-    char *cac_dir;
+    char *cac_dir = NULL;
 
     if (argc == 1) {
         usage();
     }
 
-    cac_dir = cache_init();
     repos   = repo_init();
 
     for (int i = 2; i < argc; i++) {
@@ -281,6 +280,8 @@ int main (int argc, char *argv[]) {
         case 'b':
         case 'c':
         case 'd':
+            cac_dir = cache_init();
+
             pkg_iter(pkgs) {
                 pkgs[i].path = pkg_find(pkgs[i].name, repos, 0);
             }
@@ -308,6 +309,7 @@ int main (int argc, char *argv[]) {
         case 'b':
         case 'c':
         case 'd':
+            free(cac_dir);
             break;
     }
 
