@@ -30,6 +30,13 @@
 #include <stdlib.h> /* for malloc/realloc/free */
 
 /**
+ * @brief vec_iter - Iterate over a vector.
+ * @param vec - the vector
+ * @return void
+ */
+#define vec_iter(p) for (size_t i = 0; i < vec_size(p); ++i)
+
+/**
  * @brief vec_set_capacity - For internal use, sets the capacity variable of
                              the vector
  * @param vec - the vector

@@ -195,13 +195,19 @@ static char **repo_init(void) {
 
 static char *pkg_find(const char *name, char **repos, const int all) {
     FILE *f;
+    size_t len;
+    char *tmp;
 
     for (size_t j = 0; j < vec_size(repos); ++j) {
         if ((f = fopenat(repos[j], name, O_DIRECTORY, "r"))) {
             fclose(f);
 
             if (!all) {
-                return repos[j];
+                len = strlen(repos[j]) + strlen(name) + 2;
+                tmp = xmalloc(len);
+                xsnprintf(tmp, len, "%s/%s", repos[j], name);
+
+                return tmp;
             }
 
             printf("%s/%s\n", repos[j], name);
@@ -239,6 +245,31 @@ static void pkg_version(package *pkg, char *repo) {
     pkg->ver[strcspn(pkg->ver, "\n")] = 0;
 }
 
+static void pkg_sources(package *pkg) {
+    FILE *file;
+    char *line = 0;
+    char *tmp;
+
+    if (!(file = fopenat(pkg->path, "sources", O_RDONLY, "r"))) {
+        die("[%s], sources file does not exist", pkg->name);
+    }
+
+    while (getline(&line, &(size_t){0}, file) != -1) {
+        if (line[0] != '#' && line[0] != '\n') {
+            tmp = strtok(line, " 	\r\n");
+            assert(tmp);
+            vec_push_back(pkg->src, xstrdup(tmp));
+
+
+            tmp = strtok(NULL, " 	\r\n");
+            vec_push_back(pkg->des, tmp ? xstrdup(tmp) : "");
+        }
+    }
+
+    free(line);
+    fclose(file);
+}
+
 static package pkg_new(char *name) {
     assert(name);
 
@@ -266,7 +297,7 @@ static void pkg_list(package *pkg) {
         free(list);
     }
 
-    pkg_iter(pkg) {
+    vec_iter(pkg) {
         pkg_version(&pkg[i], db);
 
         printf("%s %s\n", pkg[i].name, pkg[i].ver);
@@ -306,8 +337,12 @@ int main (int argc, char *argv[]) {
         case 'd':
             cac_dir = cache_init();
 
-            pkg_iter(pkgs) {
+            vec_iter(pkgs) {
                 pkgs[i].path = pkg_find(pkgs[i].name, repos, 0);
+            }
+
+            vec_iter(pkgs) {
+                pkg_sources(&pkgs[i]);
             }
             break;
 
@@ -316,7 +351,7 @@ int main (int argc, char *argv[]) {
             break;
 
         case 's':
-            pkg_iter(pkgs) {
+            vec_iter(pkgs) {
                 pkg_find(pkgs[i].name, repos, 1);
             }
             break;
