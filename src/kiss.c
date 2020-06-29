@@ -120,6 +120,12 @@ static FILE *fopenat(const char *d, const char *f, const int o, const char *m) {
     return fdopen(ffd, m);
 }
 
+static int existsat(const char *d, const char *f, const int o, const char *m) {
+    FILE *file = fopenat(d, f, o, m);
+
+    return file ? fclose(file) : -1;
+}
+
 static char *xdg_dir(void) {
     char *env;
     char *dir;
@@ -194,13 +200,11 @@ static char **repo_init(void) {
 }
 
 static char *pkg_find(const char *name, char **repos, const int all) {
-    FILE *f;
     size_t len;
     char *tmp;
 
     for (size_t j = 0; j < vec_size(repos); ++j) {
-        if ((f = fopenat(repos[j], name, O_DIRECTORY, "r"))) {
-            fclose(f);
+        if (!(existsat(repos[j], name, O_DIRECTORY, "r"))) {
 
             if (!all) {
                 len = strlen(repos[j]) + strlen(name) + 2;
@@ -248,7 +252,8 @@ static void pkg_version(package *pkg, char *repo) {
 static void pkg_sources(package *pkg) {
     FILE *file;
     char *line = 0;
-    char *tmp;
+    char *src;
+    char *des;
 
     if (!(file = fopenat(pkg->path, "sources", O_RDONLY, "r"))) {
         die("[%s], sources file does not exist", pkg->name);
@@ -256,13 +261,30 @@ static void pkg_sources(package *pkg) {
 
     while (getline(&line, &(size_t){0}, file) != -1) {
         if (line[0] != '#' && line[0] != '\n') {
-            tmp = strtok(line, " 	\r\n");
-            assert(tmp);
-            vec_push_back(pkg->src, xstrdup(tmp));
+            src = strtok(line, " 	\r\n");
+            assert(src);
+            des = strtok(NULL, " 	\r\n");
 
+            if (strstr(src, "://")) {
+                if (!(existsat(src, des, 0, "r"))) {
+                    msg("[%s] Found cached source %s", pkg->name, src);
+                }
 
-            tmp = strtok(NULL, " 	\r\n");
-            vec_push_back(pkg->des, tmp ? xstrdup(tmp) : "");
+            } else if (strncmp(src, "git+", 4) == 0) {
+                die("[%s] Git sources not yet supported", pkg->name);
+
+                /* look into libgit2 or other libraries if they exist */
+                /* possibly compromise and exec git directly... */
+
+            } else {
+                if (!(existsat(pkg->path, src, 0, "r"))) {
+                    msg("[%s] Found  local source %s", pkg->name, src);
+                }
+
+            }
+
+            vec_push_back(pkg->des, des ? xstrdup(des) : "");
+            vec_push_back(pkg->src, xstrdup(src));
         }
     }
 
