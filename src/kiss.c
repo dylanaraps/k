@@ -86,6 +86,19 @@ static void mkdir_p(const char *dir, const int mod) {
     free(tmp);
 }
 
+static void mkdir_at(const char *p, const char *d, const int m) {
+   char *tmp;
+   size_t len;
+
+   len = strlen(p) + strlen(d) + 2;
+   tmp = xmalloc(len);
+
+   xsnprintf(tmp, len, "%s/%s", p, d);
+   mkdir_p(tmp, m);
+
+   free(tmp);
+}
+
 static FILE *fopenat(const char *d, const char *f, const int o, const char *m) {
     int dfd;
     int ffd;
@@ -133,10 +146,13 @@ static char *xdg_dir(void) {
 }
 
 static char *cache_init(void) {
-    char  *xdg;
+    char *xdg;
+    char *cac;
     pid_t pid;
     size_t len;
-    char  *cac;
+
+    const char *caches[2] = { "sources", "bin" };
+    const char *states[3] = { "build", "extract", "pkg" };
 
     pid = getpid();
     xdg = xdg_dir();
@@ -144,8 +160,16 @@ static char *cache_init(void) {
     cac = xmalloc(len + 1);
 
     xsnprintf(cac, len + 1, "%s/%u", xdg, pid);
+
+    for (int i = 0; i < 2; i++) {
+        mkdir_at(xdg, caches[i], 0755);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        mkdir_at(cac, states[i], 0755);
+    }
+
     free(xdg);
-    mkdir_p(cac, 0755);
 
     return cac;
 }
