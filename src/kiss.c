@@ -205,7 +205,6 @@ static char *pkg_find(const char *name, char **repos, const int all) {
 
     for (size_t j = 0; j < vec_size(repos); ++j) {
         if (!(existsat(repos[j], name, O_DIRECTORY, "r"))) {
-
             if (!all) {
                 len = strlen(repos[j]) + strlen(name) + 2;
                 tmp = xmalloc(len);
@@ -347,7 +346,7 @@ int main (int argc, char *argv[]) {
         usage();
     }
 
-    repos   = repo_init();
+    repos = repo_init();
 
     for (int i = 2; i < argc; i++) {
         vec_append(pkgs, pkg_new(argv[i]));
