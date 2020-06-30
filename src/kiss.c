@@ -191,10 +191,10 @@ static char **repo_init(void) {
     }
 
     while ((tmp = strtok(i++ ? NULL : env, ":"))) {
-        vec_push_back(repos, xstrdup(tmp));
+        vec_append(repos, xstrdup(tmp));
     }
     free(env);
-    vec_push_back(repos, "/var/db/kiss/installed");
+    vec_append(repos, "/var/db/kiss/installed");
 
     return repos;
 }
@@ -283,8 +283,8 @@ static void pkg_sources(package *pkg) {
 
             }
 
-            vec_push_back(pkg->des, des ? xstrdup(des) : "");
-            vec_push_back(pkg->src, xstrdup(src));
+            vec_append(pkg->des, des ? xstrdup(des) : "");
+            vec_append(pkg->src, xstrdup(src));
         }
     }
 
@@ -312,7 +312,7 @@ static void pkg_list(package *pkg) {
 
         for (int i = 0; i < err; i++) {
             if (list[i]->d_name[0] != '.' && list[i]->d_name[2]) {
-                vec_push_back(pkg, pkg_new(list[i]->d_name));
+                vec_append(pkg, pkg_new(list[i]->d_name));
             }
         }
 
@@ -350,7 +350,7 @@ int main (int argc, char *argv[]) {
     repos   = repo_init();
 
     for (int i = 2; i < argc; i++) {
-        vec_push_back(pkgs, pkg_new(argv[i]));
+        vec_append(pkgs, pkg_new(argv[i]));
     }
 
     switch (argv[1][0]) {
