@@ -173,13 +173,13 @@
  * @return void
  */
 #define vec_push_back(vec, value)                            \
-	do {                                                     \
-		size_t __cap = vec_capacity(vec);                    \
-		if (__cap <= vec_size(vec)) {                        \
-			vec_grow((vec), !__cap ? __cap + 1 : __cap * 2); \
-		}                                                    \
-		vec[vec_size(vec)] = (value);                        \
-		vec_set_size((vec), vec_size(vec) + 1);              \
-	} while (0)
+    do {                                                     \
+        size_t __cap = vec_capacity(vec);                    \
+        if (__cap <= vec_size(vec)) {                        \
+            vec_grow((vec), !__cap ? __cap + 1 : __cap * 2); \
+        }                                                    \
+        vec[vec_size(vec)] = (value);                        \
+        vec_set_size((vec), vec_size(vec) + 1);              \
+    } while (0)
 
 #endif /* VEC_H_ */
