@@ -50,7 +50,7 @@ static int xsnprintf(char *str, size_t size, const char *fmt, ...) {
     len = vsnprintf(str, size, fmt, va);
     va_end(va);
 
-    if (len < 1 || len >= (int) size) {
+    if (len < 0 || (size_t)len >= size) {
         die("Failed to construct string");
     }
 
@@ -60,7 +60,7 @@ static int xsnprintf(char *str, size_t size, const char *fmt, ...) {
 static void cp_file(const char *src, const char *des, const int oct) {
     FILE *r;
     FILE *w;
-    int err;
+    size_t err;
     char buf[4096]; /* todo: dynamically allocate buffer */
 
     r = fopen(src, "rb");
@@ -71,9 +71,9 @@ static void cp_file(const char *src, const char *des, const int oct) {
     }
 
     for (;;) {
-        err = fread(buf, 1, sizeof(4096), r);
+        err = fread(buf, 1, sizeof(buf), r);
 
-        if (err == -1) {
+        if (err != sizeof(buf) && ferror(r)) {
             die("File not accessible");
         }
 
@@ -81,9 +81,7 @@ static void cp_file(const char *src, const char *des, const int oct) {
             break;
         }
 
-        err = fwrite(buf, 1, err, w);
-
-        if (err == -1) {
+        if (fwrite(buf, 1, err, w) != err) {
             die("Cannot copy file");
         }
     }
@@ -91,9 +89,7 @@ static void cp_file(const char *src, const char *des, const int oct) {
     fclose(r);
     fclose(w);
 
-    err = chmod(des, oct);
-
-    if (err == -1) {
+    if (chmod(des, oct) == -1) {
         die("Failed to set permissions on %s", des);
     }
 }

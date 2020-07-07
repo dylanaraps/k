@@ -1,3 +1,4 @@
 kiss
+kiss-*
 */*.o
 .ccls-cache
