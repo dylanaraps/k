@@ -1,4 +1,4 @@
 kiss
-kiss-*
+kiss-install
 */*.o
 .ccls-cache
