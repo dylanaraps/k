@@ -66,8 +66,12 @@ static void cp_file(const char *src, const char *des, const int oct) {
     r = fopen(src, "rb");
     w = fopen(des, "wb");
 
-    if (!r || !w) {
+    if (!r) {
         die("Failed to read file");
+    }
+
+    if (!w) {
+        die("Failed to write file");
     }
 
     for (;;) {
