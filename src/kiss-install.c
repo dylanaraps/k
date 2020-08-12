@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
 
@@ -63,15 +64,15 @@ static void cp_file(const char *src, const char *des, const int oct) {
     size_t err;
     char buf[4096]; /* todo: dynamically allocate buffer */
 
-    r = fopen(src, "rb");
-    w = fopen(des, "wb");
+    r = fopen(src, "r");
+    w = fopen(des, "w");
 
     if (!r) {
         die("Failed to read file");
     }
 
     if (!w) {
-        die("Failed to write file");
+        die("Failed to write file %s", des);
     }
 
     for (;;) {
@@ -98,8 +99,9 @@ static void cp_file(const char *src, const char *des, const int oct) {
     }
 }
 
-static void install_files(char *src, char *des) {
-    struct stat p;
+static void install_files(const char *src, const char *des, const char opt) {
+    struct stat src_p;
+    struct stat des_p;
     char *line = 0;
     char srcp[PATH_MAX];
     char desp[PATH_MAX];
@@ -111,44 +113,49 @@ static void install_files(char *src, char *des) {
         line[line_l] = 0;
 
         /* todo: dynamically reallocated buffer */
-        xsnprintf(srcp, PATH_MAX, "%s/%s", src, line);
-        xsnprintf(desp, PATH_MAX, "%s/%s", des, line);
+        xsnprintf(srcp, PATH_MAX, "%s%s", src, line);
+        xsnprintf(desp, PATH_MAX, "%s%s", des, line);
 
-        if (stat(srcp, &p) == -1) {
+        if (stat(srcp, &src_p) == -1) {
             die("Failed to copy '%s'\n", line);
         }
 
-        oct = p.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR |
-                           S_IRGRP | S_IWGRP | S_IXGRP |
-                           S_IROTH | S_IWOTH | S_IXOTH);
-
-        if (line[line_l - 1] == '/') {
-            if (S_ISREG(p.st_mode) == 0) {
-                mkdir(desp, oct);
-            }
-        } else {
-            if (S_ISREG(p.st_mode) == 0) {
-
-            }
-
-            oct |= p.st_mode & (S_ISUID | S_ISGID);
-            cp_file(srcp, desp, oct);
+        if (stat(srcp, &des_p) == -1) {
+            die("Failed to copy '%s'\n", line);
         }
 
-        printf("%s %o\n", line, oct);
+        oct = src_p.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR |
+                               S_IRGRP | S_IWGRP | S_IXGRP |
+                               S_IROTH | S_IWOTH | S_IXOTH);
+
+        if (line[line_l - 1] == '/') {
+            if (mkdir(desp, oct) == -1 && errno != EEXIST) {
+                die("Failed to create directory %s\n", desp);
+            }
+        } else {
+            if (S_ISDIR(des_p.st_mode) == 0) {
+                if (opt == 's' && S_ISREG(des_p.st_mode) != 0) {
+                    continue;
+                }
+
+                /* only add suid/sgid permissions to files */
+                oct |= src_p.st_mode & (S_ISUID | S_ISGID);
+                cp_file(srcp, desp, oct);
+            }
+        }
     }
 
     free(line);
 }
 
 int main(int argc, char *argv[]) {
-    char *root = xgetenv("KISS_ROOT", "/");
+    char *root = xgetenv("KISS_ROOT", "");
 
     if (!argv[1]) {
         die("Source directory must be provided");
     }
 
-    install_files(argv[1], root);
+    install_files(argv[1], root, argv[2][0]);
     free(root);
 
     return 0;
