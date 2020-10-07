@@ -27,6 +27,24 @@ enum actions {
     ACTION_UPDATE,
 };
 
+char **get_repos(void) {
+    char **repos = NULL;
+    char *p = NULL;
+    char *tok;
+    char *path = xgetenv("KISS_PATH");
+
+    for (tok = strtok_r(path, ":", &p);
+         tok != NULL;
+         tok = strtok_r(NULL, ":", &p)) {
+        vec_append(repos, xstrdup(tok));
+    }
+
+    free(path);
+    vec_append(repos, "/var/db/kiss/installed");
+
+    return repos;
+}
+
 static char *pkg_find(const char *pattern, int all) {
     glob_t buf;
 
