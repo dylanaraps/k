@@ -2,7 +2,7 @@
 
 PREFIX       = /usr/local
 ALL_WARNINGS = -Wall -Wextra -pedantic -Wmissing-prototypes -Wstrict-prototypes
-ALL_CFLAGS   = -std=c99 $(ALL_WARNINGS) -O3 $(CFLAGS) $(CPPFLAGS)
+ALL_CFLAGS   = -std=c99 $(ALL_WARNINGS) -O3 $(CFLAGS) $(CPPFLAGS) -O0 -g
 
 OBJ = \
 	src/kiss.o \

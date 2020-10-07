@@ -3,9 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <dirent.h>
 #include <glob.h>
-#include <sys/stat.h>
 
 #include "util.h"
 #include "vec.h"
@@ -30,17 +28,18 @@ enum actions {
 char **get_repos(void) {
     char **repos = NULL;
     char *p = NULL;
-    char *tok;
     char *path = xgetenv("KISS_PATH");
 
-    for (tok = strtok_r(path, ":", &p);
+    for (char *tok = strtok_r(path, ":", &p);
          tok != NULL;
          tok = strtok_r(NULL, ":", &p)) {
-        vec_append(repos, xstrdup(tok));
+        vec_add(repos, strdup(tok));
     }
 
+    free(p);
     free(path);
-    vec_append(repos, "/var/db/kiss/installed");
+
+    vec_add(repos, DB_DIR);
 
     return repos;
 }
@@ -64,7 +63,7 @@ static char *pkg_find(const char *pattern, int all) {
     char *match = NULL;
 
     if (buf.gl_pathc != 0 && buf.gl_pathv[0]) {
-        match = xstrdup(buf.gl_pathv[0]);
+        match = strdup(buf.gl_pathv[0]);
 
         if (all) {
             for (size_t i = 0; i < buf.gl_pathc; i++) {
@@ -155,7 +154,7 @@ int main (int argc, char *argv[]) {
 
     } else if (strcmp(argv[1], "version") == 0 ||
                strcmp(argv[1], "v") == 0) {
-        printf("0.0.1\n");
+        msg("0.0.1");
         return 0;
 
     } else {
@@ -182,7 +181,11 @@ int main (int argc, char *argv[]) {
 
         case ACTION_SEARCH: {
             for (int i = 2; i < argc; i++) {
-                if (pkg_find(argv[i], 1) == NULL) {
+                char *match = pkg_find(argv[i], 1);
+
+                if (match) {
+                    free(match);
+                } else {
                     die("no results for '%s'", argv[i]);
                 }
             }
@@ -191,5 +194,8 @@ int main (int argc, char *argv[]) {
         }
     }
 
+    for (size_t i = 0; i < vec_size(REPOS) - 1; i++) {
+        free(REPOS[i]);
+    }
     vec_free(REPOS);
 }

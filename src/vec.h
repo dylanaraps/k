@@ -95,7 +95,7 @@ SOFTWARE.
         }                                        \
     } while (0)
 
-#define vec_append(vec, value)                               \
+#define vec_add(vec, value)                                  \
     do {                                                     \
         size_t __cap = vec_capacity(vec);                    \
         if (__cap <= vec_size(vec)) {                        \
