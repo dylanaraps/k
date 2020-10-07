@@ -22,7 +22,9 @@ void str_cat(str *s, const char *p) {
     }
 
     memcpy(s->buf + s->len, p, p_len + 1);
+
     s->len += p_len;
+    s->buf[s->len] = 0;
 }
 
 void str_free(str *s) {
