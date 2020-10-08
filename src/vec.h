@@ -50,22 +50,22 @@ SOFTWARE.
         }                                   \
     } while (0)
 
-#define vec_grow(vec, count)                                                 \
-    do {                                                                     \
-        const size_t __sz = (count) * sizeof(*(vec)) + (sizeof(size_t) * 2); \
-        if (!(vec)) {                                                        \
-            size_t *__p = malloc(__sz);                                      \
-            assert(__p);                                                     \
-            (vec) = (void *)(&__p[2]);                                       \
-            vec_set_capacity((vec), (count));                                \
-            vec_set_size((vec), 0);                                          \
-        } else {                                                             \
-            size_t *__p1 = &((size_t *)(vec))[-2];                           \
-            size_t *__p2 = realloc(__p1, (__sz));                            \
-            assert(__p2);                                                    \
-            (vec) = (void *)(&__p2[2]);                                      \
-            vec_set_capacity((vec), (count));                                \
-        }                                                                    \
+#define vec_grow(vec, count)                                                  \
+    do {                                                                      \
+        const size_t cv_sz = (count) * sizeof(*(vec)) + (sizeof(size_t) * 2); \
+        if (!(vec)) {                                                         \
+            size_t *cv_p = malloc(cv_sz);                                     \
+            assert(cv_p);                                                     \
+            (vec) = (void *)(&cv_p[2]);                                       \
+            vec_set_capacity((vec), (count));                                 \
+            vec_set_size((vec), 0);                                           \
+        } else {                                                              \
+            size_t *cv_p1 = &((size_t *)(vec))[-2];                           \
+            size_t *cv_p2 = realloc(cv_p1, (cv_sz));                          \
+            assert(cv_p2);                                                    \
+            (vec) = (void *)(&cv_p2[2]);                                      \
+            vec_set_capacity((vec), (count));                                 \
+        }                                                                     \
     } while (0)
 
 #define vec_pop_back(vec)                       \
@@ -73,18 +73,18 @@ SOFTWARE.
         vec_set_size((vec), vec_size(vec) - 1); \
     } while (0)
 
-#define vec_erase(vec, i)                                  \
-    do {                                                   \
-        if (vec) {                                         \
-            const size_t __sz = vec_size(vec);             \
-            if ((i) < __sz) {                              \
-                vec_set_size((vec), __sz - 1);             \
-                size_t __x;                                \
-                for (__x = (i); __x < (__sz - 1); ++__x) { \
-                    (vec)[__x] = (vec)[__x + 1];           \
-                }                                          \
-            }                                              \
-        }                                                  \
+#define vec_erase(vec, i)                                      \
+    do {                                                       \
+        if (vec) {                                             \
+            const size_t cv_sz = vec_size(vec);                \
+            if ((i) < cv_sz) {                                 \
+                vec_set_size((vec), cv_sz - 1);                \
+                size_t cv_x;                                   \
+                for (cv_x = (i); cv_x < (cv_sz - 1); ++cv_x) { \
+                    (vec)[cv_x] = (vec)[cv_x + 1];             \
+                }                                              \
+            }                                                  \
+        }                                                      \
     } while (0)
 
 #define vec_free(vec)                            \
@@ -95,14 +95,14 @@ SOFTWARE.
         }                                        \
     } while (0)
 
-#define vec_add(vec, value)                                  \
-    do {                                                     \
-        size_t __cap = vec_capacity(vec);                    \
-        if (__cap <= vec_size(vec)) {                        \
-            vec_grow((vec), !__cap ? __cap + 1 : __cap * 2); \
-        }                                                    \
-        vec[vec_size(vec)] = (value);                        \
-        vec_set_size((vec), vec_size(vec) + 1);              \
+#define vec_add(vec, value)                                     \
+    do {                                                        \
+        size_t cv_cap = vec_capacity(vec);                      \
+        if (cv_cap <= vec_size(vec)) {                          \
+            vec_grow((vec), !cv_cap ? cv_cap + 1 : cv_cap * 2); \
+        }                                                       \
+        vec[vec_size(vec)] = (value);                           \
+        vec_set_size((vec), vec_size(vec) + 1);                 \
     } while (0)
 
 #endif
