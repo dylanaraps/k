@@ -22,12 +22,16 @@ VALGRIND = -s \
 OBJ = \
 	src/kiss.o \
 	src/util.o \
-	src/str.o
+	src/repo.o \
+	src/str.o \
+	src/pkg.o
 
 HDR = \
 	src/util.h \
 	src/str.h \
-	src/vec.h
+	src/repo.h \
+	src/vec.h \
+	src/pkg.h
 
 kiss: $(OBJ)
 	$(CC) $(ALL_CFLAGS) -o $@ $(OBJ) $(LDFLAGS)

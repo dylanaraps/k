@@ -3,13 +3,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <glob.h>
 
 #include "util.h"
 #include "vec.h"
 #include "str.h"
+#include "repo.h"
+#include "pkg.h"
 
-#define DB_DIR "/var/db/kiss/installed"
+static char **REPOS = NULL;
 
 enum actions {
     ACTION_ALTERNATIVES,
@@ -22,98 +23,6 @@ enum actions {
     ACTION_SEARCH,
     ACTION_UPDATE,
 };
-
-typedef struct package {
-    char *name;    
-    char *path;
-} package;
-
-static char **REPOS = NULL;
-
-static void repo_init(void) {
-    char *p = NULL;
-    char *path = xgetenv("KISS_PATH");
-
-    for (char *tok = strtok_r(path, ":", &p);
-         tok != NULL;
-         tok = strtok_r(NULL, ":", &p)) {
-
-        if (tok[0] != '/') {
-            die("relative path found in KISS_PATH");
-        }
-
-        vec_add(REPOS, strdup(tok));
-    }
-
-    free(p);
-    free(path);
-
-    vec_add(REPOS, strdup(DB_DIR));
-}
-
-static void repo_destroy(void) {
-    for (size_t i = 0; i < vec_size(REPOS); i++) {
-        free(REPOS[i]);
-    }
-    vec_free(REPOS);
-}
-
-static char *pkg_find(const char *pattern, int all) {
-    glob_t buf;
-
-    for (size_t i = 0; i < vec_size(REPOS); ++i) {
-        str query = {0};
-
-        str_cat(&query, REPOS[i]);
-        str_cat(&query, "/");
-        str_cat(&query, pattern);
-        str_cat(&query, "/");
-
-        glob(query.buf, i ? GLOB_APPEND : 0, NULL, &buf);
-
-        str_free(&query);
-    }
-
-    char *match = NULL;
-
-    if (buf.gl_pathc != 0 && buf.gl_pathv[0]) {
-        match = strdup(buf.gl_pathv[0]);
-
-        if (all) {
-            for (size_t i = 0; i < buf.gl_pathc; i++) {
-                puts(buf.gl_pathv[i]);
-            }
-        }
-    }
-
-    globfree(&buf);
-    return match;
-}
-
-static int pkg_list(const char *name) {
-    str p = {0};
-
-    str_cat(&p, DB_DIR);
-    str_cat(&p, "/");
-    str_cat(&p, name);
-
-    int ret = is_dir(p.buf);
-
-    str_free(&p);
-
-    return ret;
-}
-
-static void pkg_list_all(char **argv, int argc) {
-    for (int i = 0; i < argc; i++) {
-        if (!pkg_list(argv[i])) {
-            puts(argv[i]);
-
-        } else {
-            die("package '%s' not installed", argv[i]);
-        }
-    }
-}
 
 static void run_extension(char *argv[]) {
     str cmd = {0};
@@ -187,27 +96,57 @@ int main (int argc, char *argv[]) {
         return 0;
     }
 
-    repo_init();
-    atexit(repo_destroy);
+    REPOS = repo_init();
+    package *PKGS = NULL;
+
+    for (int i = 2; i < argc; i++) {
+        vec_add(PKGS, pkg_init(argv[i]));
+    }
+
+    if (vec_size(PKGS) == 0) {
+        switch (action) {
+            case ACTION_BUILD:
+            case ACTION_CHECKSUM:
+            case ACTION_DOWNLOAD:
+            case ACTION_INSTALL:
+            case ACTION_REMOVE:
+                // todo: use pwd as arg, prepend to KISS_PATH
+                break;
+
+            case ACTION_LIST: {
+                PKGS = pkg_init_db();
+                break;
+            }
+        }
+    }
 
     switch (action) {
         case ACTION_LIST: {
-            pkg_list_all(argv + 2, argc - 2);
+            for (size_t i = 0; i < vec_size(PKGS); ++i) {
+                if (!pkg_list(PKGS[i].name)) {
+                    die("package '%s' not installed", PKGS[i].name);
+                }
+
+                puts(PKGS[i].name);
+            }
             break;
         }
 
         case ACTION_SEARCH: {
-            for (int i = 2; i < argc; i++) {
-                char *match = pkg_find(argv[i], 1);
+            for (size_t i = 0; i < vec_size(PKGS); ++i) {
+                char *match = repo_find(PKGS[i].name, 1, REPOS);
 
                 if (match) {
                     free(match);
                 } else {
-                    die("no results for '%s'", argv[i]);
+                    die("no results for '%s'", PKGS[i].name);
                 }
             }
 
             break;
         }
     }
+
+    repo_free(REPOS);
+    pkg_free(PKGS);
 }

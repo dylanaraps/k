@@ -5,7 +5,6 @@
 #include <sys/stat.h>
 
 #include "util.h"
-#include "vec.h"
 
 char *xgetenv(const char *s) {
     char *p = getenv(s);

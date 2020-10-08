@@ -1,8 +1,4 @@
-char **get_repos(void);
 char *xgetenv(const char *);
-char *xgetcwd(void);
-char *xstrdup(const char *);
-char *path_join(const char *, const char *);
 int is_dir(const char *d);
 
 #define msg(...) \
