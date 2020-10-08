@@ -63,10 +63,8 @@ static int run_action(int action, char **argv, int argc) {
         case ACTION_INSTALL:
         case ACTION_REMOVE:
             if (vec_size(pkgs) == 0) {
-                /* char *cwd = NULL; */
-                /* size_t len = xgetcwd(&cwd); */
-                char *cwd = strdup("/home/dylan///////////");
-                size_t len = strlen(cwd);
+                char *cwd = NULL;
+                size_t len = xgetcwd(&cwd);
 
                 vec_add(pkgs, pkg_init(path_basename(cwd, len)));
                 int err = PATH_prepend(cwd, "KISS_PATH");

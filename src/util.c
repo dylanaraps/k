@@ -23,7 +23,6 @@ size_t xgetcwd(char *p[]) {
     }
 
     *p = getcwd(buf, (size_t) len);
-    free(buf);
 
     if (!*p) {
         perror("getcwd");
