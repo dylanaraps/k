@@ -6,4 +6,6 @@ jobs:
         steps:
             - uses: actions/checkout@v1
             - name: Run CI.
-              run: ./tests/ci.sh
+              run: |
+                  sudo apt-get install tcc
+                  ./tests/ci.sh
