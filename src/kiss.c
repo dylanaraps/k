@@ -64,10 +64,9 @@ static int run_action(int action, char **argv, int argc) {
             pkg_list_all(pkgs);
             break;
 
-        case ACTION_SEARCH: {
+        case ACTION_SEARCH:
             repo_find_all(pkgs, repos);
             break;
-        }
 
         case ACTION_EXTENSION:
             run_extension(argv);
