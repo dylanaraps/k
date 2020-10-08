@@ -46,7 +46,7 @@
 }
 
 {
-   <musl setenv false-positive 3>
+   <musl setenv false-positive 2>
    Memcheck:Leak
    match-leak-kinds: reachable
    fun:malloc

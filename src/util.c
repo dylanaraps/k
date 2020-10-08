@@ -69,3 +69,24 @@ int is_dir(const char *d) {
 
     return 1;
 }
+
+FILE *fopenat(const char *d, const char *f, const char *m) {
+    if (!d || !f | !m) {
+        return NULL;
+    }
+
+    str new = {0};
+    str_cat(&new, d);
+    str_cat(&new, "/");
+    str_cat(&new, f);
+
+    FILE *f2 = fopen(new.buf, m);
+
+    str_free(&new);
+
+    if (!f2) {
+        return NULL;
+    }
+
+    return f2;
+}

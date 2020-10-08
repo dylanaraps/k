@@ -19,6 +19,7 @@ enum actions {
     ACTION_CHECKSUM,
     ACTION_DOWNLOAD,
     ACTION_EXTENSION,
+    ACTION_HELPEXT,
     ACTION_INSTALL,
     ACTION_LIST,
     ACTION_REMOVE,
@@ -63,7 +64,7 @@ static int run_action(int action, char **argv, int argc) {
         case ACTION_DOWNLOAD:
         case ACTION_INSTALL:
         case ACTION_REMOVE:
-            if (argc < 3) {
+            if (vec_size(pkgs) == 0) {
                 char *cwd = xgetcwd();
                 int err = PATH_prepend(dirname(cwd), "KISS_PATH");
                 free(cwd);
@@ -135,6 +136,9 @@ int main (int argc, char *argv[]) {
     } else if (strcmp(argv[1], "download") == 0 ||
                strcmp(argv[1], "d") == 0) {
         action = ACTION_DOWNLOAD;
+
+    } else if (strcmp(argv[1], "help-ext") == 0) {
+        action = ACTION_HELPEXT;
 
     } else if (strcmp(argv[1], "install") == 0 ||
                strcmp(argv[1], "i") == 0) {
