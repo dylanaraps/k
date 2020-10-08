@@ -4,6 +4,7 @@ PREFIX = /usr/local
 
 ALL_CFLAGS = \
 	-std=c99 \
+	-D_POSIX_C_SOURCE=200809L \
 	-Wall \
 	-Wextra \
 	-pedantic \

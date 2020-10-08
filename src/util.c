@@ -1,15 +1,13 @@
-#define _POSIX_C_SOURCE 200809L
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <libgen.h>
 
 #include "str.h"
 #include "util.h"
 
-char *xgetcwd(void) {
+size_t xgetcwd(char *p[]) {
     long len = pathconf(".", _PC_PATH_MAX);
 
     if (len < 0) {
@@ -24,14 +22,15 @@ char *xgetcwd(void) {
         exit(1);
     }
 
-    char *cwd = getcwd(buf, (size_t) len);
+    *p = getcwd(buf, (size_t) len);
+    free(buf);
 
-    if (!cwd) {
+    if (!*p) {
         perror("getcwd");
         exit(1);
     }
 
-    return cwd;
+    return (size_t) len;
 }
 
 int PATH_prepend(const char *path, const char *var) {
@@ -68,6 +67,23 @@ int is_dir(const char *d) {
     }
 
     return 1;
+}
+
+char *path_basename(char *p, size_t len) {
+    for (int i = 1; p[len - i] == '/'; i++) {
+        p[len - i] = 0;
+    }
+
+    char *b = strrchr(p, '/');
+
+    if (!b) {
+        *p = '/';
+        return p;
+    }
+
+    *b++ = 0;
+
+    return b; // p now points to dirname
 }
 
 FILE *fopenat(const char *d, const char *f, const char *m) {

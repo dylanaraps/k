@@ -3,10 +3,11 @@
 
 #include <stdio.h>
 
-char *xgetcwd(void);
-int PATH_prepend(const char *path, const char *var);
+size_t xgetcwd(char *p[]);
+char *path_basename(char *, size_t);
+int PATH_prepend(const char *, const char *);
 int is_dir(const char *);
-FILE *fopenat(const char *d, const char *f, const char *m);
+FILE *fopenat(const char *, const char *, const char *);
 
 #define msg(...) \
     do { \

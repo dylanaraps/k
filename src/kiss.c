@@ -1,9 +1,7 @@
-#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <libgen.h>
 
 #include "util.h"
 #include "vec.h"
@@ -65,17 +63,21 @@ static int run_action(int action, char **argv, int argc) {
         case ACTION_INSTALL:
         case ACTION_REMOVE:
             if (vec_size(pkgs) == 0) {
-                char *cwd = xgetcwd();
-                int err = PATH_prepend(dirname(cwd), "KISS_PATH");
+                /* char *cwd = NULL; */
+                /* size_t len = xgetcwd(&cwd); */
+                char *cwd = strdup("/home/dylan///////////");
+                size_t len = strlen(cwd);
+
+                vec_add(pkgs, pkg_init(path_basename(cwd, len)));
+                int err = PATH_prepend(cwd, "KISS_PATH");
                 free(cwd);
 
                 if (err == 1) {
                     die("failed to prepend to KISS_PATH");
                 }
 
-                cwd = xgetcwd();
-                vec_add(pkgs, pkg_init(basename(cwd)));
-                free(cwd);
+                printf("%s\n", getenv("KISS_PATH"));
+                printf("%s\n", pkgs[0].name);
             }
             break;
     }
