@@ -23,24 +23,6 @@ void pkg_free(package *pkgs) {
     vec_free(pkgs);
 }
 
-package *pkg_init_db(void) {
-    package *pkgs = NULL;
-    struct dirent **list;
-    int len = scandir(DB_DIR, &list, NULL, alphasort);
-
-    if (len == -1) {
-        die("database not accessible");
-    }
-
-    for (int i = 2; i < len; i++) {
-        vec_add(pkgs, pkg_init(list[i]->d_name));
-        free(list[i]);
-    }
-    free(list);
-
-    return pkgs;
-}
-
 int pkg_list(const char *name) {
     str p = {0};
 
@@ -57,7 +39,18 @@ int pkg_list(const char *name) {
 
 void pkg_list_all(package *pkgs) {
     if (vec_size(pkgs) == 0) {
-        pkgs = pkg_init_db();
+        struct dirent **list;
+        int len = scandir(DB_DIR, &list, NULL, alphasort);
+
+        if (len == -1) {
+            die("database not accessible");
+        }
+
+        for (int i = 2; i < len; i++) {
+            vec_add(pkgs, pkg_init(list[i]->d_name));
+            free(list[i]);
+        }
+        free(list);
     }
 
     for (size_t i = 0; i < vec_size(pkgs); ++i) {

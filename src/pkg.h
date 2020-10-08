@@ -10,7 +10,6 @@ typedef struct package {
 
 package pkg_init(const char *);
 void pkg_free(package *);
-package *pkg_init_db(void);
 int pkg_list(const char *);
 void pkg_list_all(package *);
 
