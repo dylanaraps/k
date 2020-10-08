@@ -181,6 +181,7 @@ int main (int argc, char *argv[]) {
     }
 
     repo_init();
+    atexit(repo_destroy);
 
     switch (action) {
         case ACTION_LIST: {
@@ -206,6 +207,4 @@ int main (int argc, char *argv[]) {
             break;
         }
     }
-
-    repo_destroy();
 }
