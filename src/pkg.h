@@ -13,6 +13,6 @@ package pkg_init(const char *);
 void pkg_free(package *);
 int pkg_list(const char *);
 void pkg_list_all(package *);
-void pkg_version(package *);
+char *pkg_version(const char *);
 
 #endif

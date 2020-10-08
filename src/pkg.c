@@ -17,8 +17,6 @@ package pkg_init(const char *name) {
     pkg.name = strdup(name);
     pkg.path = repo_find(name);
 
-    pkg_version(&pkg);
-
     return pkg;
 }
 
@@ -66,14 +64,21 @@ void pkg_list_all(package *pkgs) {
             die("package '%s' not installed", pkgs[i].name);
         }
 
-        printf("%s %s\n", pkgs[i].name, pkgs[i].ver);
+        char *ver = pkg_version(pkgs[i].path);
+
+        if (!ver) {
+            die("[%s] failed to find version", pkgs[i].name);    
+        }
+
+        printf("%s %s\n", pkgs[i].name, ver);
+        free(ver);
     }
 }
 
-void pkg_version(package *pkg) {
+char *pkg_version(const char *path) {
     str file = {0};    
 
-    str_cat(&file, pkg->path);
+    str_cat(&file, path);
     str_cat(&file, "version");
 
     FILE *f = fopen(file.buf, "r");
@@ -81,16 +86,18 @@ void pkg_version(package *pkg) {
     str_free(&file);
 
     if (!f) {
-        die("[%s] version file not found", pkg->name);
+        return NULL;
     }
 
-    int err = getline(&pkg->ver, &(size_t){0}, f);
+    char *ver = NULL;
+    int err = getline(&ver, &(size_t){0}, f);
 
     if (err == -1) {
-        die("[%s] failed to read version file", pkg->name);
+        return NULL;
     }
     
     fclose(f);
+    ver[strcspn(ver, "\n")] = 0;
 
-    pkg->ver[strcspn(pkg->ver, "\n")] = 0;
+    return ver;
 }
