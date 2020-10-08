@@ -73,8 +73,7 @@ static int run_action(int action) {
         case ACTION_LIST: {
             for (size_t i = 0; i < vec_size(pkgs); ++i) {
                 if (!pkg_list(pkgs[i].name)) {
-                    msg("package '%s' not installed", pkgs[i].name);
-                    return 1;
+                    die("package '%s' not installed", pkgs[i].name);
                 }
 
                 puts(pkgs[i].name);
@@ -89,8 +88,7 @@ static int run_action(int action) {
                 if (match) {
                     free(match);
                 } else {
-                    msg("no results for '%s'", pkgs[i].name);
-                    return 1;
+                    die("no results for '%s'", pkgs[i].name);
                 }
             }
 
