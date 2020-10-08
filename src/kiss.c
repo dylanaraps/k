@@ -18,11 +18,14 @@ enum actions {
     ACTION_BUILD,
     ACTION_CHECKSUM,
     ACTION_DOWNLOAD,
+    ACTION_EXTENSION,
     ACTION_INSTALL,
     ACTION_LIST,
     ACTION_REMOVE,
     ACTION_SEARCH,
     ACTION_UPDATE,
+    ACTION_USAGE,
+    ACTION_VERSION,
 };
 
 static void exit_handler(void) {
@@ -51,7 +54,11 @@ static void run_extension(char *argv[]) {
     }
 }
 
-static int run_action(int action) {
+static int run_action(int action, char **argv, int argc) {
+    for (int i = 2; i < argc; i++) {
+        vec_add(pkgs, pkg_init(argv[i]));
+    }
+
     if (vec_size(pkgs) == 0) {
         switch (action) {
             case ACTION_BUILD:
@@ -91,9 +98,30 @@ static int run_action(int action) {
                     die("no results for '%s'", pkgs[i].name);
                 }
             }
-
             break;
         }
+
+        case ACTION_EXTENSION:
+            run_extension(argv);
+            break;
+
+        case ACTION_VERSION:
+            puts("0.0.1");
+            break;
+
+        default:
+            puts("kiss [b|c|d|l|s|v] [pkg]...");
+            puts("alternatives List and swap to alternatives"); 
+            puts("build        Build a package");
+            puts("checksum     Generate checksums");
+            puts("download     Pre-download all sources");
+            puts("install      Install a package");
+            puts("list         List installed packages");
+            puts("remove       Remove a package");
+            puts("search       Search for a package");
+            puts("update       Update the system");
+            puts("version:      Package manager version");
+            puts("\nRun 'kiss help-ext' to see all actions");
     }
 
     return 0;
@@ -103,18 +131,7 @@ int main (int argc, char *argv[]) {
     int action = 0;
 
     if (argc < 2 || !argv[1] || !argv[1][0] || argv[1][0] == '-') {
-        puts("kiss [b|c|d|l|s|v] [pkg]...");
-        puts("alternatives List and swap to alternatives"); 
-        puts("build        Build a package");
-        puts("checksum     Generate checksums");
-        puts("download     Pre-download all sources");
-        puts("install      Install a package");
-        puts("list         List installed packages");
-        puts("remove       Remove a package");
-        puts("search       Search for a package");
-        puts("update       Update the system");
-        puts("version:      Package manager version");
-        puts("\nRun 'kiss help-ext' to see all actions");
+        action = ACTION_USAGE;
 
     } else if (strcmp(argv[1], "build") == 0 ||
                strcmp(argv[1], "b") == 0) {
@@ -146,22 +163,14 @@ int main (int argc, char *argv[]) {
 
     } else if (strcmp(argv[1], "version") == 0 ||
                strcmp(argv[1], "v") == 0) {
-        puts("0.0.1");
+        action = ACTION_VERSION;
 
     } else {
-        run_extension(argv);
-    }
-
-    if (!action) {
-        return 0;
+        action = ACTION_EXTENSION;
     }
 
     repos = repo_init();
     atexit(exit_handler);
 
-    for (int i = 2; i < argc; i++) {
-        vec_add(pkgs, pkg_init(argv[i]));
-    }
-
-    return run_action(action);
+    return run_action(action, argv, argc);
 }
