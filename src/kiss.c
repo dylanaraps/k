@@ -59,25 +59,11 @@ static int run_action(int action, char **argv, int argc) {
         vec_add(pkgs, pkg_init(argv[i]));
     }
 
-    if (vec_size(pkgs) == 0) {
-        switch (action) {
-            case ACTION_BUILD:
-            case ACTION_CHECKSUM:
-            case ACTION_DOWNLOAD:
-            case ACTION_INSTALL:
-            case ACTION_REMOVE:
-            case ACTION_SEARCH:
-                break;
-
-            case ACTION_LIST: {
-                pkgs = pkg_init_db();
-                break;
-            }
-        }
-    }
-
     switch (action) {
         case ACTION_LIST: {
+            if (vec_size(pkgs) == 0) {
+                pkgs = pkg_init_db();
+            }
             pkg_list_all(pkgs);
             break;
         }
