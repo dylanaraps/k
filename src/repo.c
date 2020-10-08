@@ -13,9 +13,11 @@ static char **repos = NULL;
 
 void repo_init(void) {
     char *p = NULL;
-    char *path = xgetenv("KISS_PATH");
 
-    for (char *tok = strtok_r(path, ":", &p);
+    str path = {0};
+    str_cat(&path, getenv("KISS_PATH"));
+
+    for (char *tok = strtok_r(path.buf, ":", &p);
          tok != NULL;
          tok = strtok_r(NULL, ":", &p)) {
 
@@ -25,11 +27,10 @@ void repo_init(void) {
 
         vec_add(repos, strdup(tok));
     }
+    free(p);
+    str_free(&path);
 
     vec_add(repos, strdup(DB_DIR));
-
-    free(p);
-    free(path);
 }
 
 void repo_free(void) {

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <libgen.h>
 
 #include "util.h"
 #include "vec.h"
@@ -57,6 +58,28 @@ static int run_action(int action, char **argv, int argc) {
     }
 
     switch (action) {
+        case ACTION_BUILD:
+        case ACTION_CHECKSUM:
+        case ACTION_DOWNLOAD:
+        case ACTION_INSTALL:
+        case ACTION_REMOVE:
+            if (argc < 3) {
+                char *cwd = xgetcwd();
+                int err = PATH_prepend(dirname(cwd), "KISS_PATH");
+                free(cwd);
+
+                if (err == 1) {
+                    die("failed to prepend to KISS_PATH");
+                }
+
+                cwd = xgetcwd();
+                vec_add(pkgs, pkg_init(basename(cwd)));
+                free(cwd);
+            }
+            break;
+    }
+
+    switch (action) {
         case ACTION_LIST:
             pkg_list_all(pkgs);
             break;
@@ -75,7 +98,7 @@ static int run_action(int action, char **argv, int argc) {
 
         default:
             puts("kiss [b|c|d|l|s|v] [pkg]...");
-            puts("alternatives List and swap to alternatives"); 
+            puts("alternatives List and swap to alternatives");
             puts("build        Build a package");
             puts("checksum     Generate checksums");
             puts("download     Pre-download all sources");

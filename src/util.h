@@ -1,5 +1,9 @@
-char *xgetenv(const char *);
-int is_dir(const char *d);
+#ifndef KISS_UTIL_H_
+#define KISS_UTIL_H_
+
+char *xgetcwd(void);
+int PATH_prepend(const char *path, const char *var);
+int is_dir(const char *);
 
 #define msg(...) \
     do { \
@@ -12,3 +16,5 @@ int is_dir(const char *d);
         msg(__VA_ARGS__); \
         exit(EXIT_FAILURE); \
     } while (0)
+
+#endif

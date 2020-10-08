@@ -1,10 +1,10 @@
-#ifndef STR_H_
-#define STR_H_
+#ifndef KISS_STR_H_
+#define KISS_STR_H_
 
 #include <stdio.h>
 
 typedef struct str {
-    size_t len; 
+    size_t len;
     size_t cap;
     char *buf;
 } str;

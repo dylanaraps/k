@@ -4,7 +4,7 @@
 #define DB_DIR "/var/db/kiss/installed"
 
 typedef struct package {
-    char *name;    
+    char *name;
     char *path;
 } package;
 

@@ -66,7 +66,7 @@ void pkg_list_all(package *pkgs) {
         char *ver = pkg_version(pkgs[i].name, DB_DIR);
 
         if (!ver) {
-            die("[%s] failed to find version", pkgs[i].name);    
+            die("[%s] failed to find version", pkgs[i].name);
         }
 
         printf("%s %s\n", pkgs[i].name, ver);
@@ -75,13 +75,12 @@ void pkg_list_all(package *pkgs) {
 }
 
 char *pkg_version(const char *name, const char *path) {
-    str file = {0};    
+    str file = {0};
 
     str_cat(&file, path);
     str_cat(&file, "/");
     str_cat(&file, name);
-    str_cat(&file, "/");
-    str_cat(&file, "version");
+    str_cat(&file, "/version");
 
     FILE *f = fopen(file.buf, "r");
 
@@ -98,7 +97,7 @@ char *pkg_version(const char *name, const char *path) {
     if (err == -1) {
         return NULL;
     }
-    
+
     ver[strcspn(ver, "\n")] = 0;
 
     return ver;

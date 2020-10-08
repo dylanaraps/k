@@ -34,3 +34,28 @@
    obj:*
    obj:*
 }
+
+{
+   <musl setenv false-positive>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib/libc.so
+   obj:*
+   obj:/usr/lib/libc.so
+}
+
+{
+   <musl setenv false-positive 3>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:setenv
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:/usr/lib/libc.so
+   fun:PATH_prepend
+   fun:main
+}

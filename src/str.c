@@ -10,15 +10,15 @@ void str_cat(str *s, const char *p) {
         return;
     }
 
-    size_t p_len = strlen(p);    
+    size_t p_len = strlen(p);
 
     if (!s->len || (s->len + p_len) >= s->cap) {
-        s->cap += p_len * 2; 
+        s->cap += p_len * 2;
         s->buf  = realloc(s->buf, s->cap);
 
         if (!s->buf) {
             perror("realloc");
-            exit(1); 
+            exit(1);
         }
     }
 
@@ -29,5 +29,5 @@ void str_cat(str *s, const char *p) {
 }
 
 void str_free(str *s) {
-    free(s->buf);    
+    free(s->buf);
 }

@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef VEC_H_
-#define VEC_H_
+#ifndef KISS_VEC_H_
+#define KISS_VEC_H_
 
 #include <assert.h>
 #include <stddef.h>

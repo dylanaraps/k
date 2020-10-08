@@ -12,12 +12,15 @@ ALL_CFLAGS = \
 	-O3 \
 	$(CFLAGS)
 
-VALGRIND = -s \
+VALGRIND = \
 	--leak-check=full \
 	--show-leak-kinds=all \
 	--suppressions=./tests/musl.supp \
 	--track-origins=yes \
-	--error-exitcode=1
+	--error-exitcode=1 \
+	--gen-suppressions=all \
+	--exit-on-first-error=yes \
+	--trace-children=yes
 
 OBJ = \
 	src/kiss.o \
@@ -42,10 +45,11 @@ kiss: $(OBJ)
 $(OBJ): $(HDR)
 
 check:
+	valgrind $(VALGRIND) ./kiss
 	valgrind $(VALGRIND) ./kiss s zlib
 	valgrind $(VALGRIND) ./kiss l xz
 	valgrind $(VALGRIND) ./kiss v
-	valgrind $(VALGRIND) ./kiss
+	valgrind $(VALGRIND) ./kiss b
 
 clean:
 	rm -f kiss $(OBJ)
