@@ -24,7 +24,6 @@ void pkg_free(package *pkgs) {
     for (size_t i = 0; i < vec_size(pkgs); i++) {
         free(pkgs[i].name);
         free(pkgs[i].path);
-        free(pkgs[i].ver);
     }
     vec_free(pkgs);
 }

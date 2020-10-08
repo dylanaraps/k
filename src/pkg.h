@@ -6,7 +6,6 @@
 typedef struct package {
     char *name;    
     char *path;
-    char *ver;
 } package;
 
 package pkg_init(const char *);
