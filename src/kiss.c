@@ -10,6 +10,9 @@
 #include "repo.h"
 #include "pkg.h"
 
+static char **repos = NULL;
+static package *pkgs = NULL;
+
 enum actions {
     ACTION_ALTERNATIVES,
     ACTION_BUILD,
@@ -21,6 +24,16 @@ enum actions {
     ACTION_SEARCH,
     ACTION_UPDATE,
 };
+
+static void exit_handler(void) {
+    if (repos) {
+        repo_free(repos);
+    }
+
+    if (pkgs) {
+        pkg_free(pkgs);
+    }
+}
 
 static void run_extension(char *argv[]) {
     str cmd = {0};
@@ -36,6 +49,56 @@ static void run_extension(char *argv[]) {
         perror("execvp");
         exit(1);
     }
+}
+
+static int run_action(int action) {
+    if (vec_size(pkgs) == 0) {
+        switch (action) {
+            case ACTION_BUILD:
+            case ACTION_CHECKSUM:
+            case ACTION_DOWNLOAD:
+            case ACTION_INSTALL:
+            case ACTION_REMOVE:
+            case ACTION_SEARCH:
+                break;
+
+            case ACTION_LIST: {
+                pkgs = pkg_init_db();
+                break;
+            }
+        }
+    }
+
+    switch (action) {
+        case ACTION_LIST: {
+            for (size_t i = 0; i < vec_size(pkgs); ++i) {
+                if (!pkg_list(pkgs[i].name)) {
+                    msg("package '%s' not installed", pkgs[i].name);
+                    return 1;
+                }
+
+                puts(pkgs[i].name);
+            }
+            break;
+        }
+
+        case ACTION_SEARCH: {
+            for (size_t i = 0; i < vec_size(pkgs); ++i) {
+                char *match = repo_find(pkgs[i].name, 1, repos);
+
+                if (match) {
+                    free(match);
+                } else {
+                    msg("no results for '%s'", pkgs[i].name);
+                    return 1;
+                }
+            }
+
+            break;
+        }
+    }
+
+    return 0;
 }
 
 int main (int argc, char *argv[]) {
@@ -54,7 +117,6 @@ int main (int argc, char *argv[]) {
         puts("update       Update the system");
         puts("version:      Package manager version");
         puts("\nRun 'kiss help-ext' to see all actions");
-        return 0;
 
     } else if (strcmp(argv[1], "build") == 0 ||
                strcmp(argv[1], "b") == 0) {
@@ -87,64 +149,21 @@ int main (int argc, char *argv[]) {
     } else if (strcmp(argv[1], "version") == 0 ||
                strcmp(argv[1], "v") == 0) {
         puts("0.0.1");
-        return 0;
 
     } else {
         run_extension(argv);
+    }
+
+    if (!action) {
         return 0;
     }
 
-    char **repos = repo_init();
-    package *pkgs = NULL;
+    repos = repo_init();
+    atexit(exit_handler);
 
     for (int i = 2; i < argc; i++) {
         vec_add(pkgs, pkg_init(argv[i]));
     }
 
-    if (vec_size(pkgs) == 0) {
-        switch (action) {
-            case ACTION_BUILD:
-            case ACTION_CHECKSUM:
-            case ACTION_DOWNLOAD:
-            case ACTION_INSTALL:
-            case ACTION_REMOVE:
-                // todo: use pwd as arg, prepend to KISS_PATH
-                break;
-
-            case ACTION_LIST: {
-                pkgs = pkg_init_db();
-                break;
-            }
-        }
-    }
-
-    switch (action) {
-        case ACTION_LIST: {
-            for (size_t i = 0; i < vec_size(pkgs); ++i) {
-                if (!pkg_list(pkgs[i].name)) {
-                    die("package '%s' not installed", pkgs[i].name);
-                }
-
-                puts(pkgs[i].name);
-            }
-            break;
-        }
-
-        case ACTION_SEARCH: {
-            for (size_t i = 0; i < vec_size(pkgs); ++i) {
-                char *match = repo_find(pkgs[i].name, 1, repos);
-
-                if (match) {
-                    free(match);
-                } else {
-                    die("no results for '%s'", pkgs[i].name);
-                }
-            }
-
-            break;
-        }
-    }
-
-    repo_free(repos);
-    pkg_free(pkgs);
+    return run_action(action);
 }
