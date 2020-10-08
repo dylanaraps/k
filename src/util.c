@@ -27,9 +27,7 @@ char *xgetenv(const char *s) {
 int is_dir(const char *d) {
     struct stat s;
 
-    int err = lstat(d, &s);
-
-    if (err < 0) {
+    if (lstat(d, &s) < 0) {
         return 1;
     }
 

@@ -90,7 +90,7 @@ static char *pkg_find(const char *pattern, int all) {
     return match;
 }
 
-static int pkg_list(const char *name, int print) {
+static int pkg_list(const char *name) {
     str p = {0};
 
     str_cat(&p, DB_DIR);
@@ -101,11 +101,18 @@ static int pkg_list(const char *name, int print) {
 
     str_free(&p);
 
-    if (print && !ret) {
-        puts(name);
-    }
-
     return ret;
+}
+
+static void pkg_list_all(char **argv, int argc) {
+    for (int i = 0; i < argc; i++) {
+        if (!pkg_list(argv[i])) {
+            puts(argv[i]);
+
+        } else {
+            die("package '%s' not installed", argv[i]);
+        }
+    }
 }
 
 static void run_extension(char *argv[]) {
@@ -185,11 +192,7 @@ int main (int argc, char *argv[]) {
 
     switch (action) {
         case ACTION_LIST: {
-            for (int i = 2; i < argc; i++) {
-                if (pkg_list(argv[i], 1)) {
-                    die("package '%s' not installed", argv[i]);
-                }
-            }
+            pkg_list_all(argv + 2, argc - 2);
             break;
         }
 
