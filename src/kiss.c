@@ -10,8 +10,6 @@
 #include "repo.h"
 #include "pkg.h"
 
-static char **REPOS = NULL;
-
 enum actions {
     ACTION_ALTERNATIVES,
     ACTION_BUILD,
@@ -96,14 +94,14 @@ int main (int argc, char *argv[]) {
         return 0;
     }
 
-    REPOS = repo_init();
-    package *PKGS = NULL;
+    char **repos = repo_init();
+    package *pkgs = NULL;
 
     for (int i = 2; i < argc; i++) {
-        vec_add(PKGS, pkg_init(argv[i]));
+        vec_add(pkgs, pkg_init(argv[i]));
     }
 
-    if (vec_size(PKGS) == 0) {
+    if (vec_size(pkgs) == 0) {
         switch (action) {
             case ACTION_BUILD:
             case ACTION_CHECKSUM:
@@ -114,7 +112,7 @@ int main (int argc, char *argv[]) {
                 break;
 
             case ACTION_LIST: {
-                PKGS = pkg_init_db();
+                pkgs = pkg_init_db();
                 break;
             }
         }
@@ -122,24 +120,24 @@ int main (int argc, char *argv[]) {
 
     switch (action) {
         case ACTION_LIST: {
-            for (size_t i = 0; i < vec_size(PKGS); ++i) {
-                if (!pkg_list(PKGS[i].name)) {
-                    die("package '%s' not installed", PKGS[i].name);
+            for (size_t i = 0; i < vec_size(pkgs); ++i) {
+                if (!pkg_list(pkgs[i].name)) {
+                    die("package '%s' not installed", pkgs[i].name);
                 }
 
-                puts(PKGS[i].name);
+                puts(pkgs[i].name);
             }
             break;
         }
 
         case ACTION_SEARCH: {
-            for (size_t i = 0; i < vec_size(PKGS); ++i) {
-                char *match = repo_find(PKGS[i].name, 1, REPOS);
+            for (size_t i = 0; i < vec_size(pkgs); ++i) {
+                char *match = repo_find(pkgs[i].name, 1, repos);
 
                 if (match) {
                     free(match);
                 } else {
-                    die("no results for '%s'", PKGS[i].name);
+                    die("no results for '%s'", pkgs[i].name);
                 }
             }
 
@@ -147,6 +145,6 @@ int main (int argc, char *argv[]) {
         }
     }
 
-    repo_free(REPOS);
-    pkg_free(PKGS);
+    repo_free(repos);
+    pkg_free(pkgs);
 }
