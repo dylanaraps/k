@@ -68,14 +68,12 @@ static int run_action(int action, char **argv, int argc) {
 
                 vec_add(pkgs, pkg_init(path_basename(cwd, len)));
                 int err = PATH_prepend(cwd, "KISS_PATH");
+
                 free(cwd);
 
                 if (err == 1) {
                     die("failed to prepend to KISS_PATH");
                 }
-
-                printf("%s\n", getenv("KISS_PATH"));
-                printf("%s\n", pkgs[0].name);
             }
             break;
     }

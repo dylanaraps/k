@@ -20,7 +20,6 @@ VALGRIND = \
 	--track-origins=yes \
 	--error-exitcode=1 \
 	--trace-children=yes
-	# --gen-suppressions=all \
 
 OBJ = \
 	src/kiss.o \

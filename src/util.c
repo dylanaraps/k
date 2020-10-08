@@ -7,7 +7,7 @@
 #include "str.h"
 #include "util.h"
 
-size_t xgetcwd(char *p[]) {
+size_t xgetcwd(char **p) {
     long len = pathconf(".", _PC_PATH_MAX);
 
     if (len < 0) {
