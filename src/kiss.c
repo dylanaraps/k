@@ -10,7 +10,6 @@
 #include "repo.h"
 #include "pkg.h"
 
-static char **repos = NULL;
 static package *pkgs = NULL;
 
 enum actions {
@@ -29,9 +28,7 @@ enum actions {
 };
 
 static void exit_handler(void) {
-    if (repos) {
-        repo_free(repos);
-    }
+    repo_free();
 
     if (pkgs) {
         pkg_free(pkgs);
@@ -65,7 +62,7 @@ static int run_action(int action, char **argv, int argc) {
             break;
 
         case ACTION_SEARCH:
-            repo_find_all(pkgs, repos);
+            repo_find_all(pkgs);
             break;
 
         case ACTION_EXTENSION:
@@ -136,7 +133,6 @@ int main (int argc, char *argv[]) {
         action = ACTION_EXTENSION;
     }
 
-    repos = repo_init();
     atexit(exit_handler);
 
     return run_action(action, argv, argc);

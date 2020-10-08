@@ -5,10 +5,11 @@
 
 #include "pkg.h"
 
-char **repo_init(void);
-void repo_free(char **);
-glob_t repo_glob(const char *, char **);
-char *repo_find(const char *, char **);
-void repo_find_all(package *, char **);
+void repo_init(void);
+void repo_free(void);
+
+glob_t repo_glob(const char *);
+char *repo_find(const char *);
+void repo_find_all(package *);
 
 #endif

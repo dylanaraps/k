@@ -6,19 +6,24 @@
 #include <glob.h>
 
 #include "util.h"
+#include "repo.h"
 #include "vec.h"
 #include "str.h"
 #include "pkg.h"
 
 package pkg_init(const char *name) {
-    return (package) {
-        .name = strdup(name),
-    };
+    package pkg = {0};
+
+    pkg.name = strdup(name);
+    pkg.path = repo_find(name);
+
+    return pkg;
 }
 
 void pkg_free(package *pkgs) {
     for (size_t i = 0; i < vec_size(pkgs); i++) {
         free(pkgs[i].name);
+        free(pkgs[i].path);
     }
     vec_free(pkgs);
 }

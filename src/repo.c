@@ -9,8 +9,9 @@
 #include "str.h"
 #include "repo.h"
 
-char **repo_init(void) {
-    char **repos = NULL;
+static char **repos = NULL;
+
+void repo_init(void) {
     char *p = NULL;
     char *path = xgetenv("KISS_PATH");
 
@@ -29,19 +30,23 @@ char **repo_init(void) {
 
     free(p);
     free(path);
-
-    return repos;
 }
 
-void repo_free(char **repos) {
-    for (size_t i = 0; i < vec_size(repos); i++) {
-        free(repos[i]);
+void repo_free(void) {
+    if (repos) {
+        for (size_t i = 0; i < vec_size(repos); i++) {
+            free(repos[i]);
+        }
+        vec_free(repos);
     }
-    vec_free(repos);
 }
 
-glob_t repo_glob(const char *pattern, char **repos) {
+glob_t repo_glob(const char *pattern) {
     glob_t buf;
+
+    if (vec_size(repos) == 0) {
+        repo_init();
+    }
 
     for (size_t i = 0; i < vec_size(repos); ++i) {
         str query = {0};
@@ -59,8 +64,8 @@ glob_t repo_glob(const char *pattern, char **repos) {
     return buf;
 }
 
-char *repo_find(const char *pattern, char **repos) {
-    glob_t buf = repo_glob(pattern, repos);
+char *repo_find(const char *pattern) {
+    glob_t buf = repo_glob(pattern);
 
     char *match = NULL;
 
@@ -72,9 +77,9 @@ char *repo_find(const char *pattern, char **repos) {
     return match;
 }
 
-void repo_find_all(package *pkgs, char **repos) {
+void repo_find_all(package *pkgs) {
     for (size_t i = 0; i < vec_size(pkgs); ++i) {
-        glob_t buf = repo_glob(pkgs[i].name, repos);
+        glob_t buf = repo_glob(pkgs[i].name);
 
         if (buf.gl_pathc == 0) {
             die("no results for '%s'", pkgs[i].name);
