@@ -49,7 +49,6 @@ check:
 	valgrind $(VALGRIND) ./kiss l xz
 	valgrind $(VALGRIND) ./kiss v
 	valgrind $(VALGRIND) ./kiss b
-	valgrind $(VALGRIND) ./kiss d zlib
 
 clean:
 	rm -f kiss $(OBJ)
