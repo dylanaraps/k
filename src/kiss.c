@@ -78,13 +78,7 @@ static int run_action(int action, char **argv, int argc) {
 
     switch (action) {
         case ACTION_LIST: {
-            for (size_t i = 0; i < vec_size(pkgs); ++i) {
-                if (!pkg_list(pkgs[i].name)) {
-                    die("package '%s' not installed", pkgs[i].name);
-                }
-
-                puts(pkgs[i].name);
-            }
+            pkg_list_all(pkgs);
             break;
         }
 
