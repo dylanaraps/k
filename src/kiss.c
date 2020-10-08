@@ -60,24 +60,12 @@ static int run_action(int action, char **argv, int argc) {
     }
 
     switch (action) {
-        case ACTION_LIST: {
-            if (vec_size(pkgs) == 0) {
-                pkgs = pkg_init_db();
-            }
+        case ACTION_LIST:
             pkg_list_all(pkgs);
             break;
-        }
 
         case ACTION_SEARCH: {
-            for (size_t i = 0; i < vec_size(pkgs); ++i) {
-                char *match = repo_find(pkgs[i].name, 1, repos);
-
-                if (match) {
-                    free(match);
-                } else {
-                    die("no results for '%s'", pkgs[i].name);
-                }
-            }
+            repo_find_all(pkgs, repos);
             break;
         }
 

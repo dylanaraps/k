@@ -56,6 +56,10 @@ int pkg_list(const char *name) {
 }
 
 void pkg_list_all(package *pkgs) {
+    if (vec_size(pkgs) == 0) {
+        pkgs = pkg_init_db();
+    }
+
     for (size_t i = 0; i < vec_size(pkgs); ++i) {
         if (!pkg_list(pkgs[i].name)) {
             die("package '%s' not installed", pkgs[i].name);

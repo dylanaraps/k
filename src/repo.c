@@ -40,7 +40,7 @@ void repo_free(char **repos) {
     vec_free(repos);
 }
 
-char *repo_find(const char *pattern, int all, char **repos) {
+glob_t repo_glob(const char *pattern, char **repos) {
     glob_t buf;
 
     for (size_t i = 0; i < vec_size(repos); ++i) {
@@ -56,18 +56,34 @@ char *repo_find(const char *pattern, int all, char **repos) {
         str_free(&query);
     }
 
+    return buf;
+}
+
+char *repo_find(const char *pattern, char **repos) {
+    glob_t buf = repo_glob(pattern, repos);
+
     char *match = NULL;
 
     if (buf.gl_pathc != 0 && buf.gl_pathv[0]) {
         match = strdup(buf.gl_pathv[0]);
-
-        if (all) {
-            for (size_t i = 0; i < buf.gl_pathc; i++) {
-                puts(buf.gl_pathv[i]);
-            }
-        }
     }
 
     globfree(&buf);
     return match;
+}
+
+void repo_find_all(package *pkgs, char **repos) {
+    for (size_t i = 0; i < vec_size(pkgs); ++i) {
+        glob_t buf = repo_glob(pkgs[i].name, repos);
+
+        if (buf.gl_pathc == 0) {
+            die("no results for '%s'", pkgs[i].name);
+        }
+
+        for (size_t i = 0; i < buf.gl_pathc; i++) {
+            puts(buf.gl_pathv[i]);
+        }
+
+        globfree(&buf);
+    }
 }
