@@ -99,11 +99,11 @@ static int pkg_list(const char *name, int print) {
 
     int ret = is_dir(p.buf);
 
-    if (ret == 0 && print) {
+    str_free(&p);
+
+    if (print && !ret) {
         puts(name);
     }
-
-    str_free(&p);
 
     return ret;
 }
