@@ -30,8 +30,7 @@ typedef struct package {
 
 static char **REPOS = NULL;
 
-char **get_repos(void) {
-    char **repos = NULL;
+static void repo_init(void) {
     char *p = NULL;
     char *path = xgetenv("KISS_PATH");
 
@@ -43,15 +42,20 @@ char **get_repos(void) {
             die("relative path found in KISS_PATH");
         }
 
-        vec_add(repos, strdup(tok));
+        vec_add(REPOS, strdup(tok));
     }
 
     free(p);
     free(path);
 
-    vec_add(repos, DB_DIR);
+    vec_add(REPOS, strdup(DB_DIR));
+}
 
-    return repos;
+static void repo_destroy(void) {
+    for (size_t i = 0; i < vec_size(REPOS); i++) {
+        free(REPOS[i]);
+    }
+    vec_free(REPOS);
 }
 
 static char *pkg_find(const char *pattern, int all) {
@@ -176,7 +180,7 @@ int main (int argc, char *argv[]) {
         return 0;
     }
 
-    REPOS = get_repos();
+    repo_init();
 
     switch (action) {
         case ACTION_LIST: {
@@ -203,8 +207,5 @@ int main (int argc, char *argv[]) {
         }
     }
 
-    for (size_t i = 0; i + 1 < vec_size(REPOS); i++) {
-        free(REPOS[i]);
-    }
-    vec_free(REPOS);
+    repo_destroy();
 }
