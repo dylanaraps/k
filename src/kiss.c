@@ -84,7 +84,7 @@ static int run_action(int action, char **argv, int argc) {
             puts("remove       Remove a package");
             puts("search       Search for a package");
             puts("update       Update the system");
-            puts("version:      Package manager version");
+            puts("version:     Package manager version");
             puts("\nRun 'kiss help-ext' to see all actions");
     }
 
@@ -96,6 +96,10 @@ int main (int argc, char *argv[]) {
 
     if (argc < 2 || !argv[1] || !argv[1][0] || argv[1][0] == '-') {
         action = ACTION_USAGE;
+
+    } else if (strcmp(argv[1], "alternatives") == 0 ||
+               strcmp(argv[1], "a") == 0) {
+        action = ACTION_ALTERNATIVES;
 
     } else if (strcmp(argv[1], "build") == 0 ||
                strcmp(argv[1], "b") == 0) {
@@ -124,6 +128,10 @@ int main (int argc, char *argv[]) {
     } else if (strcmp(argv[1], "search") == 0 ||
                strcmp(argv[1], "s") == 0) {
         action = ACTION_SEARCH;
+
+    } else if (strcmp(argv[1], "update") == 0 ||
+               strcmp(argv[1], "u") == 0) {
+        action = ACTION_UPDATE;
 
     } else if (strcmp(argv[1], "version") == 0 ||
                strcmp(argv[1], "v") == 0) {
