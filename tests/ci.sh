@@ -2,4 +2,6 @@
 
 CC=gcc   make -B
 CC=clang make -B
-CC=tcc   make -B
+
+# tcc segfaults due to atexit()?
+# CC=tcc   make -B
