@@ -11,8 +11,6 @@
 
 #define DB_DIR "/var/db/kiss/installed"
 
-static char **REPOS = NULL;
-
 enum actions {
     ACTION_ALTERNATIVES,
     ACTION_BUILD,
@@ -24,6 +22,13 @@ enum actions {
     ACTION_SEARCH,
     ACTION_UPDATE,
 };
+
+typedef struct package {
+    char *name;    
+    char *path;
+} package;
+
+static char **REPOS = NULL;
 
 char **get_repos(void) {
     char **repos = NULL;
@@ -76,7 +81,7 @@ static char *pkg_find(const char *pattern, int all) {
     return match;
 }
 
-static int pkg_list(const char *name) {
+static int pkg_list(const char *name, int print) {
     str p = {0};
 
     str_cat(&p, DB_DIR);
@@ -84,6 +89,10 @@ static int pkg_list(const char *name) {
     str_cat(&p, name);
 
     int ret = is_dir(p.buf);
+
+    if (ret == 0 && print) {
+        printf("%s\n", name);
+    }
 
     str_free(&p);
 
@@ -167,13 +176,8 @@ int main (int argc, char *argv[]) {
     switch (action) {
         case ACTION_LIST: {
             for (int i = 2; i < argc; i++) {
-                switch (pkg_list(argv[i])) {
-                    case 0:
-                        printf("%s\n", argv[i]);
-                        break;
-
-                    default:
-                        die("package '%s' not installed", argv[i]);
+                if (pkg_list(argv[i], 1)) {
+                    die("package '%s' not installed", argv[i]);
                 }
             }
             break;
@@ -194,7 +198,7 @@ int main (int argc, char *argv[]) {
         }
     }
 
-    for (size_t i = 0; i < vec_size(REPOS) - 1; i++) {
+    for (size_t i = 0; i + 1 < vec_size(REPOS); i++) {
         free(REPOS[i]);
     }
     vec_free(REPOS);

@@ -24,13 +24,24 @@ OBJ = \
 	src/util.o \
 	src/str.o
 
-kiss:
+HDR = \
+	src/util.h \
+	src/str.h \
+	src/vec.h
+
+kiss: $(OBJ)
 	$(CC) $(ALL_CFLAGS) -o $@ $(OBJ) $(LDFLAGS)
 
+.c.o:
+	$(CC) $(ALL_CFLAGS) -c -o $@ $<
+
+$(OBJ): $(HDR)
+
 check:
-	valgrind -s $(VALGRIND) ./kiss s zlib
-	valgrind -s $(VALGRIND) ./kiss l xz
-	valgrind -s $(VALGRIND) ./kiss v
+	valgrind $(VALGRIND) ./kiss s zlib
+	valgrind $(VALGRIND) ./kiss l xz
+	valgrind $(VALGRIND) ./kiss v
+	valgrind $(VALGRIND) ./kiss
 
 clean:
 	rm -f kiss $(OBJ)
