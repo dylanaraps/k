@@ -38,6 +38,11 @@ char **get_repos(void) {
     for (char *tok = strtok_r(path, ":", &p);
          tok != NULL;
          tok = strtok_r(NULL, ":", &p)) {
+
+        if (tok[0] != '/') {
+            die("relative path found in KISS_PATH");
+        }
+
         vec_add(repos, strdup(tok));
     }
 
