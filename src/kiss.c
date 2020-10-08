@@ -77,7 +77,7 @@ static char *pkg_find(const char *pattern, int all) {
 
         if (all) {
             for (size_t i = 0; i < buf.gl_pathc; i++) {
-                printf("%s\n", buf.gl_pathv[i]);
+                puts(buf.gl_pathv[i]);
             }
         }
     }
@@ -96,7 +96,7 @@ static int pkg_list(const char *name, int print) {
     int ret = is_dir(p.buf);
 
     if (ret == 0 && print) {
-        printf("%s\n", name);
+        puts(name);
     }
 
     str_free(&p);
@@ -124,18 +124,18 @@ int main (int argc, char *argv[]) {
     int action = 0;
 
     if (argc < 2 || !argv[1] || !argv[1][0] || argv[1][0] == '-') {
-        printf("kiss [b|c|d|l|s|v] [pkg]...\n");
-        printf("alternatives List and swap to alternatives\n"); 
-        printf("build        Build a package\n");
-        printf("checksum     Generate checksums\n");
-        printf("download     Pre-download all sources\n");
-        printf("install      Install a package\n");
-        printf("list         List installed packages\n");
-        printf("remove       Remove a package\n");
-        printf("search       Search for a package\n");
-        printf("update       Update the system\n");
-        printf("version:      Package manager version\n");
-        printf("\nRun 'kiss help-ext' to see all actions\n");
+        puts("kiss [b|c|d|l|s|v] [pkg]...");
+        puts("alternatives List and swap to alternatives"); 
+        puts("build        Build a package");
+        puts("checksum     Generate checksums");
+        puts("download     Pre-download all sources");
+        puts("install      Install a package");
+        puts("list         List installed packages");
+        puts("remove       Remove a package");
+        puts("search       Search for a package");
+        puts("update       Update the system");
+        puts("version:      Package manager version");
+        puts("\nRun 'kiss help-ext' to see all actions");
         return 0;
 
     } else if (strcmp(argv[1], "build") == 0 ||
