@@ -15,7 +15,7 @@ BUILD_FLAGS = \
 	-Wundef \
 	-Wsign-conversion
 
-VALGRIND = -s \
+VALGRIND = \
 	--leak-check=full \
 	--show-leak-kinds=all \
 	--track-origins=yes \
