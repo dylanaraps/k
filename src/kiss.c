@@ -55,7 +55,7 @@ static void repo_init(void) {
     char *p = NULL;
 
     str path = {0};
-    str_cat(&path, getenv("KISS_PATH"));
+    str_push(&path, getenv("KISS_PATH"));
 
     for (char *tok = strtok_r(path.buf, ":", &p);
          tok != NULL;
@@ -91,10 +91,10 @@ static glob_t repo_glob(const char *pattern) {
     for (size_t i = 0; i < vec_size(repos); ++i) {
         str query = {0};
 
-        str_cat(&query, repos[i]);
-        str_cat(&query, "/");
-        str_cat(&query, pattern);
-        str_cat(&query, "/");
+        str_push(&query, repos[i]);
+        str_push(&query, "/");
+        str_push(&query, pattern);
+        str_push(&query, "/");
 
         glob(query.buf, i ? GLOB_APPEND : 0, NULL, &buf);
 
@@ -144,10 +144,10 @@ static void pkg_free(void) {
 static char *pkg_version(const char *name, const char *path) {
     str file = {0};
 
-    str_cat(&file, path);
-    str_cat(&file, "/");
-    str_cat(&file, name);
-    str_cat(&file, "/version");
+    str_push(&file, path);
+    str_push(&file, "/");
+    str_push(&file, name);
+    str_push(&file, "/version");
 
     FILE *f = fopen(file.buf, "r");
 
@@ -211,20 +211,22 @@ static void pkg_list_all(void) {
 // cache {{{
 
 static void get_xdg_cache(str *s) {
-    str_cat(s, getenv("XDG_CACHE_HOME"));
+    char *env = getenv("XDG_CACHE_HOME");
 
-    if (s->buf[0]) {
-        str_cat(s, "/kiss");
+    if (env && env[0]) {
+        str_push(s, env);
+        str_push(s, "/kiss");
 
     } else {
-        str_cat(s, getenv("HOME"));
+        env = getenv("HOME");
 
-        if (s->buf[0]) {
-            str_cat(s, "/.cache/kiss");
+        if (env && env[0]) {
+            str_push(s, env);
+            str_push(s, "/.cache/kiss");
         }
     }
 
-    if (!s->buf) {
+    if (!env || !env[0]) {
         die("failed to construct cache path");
     }
 }
@@ -232,50 +234,42 @@ static void get_xdg_cache(str *s) {
 static void cache_init(str *cac) {
     get_xdg_cache(cac);
 
-    if (mkdir_p(cac->buf, 0755) == 0) {
-        for (int i = 0; i < 3; i++) {
-            str tmp = {0};
-            str_cat(&tmp, cac->buf);
-            str_cat(&tmp, "/");
-            str_cat(&tmp, cache_dirs[i]);
-
-            if (mkdir(tmp.buf, 0755) == -1 && errno != EEXIST) {
-                str_free(&tmp);
-                die("failed to create directory %s", tmp.buf);
-            }
-
-            str_free(&tmp);
-        }
-
-        char *pid = pid_to_str(getpid());
-
-        str_cat(cac, "/");
-        str_cat(cac, pid);
-
-        if (mkdir_e(cac->buf, 0755) != 0) {
-            free(pid);
-            die("failed to create directory %s", cac->buf);
-        }
-
-        for (int i = 0; i < 3; i++) {
-            str tmp = {0};
-            str_cat(&tmp, cac->buf);
-            str_cat(&tmp, "/");
-            str_cat(&tmp, state_dirs[i]);
-
-            if (mkdir(tmp.buf, 0755) == -1 && errno != EEXIST) {
-                str_free(&tmp);
-                free(pid);
-                die("failed to create directory %s", tmp.buf);
-            }
-
-            str_free(&tmp);
-        }
-
-        free(pid);
-
-    } else {
+    if (mkdir_p(cac->buf, 0755) != 0) {
         die("failed to create directory %s", cac->buf);
+    }
+
+    str_push(cac, "/");
+
+    for (int i = 0; i < 3; i++) {
+        str_push(cac, cache_dirs[i]);
+
+        if (mkdir(cac->buf, 0755) == -1 && errno != EEXIST) {
+            str_free(cac);
+            die("failed to create directory");
+        }
+
+        str_undo(cac, cache_dirs[i]);
+    }
+
+    char *pid = pid_to_str(getpid());
+    str_push(cac, pid);
+    free(pid);
+
+    if (mkdir_e(cac->buf, 0755) != 0) {
+        die("failed to create directory %s", cac->buf);
+    }
+
+    str_push(cac, "/");
+
+    for (int i = 0; i < 3; i++) {
+        str_push(cac, state_dirs[i]);
+
+        if (mkdir(cac->buf, 0755) == -1 && errno != EEXIST) {
+            str_free(cac);
+            die("failed to create directory");
+        }
+
+        str_undo(cac, state_dirs[i]);
     }
 }
 
@@ -285,7 +279,7 @@ static void cache_init(str *cac) {
 
 static void crux_like(void) {
     str cwd = {0};
-    str_cat(&cwd, getenv("PWD"));
+    str_push(&cwd, getenv("PWD"));
 
     if (!cwd.buf || !cwd.buf[0]) {
         die("PWD is unset");
@@ -303,8 +297,8 @@ static void crux_like(void) {
 
 static void run_extension(char *argv[]) {
     str cmd = {0};
-    str_cat(&cmd, "kiss-");
-    str_cat(&cmd, argv[1]);
+    str_push(&cmd, "kiss-");
+    str_push(&cmd, argv[1]);
 
     int err = execvp(cmd.buf, ++argv);
 
@@ -359,7 +353,7 @@ static int run_action(int action, char **argv, int argc) {
             break;
 
         default:
-            puts("kiss [b|c|d|l|s|v] [pkg]...");
+            puts("kiss [a|b|c|d|i|l|r|s|u|v] [pkg]...");
             puts("alternatives List and swap to alternatives");
             puts("build        Build a package");
             puts("checksum     Generate checksums");

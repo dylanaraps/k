@@ -44,8 +44,6 @@ $(OBJ): $(HDR)
 check:
 	valgrind $(VALGRIND) ./kiss
 	valgrind $(VALGRIND) ./kiss s zlib
-	valgrind $(VALGRIND) ./kiss l xz
-	valgrind $(VALGRIND) ./kiss l
 	valgrind $(VALGRIND) ./kiss v
 	valgrind $(VALGRIND) ./kiss b
 

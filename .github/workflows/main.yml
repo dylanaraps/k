@@ -9,3 +9,5 @@ jobs:
               run: |
                   CFLAGS=-Werror CC=gcc   make -B
                   CFLAGS=-Werror CC=clang make -B
+                  git clone --depth=1 https://github.com/kisslinux/repo
+                  KISS_PATH=$PWD/repo/core:$PWD/repo/extra make check

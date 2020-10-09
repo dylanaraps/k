@@ -5,8 +5,8 @@
 
 #include "str.h"
 
-void str_cat(str *s, const char *p) {
-    if (!p) {
+void str_push(str *s, const char *p) {
+    if (!p || !p[0]) {
         return;
     }
 
@@ -26,6 +26,14 @@ void str_cat(str *s, const char *p) {
 
     s->len += p_len;
     s->buf[s->len] = 0;
+}
+
+void str_undo(str *s, const char *p) {
+    if (!p || !p[0]) {
+        return;
+    }
+
+    s->buf[s->len -= strlen(p)] = 0;
 }
 
 void str_free(str *s) {

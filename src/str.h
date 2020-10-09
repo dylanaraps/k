@@ -10,7 +10,8 @@ typedef struct str {
     char *buf;
 } str;
 
-void str_cat(str *, const char *);
+void str_push(str *, const char *);
+void str_undo(str *, const char *);
 void str_free(str *);
 
 #endif

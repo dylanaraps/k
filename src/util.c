@@ -15,9 +15,9 @@ int PATH_prepend(const char *path, const char *var) {
 
     str kiss_path = {0};
 
-    str_cat(&kiss_path, path);
-    str_cat(&kiss_path, ":");
-    str_cat(&kiss_path, getenv(var));
+    str_push(&kiss_path, path);
+    str_push(&kiss_path, ":");
+    str_push(&kiss_path, getenv(var));
 
     int err = setenv(var, kiss_path.buf, 1);
     free(kiss_path.buf);
@@ -68,14 +68,14 @@ char *path_basename(char *p) {
 }
 
 FILE *fopenat(const char *d, const char *f, const char *m) {
-    if (!d || !f | !m) {
+    if (!d || !f || !m) {
         return NULL;
     }
 
     str new = {0};
-    str_cat(&new, d);
-    str_cat(&new, "/");
-    str_cat(&new, f);
+    str_push(&new, d);
+    str_push(&new, "/");
+    str_push(&new, f);
 
     FILE *f2 = fopen(new.buf, m);
 
