@@ -7,7 +7,5 @@ jobs:
             - uses: actions/checkout@v1
             - name: Run CI.
               run: |
-                  sudo apt-get install tcc
-                  export CFLAGS="$CFLAGS -Werror"
-                  CC=gcc   make -B
-                  CC=clang make -B
+                  CFLAGS=-Werror CC=gcc   make -B
+                  CFLAGS=-Werror CC=clang make -B
