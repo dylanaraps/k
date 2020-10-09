@@ -37,7 +37,6 @@ static void exit_handler(void) {
 
 static void run_extension(char *argv[]) {
     str cmd = {0};
-
     str_cat(&cmd, "kiss-");
     str_cat(&cmd, argv[1]);
 
@@ -46,8 +45,7 @@ static void run_extension(char *argv[]) {
     str_free(&cmd);
 
     if (err == -1) {
-        perror("execvp");
-        exit(1);
+        die("failed to execute extension %s", argv[0]);
     }
 }
 
