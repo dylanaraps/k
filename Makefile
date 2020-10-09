@@ -10,8 +10,8 @@ ALL_CFLAGS = \
 	-pedantic \
 	-Wmissing-prototypes \
 	-Wstrict-prototypes \
-	-O3 -O0 -g \
-	# $(CFLAGS)
+	-O3 \
+	$(CFLAGS)
 
 VALGRIND = -s \
 	--leak-check=full \
