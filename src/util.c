@@ -107,27 +107,3 @@ int mkdir_p(char *p, const mode_t m) {
 int mkdir_e(char *p, const mode_t m) {
     return mkdir(p, m) == -1 && errno != EEXIST;
 }
-
-char *pid_to_str(pid_t p) {
-    int len = snprintf(NULL, 0, "%u", p);
-
-    if (len < 0) {
-        return NULL;
-    }
-
-    char *pid = malloc((size_t) len + 1);
-
-    if (!pid) {
-        perror("malloc");
-        exit(1);
-    }
-
-    int err = snprintf(pid, (size_t) len + 1, "%u", p);
-
-    if (err != len) {
-        free(pid);
-        return NULL;
-    }
-
-    return pid;
-}

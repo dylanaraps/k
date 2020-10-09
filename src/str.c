@@ -5,15 +5,9 @@
 
 #include "str.h"
 
-void str_push(str *s, const char *p) {
-    if (!p || !p[0]) {
-        return;
-    }
-
-    size_t p_len = strlen(p);
-
-    if (!s->len || (s->len + p_len) >= s->cap) {
-        s->cap += p_len * 2;
+void str_alloc(str *s, size_t len) {
+    if (!s->len || (s->len + len) >= s->cap) {
+        s->cap += len;
         s->buf  = realloc(s->buf, s->cap);
 
         if (!s->buf) {
@@ -21,7 +15,16 @@ void str_push(str *s, const char *p) {
             exit(1);
         }
     }
+}
 
+void str_push(str *s, const char *p) {
+    if (!p || !p[0]) {
+        return;
+    }
+
+    size_t p_len = strlen(p);
+
+    str_alloc(s, p_len * 2);
     memcpy(s->buf + s->len, p, p_len + 1);
 
     s->len += p_len;

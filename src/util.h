@@ -10,7 +10,6 @@ int is_dir(const char *);
 FILE *fopenat(const char *, const char *, const char *);
 int mkdir_p(char *, const mode_t);
 int mkdir_e(char *, const mode_t);
-char *pid_to_str(pid_t);
 
 #define msg(...) \
     do { \

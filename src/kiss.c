@@ -249,9 +249,7 @@ static void cache_init(str *cac) {
         str_undo(cac, cache_dirs[i]);
     }
 
-    char *pid = pid_to_str(getpid());
-    str_push(cac, pid);
-    free(pid);
+    str_from(cac, "%u", getpid());
 
     if (mkdir_e(cac->buf, 0755) != 0) {
         die("failed to create directory %s", cac->buf);
