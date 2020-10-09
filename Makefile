@@ -15,7 +15,7 @@ BUILD_FLAGS = \
 	-Wundef \
 	-Wsign-conversion
 
-VALGRIND = \
+VALGRIND = -s \
 	--leak-check=full \
 	--show-leak-kinds=all \
 	--track-origins=yes \
@@ -26,7 +26,6 @@ VALGRIND = \
 OBJ = \
 	src/kiss.o \
 	src/util.o \
-	src/str.o
 
 HDR = \
 	src/util.h \

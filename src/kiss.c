@@ -54,10 +54,10 @@ static const char *cache_dirs[] = {
 static void repo_init(void) {
     char *p = NULL;
 
-    str path = {0};
+    str *path = NULL;
     str_push(&path, getenv("KISS_PATH"));
 
-    for (char *tok = strtok_r(path.buf, ":", &p);
+    for (char *tok = strtok_r(path->buf, ":", &p);
          tok != NULL;
          tok = strtok_r(NULL, ":", &p)) {
 
@@ -87,14 +87,14 @@ static glob_t repo_glob(const char *pattern) {
     }
 
     for (size_t i = 0; i < vec_size(repos); ++i) {
-        str query = {0};
+        str *query = NULL;
 
         str_push(&query, repos[i]);
         str_push(&query, "/");
         str_push(&query, pattern);
         str_push(&query, "/");
 
-        glob(query.buf, i ? GLOB_APPEND : 0, NULL, &buf);
+        glob(query->buf, i ? GLOB_APPEND : 0, NULL, &buf);
 
         str_free(&query);
     }
@@ -140,14 +140,14 @@ static void pkg_free(void) {
 }
 
 static char *pkg_version(const char *name, const char *path) {
-    str file = {0};
+    str *file = NULL;
 
     str_push(&file, path);
     str_push(&file, "/");
     str_push(&file, name);
     str_push(&file, "/version");
 
-    FILE *f = fopen(file.buf, "r");
+    FILE *f = fopen(file->buf, "r");
 
     str_free(&file);
 
@@ -208,7 +208,7 @@ static void pkg_list_all(void) {
 
 // cache {{{
 
-static void get_xdg_cache(str *s) {
+static void get_xdg_cache(str **s) {
     char *env = getenv("XDG_CACHE_HOME");
 
     if (env && env[0]) {
@@ -229,44 +229,47 @@ static void get_xdg_cache(str *s) {
     }
 }
 
-static void cache_init(str *cac) {
-    get_xdg_cache(cac);
+static void cache_init(void) {
+    str *cac = NULL;
+    get_xdg_cache(&cac);
 
     if (mkdir_p(cac->buf, 0755) != 0) {
         die("failed to create directory %s", cac->buf);
     }
 
-    str_push(cac, "/");
+    str_push(&cac, "/");
 
     for (int i = 0; i < 3; i++) {
-        str_push(cac, cache_dirs[i]);
+        str_push(&cac, cache_dirs[i]);
 
         if (mkdir(cac->buf, 0755) == -1 && errno != EEXIST) {
-            str_free(cac);
+            str_free(&cac);
             die("failed to create directory");
         }
 
-        str_undo(cac, cache_dirs[i]);
+        str_undo(&cac, cache_dirs[i]);
     }
 
-    str_from(cac, "%u", getpid());
+    str_from(&cac, "%u", getpid());
 
     if (mkdir_e(cac->buf, 0755) != 0) {
         die("failed to create directory %s", cac->buf);
     }
 
-    str_push(cac, "/");
+    str_push(&cac, "/");
 
     for (int i = 0; i < 3; i++) {
-        str_push(cac, state_dirs[i]);
+        str_push(&cac, state_dirs[i]);
 
         if (mkdir(cac->buf, 0755) == -1 && errno != EEXIST) {
-            str_free(cac);
+            str_free(&cac);
             die("failed to create directory");
         }
 
-        str_undo(cac, state_dirs[i]);
+        str_undo(&cac, state_dirs[i]);
     }
+
+    str_free(&cac);
 }
 
 // }}}
@@ -274,16 +277,16 @@ static void cache_init(str *cac) {
 // arguments {{{
 
 static void crux_like(void) {
-    str cwd = {0};
+    str *cwd = NULL;
     str_push(&cwd, getenv("PWD"));
 
-    if (!cwd.buf || !cwd.buf[0]) {
+    if (!cwd->buf || !cwd->buf[0]) {
         die("PWD is unset");
     }
 
-    vec_add(pkgs, pkg_init(path_basename(cwd.buf)));
+    vec_add(pkgs, pkg_init(path_basename(cwd->buf)));
 
-    int err = PATH_prepend(cwd.buf, "KISS_PATH");
+    int err = PATH_prepend(cwd->buf, "KISS_PATH");
     str_free(&cwd);
 
     if (err == 1) {
@@ -292,11 +295,10 @@ static void crux_like(void) {
 }
 
 static void run_extension(char *argv[]) {
-    str cmd = {0};
-    str_push(&cmd, "kiss-");
-    str_push(&cmd, argv[1]);
+    str *cmd = NULL;
+    str_from(&cmd, "kiss-%s", argv[1]);
 
-    int err = execvp(cmd.buf, ++argv);
+    int err = execvp(cmd->buf, ++argv);
 
     str_free(&cmd);
 
@@ -327,9 +329,7 @@ static int run_action(int action) {
         case ACTION_DOWNLOAD:
         case ACTION_INSTALL:
         case ACTION_REMOVE: {
-            str cac = {0};
-            cache_init(&cac);
-            str_free(&cac);
+            cache_init();
 
             if (vec_size(pkgs) == 0) {
                 crux_like();
