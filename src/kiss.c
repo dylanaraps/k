@@ -212,15 +212,13 @@ static void get_xdg_cache(str **s) {
     char *env = getenv("XDG_CACHE_HOME");
 
     if (env && env[0]) {
-        str_push(s, env);
-        str_push(s, "/kiss");
+        str_from(s, "%s/kiss", env);
 
     } else {
         env = getenv("HOME");
 
         if (env && env[0]) {
-            str_push(s, env);
-            str_push(s, "/.cache/kiss");
+            str_from(s, "%s/.cache/kiss", env);
         }
     }
 

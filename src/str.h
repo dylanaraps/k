@@ -23,28 +23,23 @@ typedef struct str {
         }                                          \
     } while (0)
 
-#define str_alloc(s, l)                           \
-    do {                                          \
-        if (!(*s)) {                              \
-            (*s) = calloc(1, sizeof(str));        \
-                                                  \
-            if (!(*s)) {                          \
-                perror("calloc");                 \
-                exit(1);                          \
-            }                                     \
-        }                                         \
-                                                  \
-        str *_p = *s;                             \
-                                                  \
-        if ((_p->len + l) >= _p->cap) {           \
-            _p->cap += l;                         \
-            _p->buf  = realloc(_p->buf, _p->cap); \
-                                                  \
-            if (!_p->buf) {                       \
-                perror("realloc");                \
-                exit(1);                          \
-            }                                     \
-        }                                         \
+#define str_alloc(s, l)                                 \
+    do {                                                \
+        if (!(*s)) {                                    \
+            (*s) = calloc(1, sizeof(str));              \
+            if (!(*s)) {                                \
+                perror("calloc");                       \
+                exit(1);                                \
+            }                                           \
+        }                                               \
+        if (((*s)->len + l) >= (*s)->cap) {             \
+            (*s)->cap += l;                             \
+            (*s)->buf  = realloc((*s)->buf, (*s)->cap); \
+            if (!(*s)->buf) {                           \
+                perror("realloc");                      \
+                exit(1);                                \
+            }                                           \
+        }                                               \
     } while (0)
 
 #define str_push(s, d)                                \
@@ -60,17 +55,14 @@ typedef struct str {
 #define str_from(s, f, t)                            \
     do {                                             \
         int _l2 = snprintf(NULL, 0, f, t);           \
-                                                     \
         if (_l2 > 0) {                               \
-            str_alloc(s, (size_t) _l2);              \
-                                                     \
-            int e = snprintf(*s->buf + *s->len,      \
+            str_alloc(s, (size_t) _l2 + 1);          \
+            int e = snprintf((*s)->buf + (*s)->len,  \
                             (size_t) _l2 + 1, f, t); \
-                                                     \
             if (e != _l2) {                          \
-                *s->buf[*s->len] = 0;                \
+                (*s)->buf[(*s)->len] = 0;            \
             } else {                                 \
-                *s->len += (size_t) _l2;             \
+                (*s)->len += (size_t) _l2;           \
             }                                        \
         }                                            \
     } while (0)
