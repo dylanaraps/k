@@ -17,14 +17,13 @@ size_t xgetcwd(char **p) {
     char *buf = malloc((size_t) len);
 
     if (!buf) {
-        free(buf);
         return 0;
     }
 
     *p = getcwd(buf, (size_t) len);
 
     if (!p) {
-        free(buf);
+        free(p);
         return 0;
     }
 
