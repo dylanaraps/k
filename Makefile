@@ -2,7 +2,7 @@
 
 PREFIX = /usr/local
 
-ALL_CFLAGS = \
+BUILD_FLAGS = \
 	-std=c99 \
 	-D_POSIX_C_SOURCE=200809L \
 	-Wall \
@@ -10,8 +10,8 @@ ALL_CFLAGS = \
 	-pedantic \
 	-Wmissing-prototypes \
 	-Wstrict-prototypes \
-	-O3 \
-	$(CFLAGS)
+	-Wwrite-strings \
+	-fanalyzer
 
 VALGRIND = -s \
 	--leak-check=full \
@@ -32,10 +32,10 @@ HDR = \
 	src/vec.h
 
 kiss: $(OBJ)
-	$(CC) $(ALL_CFLAGS) -o $@ $(OBJ) $(LDFLAGS)
+	$(CC) $(BUILD_FLAGS) $(CFLAGS) -o $@ $(OBJ) $(LDFLAGS)
 
 .c.o:
-	$(CC) $(ALL_CFLAGS) -c -o $@ $<
+	$(CC) $(BUILD_FLAGS) $(CFLAGS) -c -o $@ $<
 
 $(OBJ): $(HDR)
 
