@@ -11,6 +11,8 @@ BUILD_FLAGS = \
 	-Wmissing-prototypes \
 	-Wstrict-prototypes \
 	-Wwrite-strings \
+	-Wshadow \
+	-Wundef \
 	-fanalyzer
 
 VALGRIND = -s \

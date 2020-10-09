@@ -114,8 +114,8 @@ static void repo_find_all(void) {
             die("no results for '%s'", pkgs[i].name);
         }
 
-        for (size_t i = 0; i < buf.gl_pathc; i++) {
-            puts(buf.gl_pathv[i]);
+        for (size_t j = 0; j < buf.gl_pathc; j++) {
+            puts(buf.gl_pathv[j]);
         }
 
         globfree(&buf);
