@@ -212,13 +212,15 @@ static void get_xdg_cache(str **s) {
     char *env = getenv("XDG_CACHE_HOME");
 
     if (env && env[0]) {
-        str_from(s, "%s/kiss", env);
+        str_push(s, env);
+        str_push(s, "/kiss");
 
     } else {
         env = getenv("HOME");
 
         if (env && env[0]) {
-            str_from(s, "%s/.cache/kiss", env);
+            str_push(s, env);
+            str_push(s, "/.cache/kiss");
         }
     }
 
@@ -294,7 +296,8 @@ static void crux_like(void) {
 
 static void run_extension(char *argv[]) {
     str *cmd = NULL;
-    str_from(&cmd, "kiss-%s", argv[1]);
+    str_push(&cmd, "kiss-");
+    str_push(&cmd, argv[1]);
 
     int err = execvp(cmd->buf, ++argv);
 
