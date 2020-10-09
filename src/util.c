@@ -11,22 +11,21 @@ size_t xgetcwd(char **p) {
     long len = pathconf(".", _PC_PATH_MAX);
 
     if (len < 0) {
-        perror("pathconf");
-        exit(1);
+        return 0;
     }
 
     char *buf = malloc((size_t) len);
 
     if (!buf) {
-        perror("malloc");
-        exit(1);
+        free(buf);
+        return 0;
     }
 
     *p = getcwd(buf, (size_t) len);
 
-    if (!*p) {
-        perror("getcwd");
-        exit(1);
+    if (!p) {
+        free(buf);
+        return 0;
     }
 
     return (size_t) len;

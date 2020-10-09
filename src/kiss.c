@@ -66,9 +66,12 @@ static int run_action(int action, char **argv, int argc) {
                 char *cwd = NULL;
                 size_t len = xgetcwd(&cwd);
 
+                if (len == 0) {
+                    die("failed to get cwd");
+                }
+
                 vec_add(pkgs, pkg_init(path_basename(cwd, len)));
                 int err = PATH_prepend(cwd, "KISS_PATH");
-
                 free(cwd);
 
                 if (err == 1) {

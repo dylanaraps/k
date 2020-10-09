@@ -13,7 +13,7 @@ ALL_CFLAGS = \
 	-O3 \
 	$(CFLAGS)
 
-VALGRIND = \
+VALGRIND = -s \
 	--leak-check=full \
 	--show-leak-kinds=all \
 	--suppressions=./tests/musl.supp \

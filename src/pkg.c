@@ -97,7 +97,11 @@ char *pkg_version(const char *name, const char *path) {
         return NULL;
     }
 
-    ver[strcspn(ver, "\n")] = 0;
+    char *tmp = strchr(ver, '\n');
+
+    if (tmp) {
+        *tmp = 0;
+    }
 
     return ver;
 }
