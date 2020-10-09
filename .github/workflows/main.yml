@@ -8,4 +8,7 @@ jobs:
             - name: Run CI.
               run: |
                   sudo apt-get install tcc
-                  ./tests/ci.sh
+                  export CFLAGS="$CFLAGS -Werror"
+                  CC=gcc   make -B
+                  CC=clang make -B
+                  CC=tcc   make -B

@@ -10,30 +10,26 @@ ALL_CFLAGS = \
 	-pedantic \
 	-Wmissing-prototypes \
 	-Wstrict-prototypes \
-	-O3 \
-	$(CFLAGS)
+	-O3 -O0 -g \
+	# $(CFLAGS)
 
 VALGRIND = -s \
 	--leak-check=full \
 	--show-leak-kinds=all \
-	--suppressions=./tests/musl.supp \
 	--track-origins=yes \
 	--error-exitcode=1 \
-	--trace-children=yes
+	--trace-children=yes \
+	--show-reachable=no \
 
 OBJ = \
 	src/kiss.o \
 	src/util.o \
-	src/repo.o \
-	src/str.o \
-	src/pkg.o
+	src/str.o
 
 HDR = \
 	src/util.h \
 	src/str.h \
-	src/repo.h \
-	src/vec.h \
-	src/pkg.h
+	src/vec.h
 
 kiss: $(OBJ)
 	$(CC) $(ALL_CFLAGS) -o $@ $(OBJ) $(LDFLAGS)
@@ -47,6 +43,7 @@ check:
 	valgrind $(VALGRIND) ./kiss
 	valgrind $(VALGRIND) ./kiss s zlib
 	valgrind $(VALGRIND) ./kiss l xz
+	valgrind $(VALGRIND) ./kiss l
 	valgrind $(VALGRIND) ./kiss v
 	valgrind $(VALGRIND) ./kiss b
 

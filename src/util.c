@@ -8,29 +8,6 @@
 #include "str.h"
 #include "util.h"
 
-size_t xgetcwd(char **p) {
-    long len = pathconf(".", _PC_PATH_MAX);
-
-    if (len < 0) {
-        return 0;
-    }
-
-    char *buf = malloc((size_t) len);
-
-    if (!buf) {
-        return 0;
-    }
-
-    *p = getcwd(buf, (size_t) len);
-
-    if (!p) {
-        free(buf);
-        return 0;
-    }
-
-    return (size_t) len;
-}
-
 int PATH_prepend(const char *path, const char *var) {
     if (!path || !var) {
         return 1;
@@ -43,7 +20,7 @@ int PATH_prepend(const char *path, const char *var) {
     str_cat(&kiss_path, getenv(var));
 
     int err = setenv(var, kiss_path.buf, 1);
-    str_free(&kiss_path);
+    free(kiss_path.buf);
 
     if (err == -1) {
         perror("setenv");
@@ -67,7 +44,13 @@ int is_dir(const char *d) {
     return 1;
 }
 
-char *path_basename(char *p, size_t len) {
+char *path_basename(char *p) {
+    if (!p) {
+        return NULL;
+    }
+
+    size_t len = strlen(p);
+
     for (int i = 1; p[len - i] == '/'; i++) {
         p[len - i] = 0;
     }
@@ -96,7 +79,7 @@ FILE *fopenat(const char *d, const char *f, const char *m) {
 
     FILE *f2 = fopen(new.buf, m);
 
-    str_free(&new);
+    free(new.buf);
 
     if (!f2) {
         return NULL;
@@ -119,4 +102,32 @@ int mkdir_p(char *p, const int m) {
     }
 
     return mkdir(p, m) == -1 && errno != EEXIST;
+}
+
+int mkdir_e(char *p, const int m) {
+    return mkdir(p, m) == -1 && errno != EEXIST;
+}
+
+char *pid_to_str(pid_t p) {
+    int len = snprintf(NULL, 0, "%u", p);
+
+    if (len < 0) {
+        return NULL;
+    }
+
+    char *pid = malloc(len + 1);
+
+    if (!pid) {
+        perror("malloc");
+        exit(1);
+    }
+
+    int err = snprintf(pid, len + 1, "%u", p);
+
+    if (err != len) {
+        free(pid);
+        return NULL;
+    }
+
+    return pid;
 }

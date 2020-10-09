@@ -1,15 +1,26 @@
+#define _POSIX_C_SOURCE 200809L
+#include <dirent.h>
+#include <errno.h>
+#include <glob.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "util.h"
 #include "vec.h"
 #include "str.h"
-#include "repo.h"
-#include "pkg.h"
 
-static package *pkgs = NULL;
+#define DB_DIR "/var/db/kiss/installed"
+
+typedef struct pkg {
+    char *name;
+    char *path;
+} pkg;
+
+static pkg  *pkgs   = NULL;
+static char **repos = NULL;
 
 enum actions {
     ACTION_ALTERNATIVES,
@@ -27,27 +38,178 @@ enum actions {
     ACTION_VERSION,
 };
 
-static void exit_handler(void) {
-    repo_free();
+static const char *state_dirs[] = {
+    "build",
+    "extract",
+    "pkg",
+};
 
-    if (pkgs) {
-        pkg_free(pkgs);
+static const char *cache_dirs[] = {
+    "bin",
+    "logs",
+    "sources",
+};
+
+// repositories {{{
+
+static void repo_init(void) {
+    char *p = NULL;
+
+    str path = {0};
+    str_cat(&path, getenv("KISS_PATH"));
+
+    for (char *tok = strtok_r(path.buf, ":", &p);
+         tok != NULL;
+         tok = strtok_r(NULL, ":", &p)) {
+
+        if (tok[0] != '/') {
+            die("relative path found in KISS_PATH");
+        }
+
+        vec_add(repos, strdup(tok));
+    }
+
+    free(p);
+    str_free(&path);
+
+    vec_add(repos, strdup(DB_DIR));
+}
+
+static void repo_free(void) {
+    for (size_t i = 0; i < vec_size(repos); i++) {
+        free(repos[i]);
+    }
+    vec_free(repos);
+}
+
+static glob_t repo_glob(const char *pattern) {
+    glob_t buf = {0};
+
+    if (vec_size(repos) == 0) {
+        repo_init();
+    }
+
+    for (size_t i = 0; i < vec_size(repos); ++i) {
+        str query = {0};
+
+        str_cat(&query, repos[i]);
+        str_cat(&query, "/");
+        str_cat(&query, pattern);
+        str_cat(&query, "/");
+
+        glob(query.buf, i ? GLOB_APPEND : 0, NULL, &buf);
+
+        str_free(&query);
+    }
+
+    return buf;
+}
+
+static void repo_find_all(void) {
+    for (size_t i = 0; i < vec_size(pkgs); ++i) {
+        glob_t buf = repo_glob(pkgs[i].name);
+
+        if (buf.gl_pathc == 0) {
+            globfree(&buf);
+            die("no results for '%s'", pkgs[i].name);
+        }
+
+        for (size_t i = 0; i < buf.gl_pathc; i++) {
+            puts(buf.gl_pathv[i]);
+        }
+
+        globfree(&buf);
     }
 }
 
-static void run_extension(char *argv[]) {
-    str cmd = {0};
-    str_cat(&cmd, "kiss-");
-    str_cat(&cmd, argv[1]);
+// }}}
 
-    int err = execvp(cmd.buf, ++argv);
+// packages {{{
 
-    str_free(&cmd);
+static pkg pkg_init(const char *name) {
+    pkg p = {0};
+
+    p.name = strdup(name);
+
+    return p;
+}
+
+static void pkg_free(void) {
+    for (size_t i = 0; i < vec_size(pkgs); i++) {
+        free(pkgs[i].name);
+        free(pkgs[i].path);
+    }
+    vec_free(pkgs);
+}
+
+static char *pkg_version(const char *name, const char *path) {
+    str file = {0};
+
+    str_cat(&file, path);
+    str_cat(&file, "/");
+    str_cat(&file, name);
+    str_cat(&file, "/version");
+
+    FILE *f = fopen(file.buf, "r");
+
+    str_free(&file);
+
+    if (!f) {
+        return NULL;
+    }
+
+    char *ver = NULL;
+    int err = getline(&ver, &(size_t){0}, f);
+    fclose(f);
 
     if (err == -1) {
-        die("failed to execute extension %s", argv[0]);
+        return NULL;
+    }
+
+    char *tmp = strchr(ver, '\n');
+
+    if (tmp) {
+        *tmp = 0;
+    }
+
+    return ver;
+}
+
+static void pkg_list_all(void) {
+    if (vec_size(pkgs) == 0) {
+        struct dirent **list;
+        int len = scandir(DB_DIR, &list, NULL, alphasort);
+
+        // '.' and '..'
+        free(list[0]);
+        free(list[1]);
+
+        for (int i = 2; i < len; i++) {
+            vec_add(pkgs, pkg_init(list[i]->d_name));
+            free(list[i]);
+        }
+        free(list);
+
+        if (len == -1) {
+            die("database not accessible");
+        }
+    }
+
+    for (size_t i = 0; i < vec_size(pkgs); ++i) {
+        char *ver = pkg_version(pkgs[i].name, DB_DIR);
+
+        if (!ver) {
+            die("package '%s' not installed", pkgs[i].name);
+        }
+
+        printf("%s %s\n", pkgs[i].name, ver);
+        free(ver);
     }
 }
+
+// }}}
+
+// cache {{{
 
 static void get_xdg_cache(str *s) {
     str_cat(s, getenv("XDG_CACHE_HOME"));
@@ -71,53 +233,122 @@ static void get_xdg_cache(str *s) {
 static void cache_init(str *cac) {
     get_xdg_cache(cac);
 
-    if (mkdir_p(cac->buf, 0755) != 0) {
+    if (mkdir_p(cac->buf, 0755) == 0) {
+        for (int i = 0; i < 3; i++) {
+            str tmp = {0};
+            str_cat(&tmp, cac->buf);
+            str_cat(&tmp, "/");
+            str_cat(&tmp, cache_dirs[i]);
+
+            if (mkdir(tmp.buf, 0755) == -1 && errno != EEXIST) {
+                str_free(&tmp);
+                die("failed to create directory %s", tmp.buf);
+            }
+
+            str_free(&tmp);
+        }
+
+        char *pid = pid_to_str(getpid());
+
+        str_cat(cac, "/");
+        str_cat(cac, pid);
+
+        if (mkdir_e(cac->buf, 0755) != 0) {
+            free(pid);
+            die("failed to create directory %s", cac->buf);
+        }
+
+        for (int i = 0; i < 3; i++) {
+            str tmp = {0};
+            str_cat(&tmp, cac->buf);
+            str_cat(&tmp, "/");
+            str_cat(&tmp, state_dirs[i]);
+
+            if (mkdir(tmp.buf, 0755) == -1 && errno != EEXIST) {
+                str_free(&tmp);
+                free(pid);
+                die("failed to create directory %s", tmp.buf);
+            }
+
+            str_free(&tmp);
+        }
+
+        free(pid);
+
+    } else {
         die("failed to create directory %s", cac->buf);
     }
 }
 
+// }}}
+
+// arguments {{{
+
+static void crux_like(void) {
+    str cwd = {0};
+    str_cat(&cwd, getenv("PWD"));
+
+    if (!cwd.buf || !cwd.buf[0]) {
+        die("PWD is unset");
+    }
+
+    vec_add(pkgs, pkg_init(path_basename(cwd.buf)));
+
+    int err = PATH_prepend(cwd.buf, "KISS_PATH");
+    str_free(&cwd);
+
+    if (err == 1) {
+        die("failed to prepend to KISS_PATH");
+    }
+}
+
+static void run_extension(char *argv[]) {
+    str cmd = {0};
+    str_cat(&cmd, "kiss-");
+    str_cat(&cmd, argv[1]);
+
+    int err = execvp(cmd.buf, ++argv);
+
+    str_free(&cmd);
+
+    if (err == -1) {
+        die("failed to execute extension %s", argv[0]);
+    }
+}
+
 static int run_action(int action, char **argv, int argc) {
+    atexit(repo_free);
+    atexit(pkg_free);
+
     for (int i = 2; i < argc; i++) {
         vec_add(pkgs, pkg_init(argv[i]));
     }
-
-    str cac = {0};
-    cache_init(&cac);
-    str_free(&cac);
 
     switch (action) {
         case ACTION_BUILD:
         case ACTION_CHECKSUM:
         case ACTION_DOWNLOAD:
         case ACTION_INSTALL:
-        case ACTION_REMOVE:
+        case ACTION_REMOVE: {
+            str cac = {0};
+            cache_init(&cac);
+            str_free(&cac);
+
             if (vec_size(pkgs) == 0) {
-                char *cwd = NULL;
-                size_t len = xgetcwd(&cwd);
-
-                if (len == 0) {
-                    free(cwd);
-                    die("failed to get cwd");
-                }
-
-                vec_add(pkgs, pkg_init(path_basename(cwd, len)));
-                int err = PATH_prepend(cwd, "KISS_PATH");
-                free(cwd);
-
-                if (err == 1) {
-                    die("failed to prepend to KISS_PATH");
-                }
+                crux_like();
             }
+
             break;
+        }
     }
 
     switch (action) {
         case ACTION_LIST:
-            pkg_list_all(pkgs);
+            pkg_list_all();
             break;
 
         case ACTION_SEARCH:
-            repo_find_all(pkgs);
+            repo_find_all();
             break;
 
         case ACTION_EXTENSION:
@@ -199,7 +430,7 @@ int main (int argc, char *argv[]) {
         action = ACTION_EXTENSION;
     }
 
-    atexit(exit_handler);
-
     return run_action(action, argv, argc);
 }
+
+// }}}

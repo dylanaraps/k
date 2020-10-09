@@ -2,6 +2,7 @@
 #define KISS_STR_H_
 
 #include <stdio.h>
+#include <sys/types.h>
 
 typedef struct str {
     size_t len;
