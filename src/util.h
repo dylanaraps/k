@@ -20,7 +20,8 @@ char *pid_to_str(pid_t);
 
 #define die(...) \
     do { \
-        msg(__VA_ARGS__); \
+        fprintf(stderr, __VA_ARGS__); \
+        puts(""); \
         exit(EXIT_FAILURE); \
     } while (0)
 
