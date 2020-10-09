@@ -27,7 +27,6 @@ SOFTWARE.
 #define KISS_VEC_H_
 
 #include <assert.h>
-#include <stddef.h>
 #include <stdlib.h>
 
 #define vec_capacity(vec) ((vec) ? ((size_t *)(vec))[-1] : (size_t)0)
