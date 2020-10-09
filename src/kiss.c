@@ -51,10 +51,41 @@ static void run_extension(char *argv[]) {
     }
 }
 
+static void get_xdg_cache(str *s) {
+    str_cat(s, getenv("XDG_CACHE_HOME"));
+
+    if (s->buf[0]) {
+        str_cat(s, "/kiss");
+
+    } else {
+        str_cat(s, getenv("HOME"));
+
+        if (s->buf[0]) {
+            str_cat(s, "/.cache/kiss");
+        }
+    }
+
+    if (!s->buf) {
+        die("failed to construct cache path");
+    }
+}
+
+static void cache_init(str *cac) {
+    get_xdg_cache(cac);
+
+    if (mkdir_p(cac->buf, 0755) != 0) {
+        die("failed to create directory %s", cac->buf);
+    }
+}
+
 static int run_action(int action, char **argv, int argc) {
     for (int i = 2; i < argc; i++) {
         vec_add(pkgs, pkg_init(argv[i]));
     }
+
+    str cac = {0};
+    cache_init(&cac);
+    str_free(&cac);
 
     switch (action) {
         case ACTION_BUILD:
@@ -67,6 +98,7 @@ static int run_action(int action, char **argv, int argc) {
                 size_t len = xgetcwd(&cwd);
 
                 if (len == 0) {
+                    free(cwd);
                     die("failed to get cwd");
                 }
 

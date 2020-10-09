@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "str.h"
 #include "util.h"
@@ -23,7 +24,7 @@ size_t xgetcwd(char **p) {
     *p = getcwd(buf, (size_t) len);
 
     if (!p) {
-        free(p);
+        free(buf);
         return 0;
     }
 
@@ -102,4 +103,20 @@ FILE *fopenat(const char *d, const char *f, const char *m) {
     }
 
     return f2;
+}
+
+int mkdir_p(char *p, const int m) {
+    for (char *d = p + 1; *d; d++) {
+        if (*d == '/') {
+            *d = 0;
+
+            if (mkdir(p, m) == -1 && errno != EEXIST) {
+                return 1;
+            }
+
+            *d = '/';
+        }
+    }
+
+    return mkdir(p, m) == -1 && errno != EEXIST;
 }
