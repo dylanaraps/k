@@ -51,7 +51,7 @@ char *path_basename(char *p) {
 
     size_t len = strlen(p);
 
-    for (int i = 1; p[len - i] == '/'; i++) {
+    for (size_t i = 1; p[len - i] == '/'; i++) {
         p[len - i] = 0;
     }
 
@@ -88,7 +88,7 @@ FILE *fopenat(const char *d, const char *f, const char *m) {
     return f2;
 }
 
-int mkdir_p(char *p, const int m) {
+int mkdir_p(char *p, const mode_t m) {
     for (char *d = p + 1; *d; d++) {
         if (*d == '/') {
             *d = 0;
@@ -104,7 +104,7 @@ int mkdir_p(char *p, const int m) {
     return mkdir(p, m) == -1 && errno != EEXIST;
 }
 
-int mkdir_e(char *p, const int m) {
+int mkdir_e(char *p, const mode_t m) {
     return mkdir(p, m) == -1 && errno != EEXIST;
 }
 
@@ -115,14 +115,14 @@ char *pid_to_str(pid_t p) {
         return NULL;
     }
 
-    char *pid = malloc(len + 1);
+    char *pid = malloc((size_t) len + 1);
 
     if (!pid) {
         perror("malloc");
         exit(1);
     }
 
-    int err = snprintf(pid, len + 1, "%u", p);
+    int err = snprintf(pid, (size_t) len + 1, "%u", p);
 
     if (err != len) {
         free(pid);

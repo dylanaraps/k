@@ -13,7 +13,7 @@ BUILD_FLAGS = \
 	-Wwrite-strings \
 	-Wshadow \
 	-Wundef \
-	-fanalyzer
+	-Wsign-conversion
 
 VALGRIND = -s \
 	--leak-check=full \
