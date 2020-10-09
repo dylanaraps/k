@@ -369,7 +369,7 @@ static int run_action(int action, char **argv, int argc) {
             puts("remove       Remove a package");
             puts("search       Search for a package");
             puts("update       Update the system");
-            puts("version:     Package manager version");
+            puts("version      Package manager version");
             puts("\nRun 'kiss help-ext' to see all actions");
     }
 
