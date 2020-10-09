@@ -307,14 +307,22 @@ static void run_extension(char *argv[]) {
     }
 }
 
-static int run_action(int action, char **argv, int argc) {
-    atexit(repo_free);
-    atexit(pkg_free);
+static void usage(void) {
+    puts("kiss [a|b|c|d|i|l|r|s|u|v] [pkg]...");
+    puts("alternatives List and swap to alternatives");
+    puts("build        Build a package");
+    puts("checksum     Generate checksums");
+    puts("download     Pre-download all sources");
+    puts("install      Install a package");
+    puts("list         List installed packages");
+    puts("remove       Remove a package");
+    puts("search       Search for a package");
+    puts("update       Update the system");
+    puts("version      Package manager version");
+    puts("\nRun 'kiss help-ext' to see all actions");
+}
 
-    for (int i = 2; i < argc; i++) {
-        vec_add(pkgs, pkg_init(argv[i]));
-    }
-
+static int run_action(int action) {
     switch (action) {
         case ACTION_BUILD:
         case ACTION_CHECKSUM:
@@ -341,28 +349,6 @@ static int run_action(int action, char **argv, int argc) {
         case ACTION_SEARCH:
             repo_find_all();
             break;
-
-        case ACTION_EXTENSION:
-            run_extension(argv);
-            break;
-
-        case ACTION_VERSION:
-            puts("0.0.1");
-            break;
-
-        default:
-            puts("kiss [a|b|c|d|i|l|r|s|u|v] [pkg]...");
-            puts("alternatives List and swap to alternatives");
-            puts("build        Build a package");
-            puts("checksum     Generate checksums");
-            puts("download     Pre-download all sources");
-            puts("install      Install a package");
-            puts("list         List installed packages");
-            puts("remove       Remove a package");
-            puts("search       Search for a package");
-            puts("update       Update the system");
-            puts("version      Package manager version");
-            puts("\nRun 'kiss help-ext' to see all actions");
     }
 
     return 0;
@@ -371,8 +357,10 @@ static int run_action(int action, char **argv, int argc) {
 int main (int argc, char *argv[]) {
     int action = 0;
 
-    if (argc < 2 || !argv[1] || !argv[1][0] || argv[1][0] == '-') {
-        action = ACTION_USAGE;
+    if (argc < 2 || !argv[1] || !argv[1][0] ||
+        argv[1][0] == '-' || argc > 4096) {
+        usage();
+        exit(EXIT_SUCCESS);
 
     } else if (strcmp(argv[1], "alternatives") == 0 ||
                strcmp(argv[1], "a") == 0) {
@@ -415,13 +403,21 @@ int main (int argc, char *argv[]) {
 
     } else if (strcmp(argv[1], "version") == 0 ||
                strcmp(argv[1], "v") == 0) {
-        action = ACTION_VERSION;
+        puts("0.0.1");
+        exit(EXIT_SUCCESS);
 
     } else {
-        action = ACTION_EXTENSION;
+        run_extension(argv);
     }
 
-    return run_action(action, argv, argc);
+    atexit(repo_free);
+    atexit(pkg_free);
+
+    for (int i = 2; i < argc; i++) {
+        vec_add(pkgs, pkg_init(argv[i]));
+    }
+
+    return run_action(action);
 }
 
 // }}}
