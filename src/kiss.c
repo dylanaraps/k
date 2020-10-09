@@ -68,9 +68,7 @@ static void repo_init(void) {
         vec_add(repos, strdup(tok));
     }
 
-    free(p);
     str_free(&path);
-
     vec_add(repos, strdup(DB_DIR));
 }
 
