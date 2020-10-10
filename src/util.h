@@ -11,17 +11,28 @@ FILE *fopenat(const char *, const char *, const char *);
 int mkdir_p(char *, const mode_t);
 int mkdir_e(char *, const mode_t);
 
-#define msg(...) \
-    do { \
+#define msg(...)                      \
+    do {                              \
         fprintf(stderr, __VA_ARGS__); \
-        fputc('\n', stderr); \
+        fputc('\n', stderr);          \
     } while (0)
 
-#define die(...) \
-    do { \
-        fprintf(stderr, __VA_ARGS__); \
-        fputc('\n', stderr); \
+#define die(...)            \
+    do {                    \
+        msg(__VA_ARGS__);   \
         exit(EXIT_FAILURE); \
+    } while (0)
+
+#define free_die(v, ...)  \
+    do {                  \
+        free(v);          \
+        die(__VA_ARGS__); \
+    } while (0)
+
+#define str_free_die(s, ...)  \
+    do {                      \
+        str_free(s);          \
+        die(__VA_ARGS__);     \
     } while (0)
 
 #endif

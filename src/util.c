@@ -14,10 +14,7 @@ int PATH_prepend(const char *path, const char *var) {
     }
 
     str *kiss_path = NULL;
-
-    str_push(&kiss_path, path);
-    str_push(&kiss_path, ":");
-    str_push(&kiss_path, getenv(var));
+    str_fmt(&kiss_path, "%s:%s", path, getenv(var));
 
     int err = setenv(var, kiss_path->buf, 1);
 
@@ -74,9 +71,7 @@ FILE *fopenat(const char *d, const char *f, const char *m) {
     }
 
     str *new = NULL;
-    str_push(&new, d);
-    str_push(&new, "/");
-    str_push(&new, f);
+    str_fmt(&new, "%s/%s", d, f);
 
     FILE *f2 = fopen(new->buf, m);
 

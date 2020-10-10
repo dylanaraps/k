@@ -9,6 +9,17 @@ typedef struct str {
     char *buf;
 } str;
 
+#define str_init(s)                                     \
+    do {                                                \
+        if (!(*s)) {                                    \
+            (*s) = calloc(1, sizeof(str));              \
+            if (!(*s)) {                                \
+                perror("calloc");                       \
+                exit(1);                                \
+            }                                           \
+        }                                               \
+    } while (0)
+
 #define str_free(s)      \
     do {                 \
         free((*s)->buf); \
@@ -24,13 +35,7 @@ typedef struct str {
 
 #define str_alloc(s, l)                                 \
     do {                                                \
-        if (!(*s)) {                                    \
-            (*s) = calloc(1, sizeof(str));              \
-            if (!(*s)) {                                \
-                perror("calloc");                       \
-                exit(1);                                \
-            }                                           \
-        }                                               \
+        str_init(s);                                    \
         if (((*s)->len + l) >= (*s)->cap) {             \
             (*s)->cap += l;                             \
             (*s)->buf  = realloc((*s)->buf, (*s)->cap); \
@@ -51,20 +56,18 @@ typedef struct str {
         }                                             \
     } while (0)
 
-#define str_from(s, f, t)                            \
-    do {                                             \
-        int _l2 = snprintf(NULL, 0, f, t);           \
-        if (_l2 > 0) {                               \
-            str_alloc(s, (size_t) _l2 + 1);          \
-            int e = snprintf((*s)->buf + (*s)->len,  \
-                            (size_t) _l2 + 1, f, t); \
-            if (e == _l2) {                          \
-                (*s)->len += (size_t) _l2 + 1;       \
-            } else {                                 \
-                perror("snprintf");                  \
-                exit(1);                             \
-            }                                        \
-        }                                            \
+#define str_fmt(s, f, ...)                                  \
+    do {                                                    \
+        int _l2 = snprintf(NULL, 0, f, __VA_ARGS__);        \
+        if (_l2 > 0) {                                      \
+            str_alloc(s, (size_t) _l2 + 1);                 \
+            if (snprintf((*s)->buf + (*s)->len,             \
+                (size_t) _l2 + 1, f, __VA_ARGS__) != _l2) { \
+                perror("snprintf");                         \
+                exit(1);                                    \
+            }                                               \
+            (*s)->len += (size_t) _l2;                      \
+        }                                                   \
     } while (0)
 
 #endif

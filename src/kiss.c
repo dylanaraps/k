@@ -79,32 +79,22 @@ static void repo_free(void) {
     vec_free(repos);
 }
 
-static glob_t repo_glob(const char *pattern) {
-    glob_t buf = {0};
-
+static void repo_find_all(void) {
     if (vec_size(repos) == 0) {
         repo_init();
     }
 
-    for (size_t i = 0; i < vec_size(repos); ++i) {
-        str *query = NULL;
+    for (size_t i = 0; i < vec_size(pkgs); i++) {
+        glob_t buf = {0};
 
-        str_push(&query, repos[i]);
-        str_push(&query, "/");
-        str_push(&query, pattern);
-        str_push(&query, "/");
+        for (size_t j = 0; j < vec_size(repos); j++) {
+            str *query = NULL;
+            str_fmt(&query, "%s/%s/", repos[j], pkgs[i]->name);
 
-        glob(query->buf, i ? GLOB_APPEND : 0, NULL, &buf);
+            glob(query->buf, j ? GLOB_APPEND : 0, NULL, &buf);
 
-        str_free(&query);
-    }
-
-    return buf;
-}
-
-static void repo_find_all(void) {
-    for (size_t i = 0; i < vec_size(pkgs); ++i) {
-        glob_t buf = repo_glob(pkgs[i]->name);
+            str_free(&query);
+        }
 
         if (buf.gl_pathc == 0) {
             globfree(&buf);
@@ -152,10 +142,7 @@ static void pkg_free(void) {
 static char *pkg_version(const char *name, const char *path) {
     str *file = NULL;
 
-    str_push(&file, path);
-    str_push(&file, "/");
-    str_push(&file, name);
-    str_push(&file, "/version");
+    str_fmt(&file, "%s/%s/version", path, name);
 
     FILE *f = fopen(file->buf, "r");
 
@@ -223,15 +210,13 @@ static void get_xdg_cache(str **s) {
     char *env = getenv("XDG_CACHE_HOME");
 
     if (env && env[0]) {
-        str_push(s, env);
-        str_push(s, "/kiss");
+        str_fmt(s, "%s/kiss", env);
 
     } else {
         env = getenv("HOME");
 
         if (env && env[0]) {
-            str_push(s, env);
-            str_push(s, "/.cache/kiss");
+            str_fmt(s, "%s/.cache/kiss", env);
         }
     }
 
@@ -245,7 +230,7 @@ static void cache_init(void) {
     get_xdg_cache(&cac);
 
     if (mkdir_p(cac->buf, 0755) != 0) {
-        die("failed to create directory %s", cac->buf);
+        str_free_die(&cac, "failed to create directory");
     }
 
     str_push(&cac, "/");
@@ -254,17 +239,16 @@ static void cache_init(void) {
         str_push(&cac, cache_dirs[i]);
 
         if (mkdir(cac->buf, 0755) == -1 && errno != EEXIST) {
-            str_free(&cac);
-            die("failed to create directory");
+            str_free_die(&cac, "failed to create directory");
         }
 
         str_undo(&cac, cache_dirs[i]);
     }
 
-    str_from(&cac, "%u", getpid());
+    str_fmt(&cac, "%u", getpid());
 
     if (mkdir_e(cac->buf, 0755) != 0) {
-        die("failed to create directory %s", cac->buf);
+        str_free_die(&cac, "failed to create directory");
     }
 
     str_push(&cac, "/");
@@ -273,14 +257,14 @@ static void cache_init(void) {
         str_push(&cac, state_dirs[i]);
 
         if (mkdir(cac->buf, 0755) == -1 && errno != EEXIST) {
-            str_free(&cac);
-            die("failed to create directory");
+            str_free_die(&cac, "failed to create directory");
         }
 
         str_undo(&cac, state_dirs[i]);
     }
 
     str_free(&cac);
+    return;
 }
 
 // }}}
