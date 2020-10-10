@@ -6,7 +6,6 @@
 typedef struct str {
     size_t len;
     size_t cap;
-    size_t pre;
     char *buf;
 } str;
 
@@ -21,15 +20,17 @@ typedef struct str {
         }                                  \
     } while (0)
 
-#define str_free(s)      \
-    do {                 \
-        free((*s)->buf); \
-        free((*s));      \
+#define str_free(s)          \
+    do {                     \
+        if ((*s)) {          \
+            free((*s)->buf); \
+            free((*s));      \
+        }                    \
     } while (0)
 
-#define str_undo(s)                           \
-    do {                                      \
-        (*s)->buf[(*s)->len = (*s)->pre] = 0; \
+#define str_undo(s, d)                         \
+    do {                                       \
+        (*s)->buf[(*s)->len -= strlen(d)] = 0; \
     } while (0)
 
 #define str_alloc(s, l)                                     \
@@ -41,7 +42,6 @@ typedef struct str {
                 perror("realloc");                          \
                 exit(1);                                    \
             }                                               \
-            (*s)->pre = (*s)->len;                          \
         }                                                   \
     } while (0)
 
@@ -67,6 +67,15 @@ typedef struct str {
             }                                               \
             (*s)->len += (size_t) _l2;                      \
         }                                                   \
+    } while (0)
+
+#define str_path(s)                                        \
+    do {                                                   \
+        size_t _l3 = 1;                                    \
+        for (; (*s)->buf[(*s)->len - _l3] == '/'; _l3++) { \
+            (*s)->buf[(*s)->len - _l3] = 0;                \
+        }                                                  \
+        (*s)->len -= _l3 - 1;                              \
     } while (0)
 
 #endif

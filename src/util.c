@@ -1,3 +1,4 @@
+#include <dirent.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -7,49 +8,6 @@
 
 #include "str.h"
 #include "util.h"
-
-int PATH_prepend(const char *path, const char *var) {
-    if (!path || !var) {
-        return 1;
-    }
-
-    str *kiss_path = NULL;
-    str_fmt(&kiss_path, "%s:%s", path, getenv(var));
-
-    int err = setenv(var, kiss_path->buf, 1);
-
-    str_free(&kiss_path);
-
-    if (err == -1) {
-        perror("setenv");
-        return 1;
-    }
-
-    return 0;
-}
-
-char *path_basename(char *p) {
-    if (!p) {
-        return NULL;
-    }
-
-    size_t len = strlen(p);
-
-    for (size_t i = 1; p[len - i] == '/'; i++) {
-        p[len - i] = 0;
-    }
-
-    char *b = strrchr(p, '/');
-
-    if (!b) {
-        *p = '/';
-        return p;
-    }
-
-    *b++ = 0;
-
-    return b; // p now points to dirname
-}
 
 int mkdir_p(char *p, const mode_t m) {
     for (char *d = p + 1; *d; d++) {
@@ -62,6 +20,70 @@ int mkdir_p(char *p, const mode_t m) {
 
             *d = '/';
         }
+    }
+
+    return 0;
+}
+
+int is_dir(const char *d) {
+    struct stat s;
+
+    if (lstat(d, &s) < 0) {
+        return 1;
+    }
+
+    if (S_ISDIR(s.st_mode)) {
+        return 0;
+    }
+
+    return 1;
+}
+
+int rm_rf(const char *p) {
+    DIR *dir = opendir(p);
+
+    if (!dir) {
+        msg("opendir failed %s\n", p);
+        return 1;
+    }
+
+    str *tmp = NULL;
+    str_push(&tmp, p);
+
+    if (tmp->buf[tmp->len - 1] != '/') {
+        str_push(&tmp, "/");
+    }
+
+    struct dirent *e;
+
+    while ((e = readdir(dir))) {
+        if ((!e->d_name[1] && e->d_name[0] == '.') ||
+            (!e->d_name[2] && e->d_name[0] == '.' && e->d_name[1] == '.')) {
+            continue;
+        }
+
+        str_push(&tmp, e->d_name);
+
+        if (is_dir(tmp->buf) == 0) {
+            if (rm_rf(tmp->buf) != 0) {
+                msg("failed to open directory %s", tmp->buf);
+                break;
+            }
+
+        } else {
+            if (unlink(tmp->buf) != 0) {
+                msg("failed to remove file %s", tmp->buf);
+            }
+        }
+
+        str_undo(&tmp, e->d_name);
+    }
+
+    str_free(&tmp);
+    closedir(dir);
+
+    if (rmdir(p) != 0) {
+        msg("failed to remove directory %s", p);
     }
 
     return 0;

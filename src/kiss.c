@@ -20,6 +20,7 @@ typedef struct pkg {
 
 static pkg  **pkgs  = NULL;
 static char **repos = NULL;
+static str *cac_dir = NULL;
 
 enum actions {
     ACTION_ALTERNATIVES,
@@ -65,11 +66,11 @@ static void repo_init(void) {
             die("relative path found in KISS_PATH");
         }
 
-        vec_add(repos, strdup(tok));
+        vec_push(repos, strdup(tok));
     }
 
     str_free(&path);
-    vec_add(repos, strdup(DB_DIR));
+    vec_push(repos, strdup(DB_DIR));
 }
 
 static void repo_free(void) {
@@ -179,7 +180,7 @@ static void pkg_list_all(void) {
         free(list[1]);
 
         for (int i = 2; i < len; i++) {
-            vec_add(pkgs, pkg_init(list[i]->d_name));
+            vec_push(pkgs, pkg_init(list[i]->d_name));
             free(list[i]);
         }
         free(list);
@@ -225,41 +226,51 @@ static void get_xdg_cache(str **s) {
 }
 
 static void cache_init(void) {
-    str *cac = NULL;
-    get_xdg_cache(&cac);
+    get_xdg_cache(&cac_dir);
 
-    if (mkdir_p(cac->buf, 0755) != 0) {
-        str_free_die(&cac, "failed to create directory");
+    if (mkdir_p(cac_dir->buf, 0755) != 0) {
+        str_free_die(&cac_dir, "failed to create directory");
     }
 
     for (int i = 0; i < 3; i++) {
-        str_push(&cac, cache_dirs[i]);
+        str_push(&cac_dir, cache_dirs[i]);
 
-        if (mkdir(cac->buf, 0755) == -1 && errno != EEXIST) {
-            str_free_die(&cac, "failed to create directory");
+        if (mkdir(cac_dir->buf, 0755) == -1 && errno != EEXIST) {
+            str_free_die(&cac_dir, "failed to create directory");
         }
 
-        str_undo(&cac);
+        str_undo(&cac_dir, cache_dirs[i]);
+    }
+
+    str_push(&cac_dir, "proc/");
+
+    if (mkdir(cac_dir->buf, 0755) == -1 && errno != EEXIST) {
+        str_free_die(&cac_dir, "failed to create directory");
     }
 
     pid_t pid = getpid();
-    str_fmt(&cac, "%u/", pid);
+    str_fmt(&cac_dir, "%u/", pid);
 
-    if (mkdir(cac->buf, 0755) == -1 && errno != EEXIST) {
-        str_free_die(&cac, "failed to create directory");
+    if (mkdir(cac_dir->buf, 0755) == -1 && errno != EEXIST) {
+        str_free_die(&cac_dir, "failed to create directory");
     }
 
     for (int i = 0; i < 3; i++) {
-        str_push(&cac, state_dirs[i]);
+        str_push(&cac_dir, state_dirs[i]);
 
-        if (mkdir(cac->buf, 0755) == -1 && errno != EEXIST) {
-            str_free_die(&cac, "failed to create directory");
+        if (mkdir(cac_dir->buf, 0755) == -1 && errno != EEXIST) {
+            str_free_die(&cac_dir, "failed to create directory");
         }
 
-        str_undo(&cac);
+        str_undo(&cac_dir, state_dirs[i]);
     }
+}
 
-    str_free(&cac);
+static void cache_free(void) {
+    if (cac_dir) {
+        rm_rf(cac_dir->buf);
+        str_free(&cac_dir);
+    }
 }
 
 // }}}
@@ -269,17 +280,20 @@ static void cache_init(void) {
 static void crux_like(void) {
     str *cwd = NULL;
     str_push(&cwd, getenv("PWD"));
+    str_path(&cwd);
 
-    if (!cwd->buf || !cwd->buf[0]) {
-        die("PWD is unset");
-    }
+    char *base = strrchr(cwd->buf, '/');
 
-    vec_add(pkgs, pkg_init(path_basename(cwd->buf)));
+    vec_push(pkgs, pkg_init(base + 1));
+    str_undo(&cwd, base);
+    str_push(&cwd, ":");
+    str_push(&cwd, getenv("KISS_PATH"));
 
-    int err = PATH_prepend(cwd->buf, "KISS_PATH");
+    int err = setenv("KISS_PATH", cwd->buf, 1);
+
     str_free(&cwd);
 
-    if (err == 1) {
+    if (err == -1) {
         die("failed to prepend to KISS_PATH");
     }
 }
@@ -398,11 +412,12 @@ int main (int argc, char *argv[]) {
         run_extension(argv);
     }
 
+    atexit(cache_free);
     atexit(repo_free);
     atexit(pkg_free);
 
     for (int i = 2; i < argc; i++) {
-        vec_add(pkgs, pkg_init(argv[i]));
+        vec_push(pkgs, pkg_init(argv[i]));
     }
 
     return run_action(action);
