@@ -133,6 +133,11 @@ static pkg *pkg_init(const char *name) {
 
     p->name = strdup(name);
 
+    if (!p->name || errno == ENOMEM) {
+        perror("strdup");
+        exit(EXIT_FAILURE);
+    }
+
     return p;
 }
 
