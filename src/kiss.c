@@ -81,10 +81,6 @@ static void repo_free(void) {
 }
 
 static void repo_find_all(void) {
-    if (vec_size(repos) == 0) {
-        repo_init();
-    }
-
     for (size_t i = 0; i < vec_size(pkgs); i++) {
         glob_t buf = {0};
 
@@ -334,6 +330,7 @@ static int run_action(int action) {
         case ACTION_INSTALL:
         case ACTION_REMOVE: {
             cache_init();
+            repo_init();
 
             if (vec_size(pkgs) == 0) {
                 crux_like();
@@ -349,6 +346,7 @@ static int run_action(int action) {
             break;
 
         case ACTION_SEARCH:
+            repo_init();
             repo_find_all();
             break;
     }
