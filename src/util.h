@@ -14,13 +14,13 @@ int mkdir_e(char *, const mode_t);
 #define msg(...) \
     do { \
         fprintf(stderr, __VA_ARGS__); \
-        puts(""); \
+        fputs("\n", stderr); \
     } while (0)
 
 #define die(...) \
     do { \
         fprintf(stderr, __VA_ARGS__); \
-        puts(""); \
+        fputs("\n", stderr); \
         exit(EXIT_FAILURE); \
     } while (0)
 

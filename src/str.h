@@ -59,7 +59,7 @@ typedef struct str {
             int e = snprintf((*s)->buf + (*s)->len,  \
                             (size_t) _l2 + 1, f, t); \
             if (e == _l2) {                          \
-                (*s)->len += (size_t) _l2;           \
+                (*s)->len += (size_t) _l2 + 1;       \
             } else {                                 \
                 perror("snprintf");                  \
                 exit(1);                             \

@@ -160,6 +160,7 @@ static char *pkg_version(const char *name, const char *path) {
     fclose(f);
 
     if (err == -1) {
+        free(ver);
         return NULL;
     }
 
