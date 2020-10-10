@@ -210,13 +210,13 @@ static void get_xdg_cache(str **s) {
     char *env = getenv("XDG_CACHE_HOME");
 
     if (env && env[0]) {
-        str_fmt(s, "%s/kiss", env);
+        str_fmt(s, "%s/kiss/", env);
 
     } else {
         env = getenv("HOME");
 
         if (env && env[0]) {
-            str_fmt(s, "%s/.cache/kiss", env);
+            str_fmt(s, "%s/.cache/kiss/", env);
         }
     }
 
@@ -233,8 +233,6 @@ static void cache_init(void) {
         str_free_die(&cac, "failed to create directory");
     }
 
-    str_push(&cac, "/");
-
     for (int i = 0; i < 3; i++) {
         str_push(&cac, cache_dirs[i]);
 
@@ -242,16 +240,14 @@ static void cache_init(void) {
             str_free_die(&cac, "failed to create directory");
         }
 
-        str_undo(&cac, cache_dirs[i]);
+        str_undo(&cac);
     }
 
-    str_fmt(&cac, "%u", getpid());
+    str_fmt(&cac, "%u/", getpid());
 
     if (mkdir_e(cac->buf, 0755) != 0) {
         str_free_die(&cac, "failed to create directory");
     }
-
-    str_push(&cac, "/");
 
     for (int i = 0; i < 3; i++) {
         str_push(&cac, state_dirs[i]);
@@ -260,11 +256,10 @@ static void cache_init(void) {
             str_free_die(&cac, "failed to create directory");
         }
 
-        str_undo(&cac, state_dirs[i]);
+        str_undo(&cac);
     }
 
     str_free(&cac);
-    return;
 }
 
 // }}}
@@ -291,8 +286,7 @@ static void crux_like(void) {
 
 static void run_extension(char *argv[]) {
     str *cmd = NULL;
-    str_push(&cmd, "kiss-");
-    str_push(&cmd, argv[1]);
+    str_fmt(&cmd, "kiss-%s", argv[1]);
 
     int err = execvp(cmd->buf, ++argv);
 

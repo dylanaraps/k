@@ -97,7 +97,7 @@ int mkdir_p(char *p, const mode_t m) {
         }
     }
 
-    return mkdir(p, m) == -1 && errno != EEXIST;
+    return 0;
 }
 
 int mkdir_e(char *p, const mode_t m) {

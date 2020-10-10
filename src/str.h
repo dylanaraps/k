@@ -6,18 +6,19 @@
 typedef struct str {
     size_t len;
     size_t cap;
+    size_t pre;
     char *buf;
 } str;
 
-#define str_init(s)                                     \
-    do {                                                \
-        if (!(*s)) {                                    \
-            (*s) = calloc(1, sizeof(str));              \
-            if (!(*s)) {                                \
-                perror("calloc");                       \
-                exit(1);                                \
-            }                                           \
-        }                                               \
+#define str_init(s)                        \
+    do {                                   \
+        if (!(*s)) {                       \
+            (*s) = calloc(1, sizeof(str)); \
+            if (!(*s)) {                   \
+                perror("calloc");          \
+                exit(1);                   \
+            }                              \
+        }                                  \
     } while (0)
 
 #define str_free(s)      \
@@ -26,24 +27,22 @@ typedef struct str {
         free((*s));      \
     } while (0)
 
-#define str_undo(s, d)                             \
-    do {                                           \
-        if (d && d[0]) {                           \
-            (*s)->buf[(*s)->len -= strlen(d)] = 0; \
-        }                                          \
+#define str_undo(s)                           \
+    do {                                      \
+        (*s)->buf[(*s)->len = (*s)->pre] = 0; \
     } while (0)
 
-#define str_alloc(s, l)                                 \
-    do {                                                \
-        str_init(s);                                    \
-        if (((*s)->len + l) >= (*s)->cap) {             \
-            (*s)->cap += l;                             \
-            (*s)->buf  = realloc((*s)->buf, (*s)->cap); \
-            if (!(*s)->buf) {                           \
-                perror("realloc");                      \
-                exit(1);                                \
-            }                                           \
-        }                                               \
+#define str_alloc(s, l)                                     \
+    do {                                                    \
+        str_init(s);                                        \
+        if (((*s)->len + l) >= (*s)->cap) {                 \
+            (*s)->buf = realloc((*s)->buf, (*s)->cap += l); \
+            if (!(*s)->buf) {                               \
+                perror("realloc");                          \
+                exit(1);                                    \
+            }                                               \
+            (*s)->pre = (*s)->len;                          \
+        }                                                   \
     } while (0)
 
 #define str_push(s, d)                                \
