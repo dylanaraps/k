@@ -5,7 +5,6 @@
 
 char *path_basename(char *);
 int PATH_prepend(const char *, const char *);
-int is_dir(const char *);
 int mkdir_p(char *, const mode_t);
 
 #define msg(...)                      \

@@ -28,20 +28,6 @@ int PATH_prepend(const char *path, const char *var) {
     return 0;
 }
 
-int is_dir(const char *d) {
-    struct stat s;
-
-    if (lstat(d, &s) < 0) {
-        return 1;
-    }
-
-    if (S_ISDIR(s.st_mode)) {
-        return 0;
-    }
-
-    return 1;
-}
-
 char *path_basename(char *p) {
     if (!p) {
         return NULL;
