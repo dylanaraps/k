@@ -18,7 +18,7 @@ typedef struct pkg {
     char *path;
 } pkg;
 
-static pkg  *pkgs   = NULL;
+static pkg  **pkgs  = NULL;
 static char **repos = NULL;
 
 enum actions {
@@ -104,11 +104,11 @@ static glob_t repo_glob(const char *pattern) {
 
 static void repo_find_all(void) {
     for (size_t i = 0; i < vec_size(pkgs); ++i) {
-        glob_t buf = repo_glob(pkgs[i].name);
+        glob_t buf = repo_glob(pkgs[i]->name);
 
         if (buf.gl_pathc == 0) {
             globfree(&buf);
-            die("no results for '%s'", pkgs[i].name);
+            die("no results for '%s'", pkgs[i]->name);
         }
 
         for (size_t j = 0; j < buf.gl_pathc; j++) {
@@ -123,18 +123,23 @@ static void repo_find_all(void) {
 
 // packages {{{
 
-static pkg pkg_init(const char *name) {
-    pkg p = {0};
+static pkg *pkg_init(const char *name) {
+    pkg *p = malloc(sizeof(pkg));
 
-    p.name = strdup(name);
+    if (!p) {
+        perror("malloc");
+        exit(EXIT_FAILURE);
+    }
+
+    p->name = strdup(name);
 
     return p;
 }
 
 static void pkg_free(void) {
     for (size_t i = 0; i < vec_size(pkgs); i++) {
-        free(pkgs[i].name);
-        free(pkgs[i].path);
+        free(pkgs[i]->name);
+        free(pkgs[i]);
     }
     vec_free(pkgs);
 }
@@ -194,13 +199,13 @@ static void pkg_list_all(void) {
     }
 
     for (size_t i = 0; i < vec_size(pkgs); ++i) {
-        char *ver = pkg_version(pkgs[i].name, DB_DIR);
+        char *ver = pkg_version(pkgs[i]->name, DB_DIR);
 
         if (!ver) {
-            die("package '%s' not installed", pkgs[i].name);
+            die("package '%s' not installed", pkgs[i]->name);
         }
 
-        printf("%s %s\n", pkgs[i].name, ver);
+        printf("%s %s\n", pkgs[i]->name, ver);
         free(ver);
     }
 }
