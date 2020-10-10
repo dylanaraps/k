@@ -246,7 +246,7 @@ static void cache_init(void) {
     pid_t pid = getpid();
     str_fmt(&cac, "%u/", pid);
 
-    if (mkdir_e(cac->buf, 0755) != 0) {
+    if (mkdir(cac->buf, 0755) == -1 && errno != EEXIST) {
         str_free_die(&cac, "failed to create directory");
     }
 

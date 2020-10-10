@@ -36,3 +36,22 @@ static char *repo_find(const char *pkg) {
     return NULL;
 }
 
+FILE *fopenat(const char *d, const char *f, const char *m) {
+    if (!d || !f || !m) {
+        return NULL;
+    }
+
+    str *new = NULL;
+    str_fmt(&new, "%s/%s", d, f);
+
+    FILE *f2 = fopen(new->buf, m);
+
+    str_free(&new);
+
+    if (!f2) {
+        return NULL;
+    }
+
+    return f2;
+}
+

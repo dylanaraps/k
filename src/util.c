@@ -65,25 +65,6 @@ char *path_basename(char *p) {
     return b; // p now points to dirname
 }
 
-FILE *fopenat(const char *d, const char *f, const char *m) {
-    if (!d || !f || !m) {
-        return NULL;
-    }
-
-    str *new = NULL;
-    str_fmt(&new, "%s/%s", d, f);
-
-    FILE *f2 = fopen(new->buf, m);
-
-    str_free(&new);
-
-    if (!f2) {
-        return NULL;
-    }
-
-    return f2;
-}
-
 int mkdir_p(char *p, const mode_t m) {
     for (char *d = p + 1; *d; d++) {
         if (*d == '/') {
@@ -98,8 +79,4 @@ int mkdir_p(char *p, const mode_t m) {
     }
 
     return 0;
-}
-
-int mkdir_e(char *p, const mode_t m) {
-    return mkdir(p, m) == -1 && errno != EEXIST;
 }
