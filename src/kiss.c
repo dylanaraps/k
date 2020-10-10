@@ -141,7 +141,6 @@ static void pkg_free(void) {
 
 static char *pkg_version(const char *name, const char *path) {
     str *file = NULL;
-
     str_fmt(&file, "%s/%s/version", path, name);
 
     FILE *f = fopen(file->buf, "r");
