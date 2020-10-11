@@ -7,7 +7,8 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-#include "util.h"
+#include "dir.h"
+#include "log.h"
 #include "vec.h"
 #include "str.h"
 
@@ -21,6 +22,7 @@ typedef struct pkg {
 static pkg  **pkgs  = NULL;
 static char **repos = NULL;
 static str *cac_dir = NULL;
+static str *tmp_str = NULL;
 
 enum actions {
     ACTION_ALTERNATIVES,
@@ -53,12 +55,12 @@ static const char *cache_dirs[] = {
 // repositories {{{
 
 static void repo_init(void) {
+    str_zero(&tmp_str);
+    str_push(&tmp_str, getenv("KISS_PATH"));
+
     char *p = NULL;
 
-    str *path = NULL;
-    str_push(&path, getenv("KISS_PATH"));
-
-    for (char *tok = strtok_r(path->buf, ":", &p);
+    for (char *tok = strtok_r(tmp_str->buf, ":", &p);
          tok != NULL;
          tok = strtok_r(NULL, ":", &p)) {
 
@@ -69,7 +71,6 @@ static void repo_init(void) {
         vec_push(repos, strdup(tok));
     }
 
-    str_free(&path);
     vec_push(repos, strdup(DB_DIR));
 }
 
@@ -85,12 +86,10 @@ static void repo_find_all(void) {
         glob_t buf = {0};
 
         for (size_t j = 0; j < vec_size(repos); j++) {
-            str *query = NULL;
-            str_fmt(&query, "%s/%s/", repos[j], pkgs[i]->name);
+            str_zero(&tmp_str);
+            str_fmt(&tmp_str, "%s/%s/", repos[j], pkgs[i]->name);
 
-            glob(query->buf, j ? GLOB_APPEND : 0, NULL, &buf);
-
-            str_free(&query);
+            glob(tmp_str->buf, j ? GLOB_APPEND : 0, NULL, &buf);
         }
 
         if (buf.gl_pathc == 0) {
@@ -136,65 +135,59 @@ static void pkg_free(void) {
     vec_free(pkgs);
 }
 
-static char *pkg_version(const char *name, const char *path) {
-    str *file = NULL;
-    str_fmt(&file, "%s/%s/version", path, name);
+static int pkg_version(str **s, const char *p, const char *db) {
+    str_zero(s);
+    str_fmt(s, "%s/%s/version", db, p);
 
-    FILE *f = fopen(file->buf, "r");
-
-    str_free(&file);
+    FILE *f = fopen((*s)->buf, "r");
 
     if (!f) {
-        return NULL;
+        return 1;
     }
 
-    char *ver = NULL;
-    int err = getline(&ver, &(size_t){0}, f);
+    str_getline(s, f);
     fclose(f);
 
-    if (err == -1) {
-        free(ver);
-        return NULL;
-    }
-
-    char *tmp = strchr(ver, '\n');
-
-    if (tmp) {
-        *tmp = 0;
-    }
-
-    return ver;
+    return !(*s)->buf;
 }
 
 static void pkg_list_all(void) {
-    if (vec_size(pkgs) == 0) {
-        struct dirent **list;
-        int len = scandir(DB_DIR, &list, NULL, alphasort);
+    struct dirent **list;
+    int len = scandir(DB_DIR, &list, NULL, alphasort);
 
-        // '.' and '..'
-        free(list[0]);
-        free(list[1]);
+    // '.' and '..'
+    free(list[0]);
+    free(list[1]);
 
-        for (int i = 2; i < len; i++) {
-            vec_push(pkgs, pkg_init(list[i]->d_name));
+    str_zero(&tmp_str);
+
+    for (int i = 2; i < len; i++) {
+        if (pkg_version(&tmp_str, list[i]->d_name, DB_DIR) != 0) {
             free(list[i]);
-        }
-        free(list);
-
-        if (len == -1) {
-            die("database not accessible");
-        }
-    }
-
-    for (size_t i = 0; i < vec_size(pkgs); ++i) {
-        char *ver = pkg_version(pkgs[i]->name, DB_DIR);
-
-        if (!ver) {
+            free(list);
             die("package '%s' not installed", pkgs[i]->name);
         }
 
-        printf("%s %s\n", pkgs[i]->name, ver);
-        free(ver);
+        printf("%s %s\n", list[i]->d_name, tmp_str->buf);
+        free(list[i]);
+    }
+
+    free(list);
+
+    if (len == -1) {
+        die("database not accessible");
+    }
+}
+
+static void pkg_list_vec(void) {
+    str_zero(&tmp_str);
+
+    for (size_t i = 0; i < vec_size(pkgs); i++) {
+        if (pkg_version(&tmp_str, pkgs[i]->name, DB_DIR) != 0) {
+            die("package '%s' not installed", pkgs[i]->name);
+        }
+
+        printf("%s %s\n", pkgs[i]->name, tmp_str->buf);
     }
 }
 
@@ -225,14 +218,14 @@ static void cache_init(void) {
     get_xdg_cache(&cac_dir);
 
     if (mkdir_p(cac_dir->buf, 0755) != 0) {
-        str_free_die(&cac_dir, "failed to create directory");
+        die("failed to create directory");
     }
 
     for (int i = 0; i < 3; i++) {
         str_push(&cac_dir, cache_dirs[i]);
 
         if (mkdir(cac_dir->buf, 0755) == -1 && errno != EEXIST) {
-            str_free_die(&cac_dir, "failed to create directory");
+            die("failed to create directory");
         }
 
         str_undo(&cac_dir, cache_dirs[i]);
@@ -241,21 +234,21 @@ static void cache_init(void) {
     str_push(&cac_dir, "proc/");
 
     if (mkdir(cac_dir->buf, 0755) == -1 && errno != EEXIST) {
-        str_free_die(&cac_dir, "failed to create directory");
+        die("failed to create directory");
     }
 
     pid_t pid = getpid();
     str_fmt(&cac_dir, "%u/", pid);
 
     if (mkdir(cac_dir->buf, 0755) == -1 && errno != EEXIST) {
-        str_free_die(&cac_dir, "failed to create directory");
+        die("failed to create directory");
     }
 
     for (int i = 0; i < 3; i++) {
         str_push(&cac_dir, state_dirs[i]);
 
         if (mkdir(cac_dir->buf, 0755) == -1 && errno != EEXIST) {
-            str_free_die(&cac_dir, "failed to create directory");
+            die("failed to create directory");
         }
 
         str_undo(&cac_dir, state_dirs[i]);
@@ -263,7 +256,7 @@ static void cache_init(void) {
 }
 
 static void cache_free(void) {
-    if (cac_dir) {
+    if (cac_dir->len) {
         rm_rf(cac_dir->buf);
         str_free(&cac_dir);
     }
@@ -273,21 +266,27 @@ static void cache_free(void) {
 
 // arguments {{{
 
-static void crux_like(void) {
-    str *cwd = NULL;
-    str_push(&cwd, getenv("PWD"));
-    str_path(&cwd);
+static void exit_handler(void) {
+    cache_free();
+    repo_free();
+    pkg_free();
 
-    char *base = strrchr(cwd->buf, '/');
+    str_free(&tmp_str);
+}
+
+static void crux_like(void) {
+    str_zero(&tmp_str);
+    str_push(&tmp_str, getenv("PWD"));
+    str_path(&tmp_str);
+
+    char *base = strrchr(tmp_str->buf, '/');
 
     vec_push(pkgs, pkg_init(base + 1));
-    str_undo(&cwd, base);
-    str_push(&cwd, ":");
-    str_push(&cwd, getenv("KISS_PATH"));
+    str_undo(&tmp_str, base);
+    str_push(&tmp_str, ":");
+    str_push(&tmp_str, getenv("KISS_PATH"));
 
-    int err = setenv("KISS_PATH", cwd->buf, 1);
-
-    str_free(&cwd);
+    int err = setenv("KISS_PATH", tmp_str->buf, 1);
 
     if (err == -1) {
         die("failed to prepend to KISS_PATH");
@@ -295,14 +294,10 @@ static void crux_like(void) {
 }
 
 static void run_extension(char *argv[]) {
-    str *cmd = NULL;
-    str_fmt(&cmd, "kiss-%s", argv[1]);
+    str_zero(&tmp_str);
+    str_fmt(&tmp_str, "kiss-%s", argv[1]);
 
-    int err = execvp(cmd->buf, ++argv);
-
-    str_free(&cmd);
-
-    if (err == -1) {
+    if (execvp(tmp_str->buf, ++argv) == -1) {
         die("failed to execute extension %s", argv[0]);
     }
 }
@@ -342,7 +337,11 @@ static int run_action(int action) {
 
     switch (action) {
         case ACTION_LIST:
-            pkg_list_all();
+            if (vec_size(pkgs)) {
+                pkg_list_vec();
+            } else {
+                pkg_list_all();
+            }
             break;
 
         case ACTION_SEARCH:
@@ -410,9 +409,9 @@ int main (int argc, char *argv[]) {
         run_extension(argv);
     }
 
-    atexit(cache_free);
-    atexit(repo_free);
-    atexit(pkg_free);
+    atexit(exit_handler);
+    str_alloc(&tmp_str, 256);
+    str_alloc(&cac_dir, 32);
 
     for (int i = 2; i < argc; i++) {
         vec_push(pkgs, pkg_init(argv[i]));

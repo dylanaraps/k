@@ -1,13 +1,12 @@
-#include <dirent.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <dirent.h>
 #include <errno.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 #include "str.h"
-#include "util.h"
+#include "dir.h"
+#include "log.h"
 
 int mkdir_p(char *p, const mode_t m) {
     for (char *d = p + 1; *d; d++) {
