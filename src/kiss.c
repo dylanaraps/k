@@ -208,27 +208,19 @@ static void run_extension(char *argv[]) {
 }
 
 static int run_action(int action, int argc, char *argv[]) {
-    switch (action) { // throwaway buffer.
+    switch (action) {
         case ACTION_EXT:
         case ACTION_LIST:
         case ACTION_SEARCH:
             if (!(tmp_str = str_init(256))) {
                 die("failed to allocate memory");
             }
-
-        // to make compiler happy, temporary
-        default:
-            break;
     }
 
-    switch (action) { // actions requiring repository access.
+    switch (action) {
         case ACTION_LIST:
         case ACTION_SEARCH:
             repo_init();
-
-        // to make compiler happy, temporary
-        default:
-            break;
     }
 
     switch (action) {
