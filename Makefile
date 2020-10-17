@@ -20,8 +20,7 @@ VALGRIND = \
 	--show-leak-kinds=all \
 	--track-origins=yes \
 	--error-exitcode=1 \
-	--trace-children=yes \
-	--show-reachable=no \
+	--trace-children=yes
 
 OBJ = \
 	src/kiss.o \
