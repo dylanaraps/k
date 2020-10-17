@@ -13,7 +13,8 @@ BUILD_FLAGS = \
 	-Wwrite-strings \
 	-Wshadow \
 	-Wundef \
-	-Wsign-conversion
+	-Wsign-conversion \
+	-fno-omit-frame-pointer \
 
 VALGRIND = \
 	--leak-check=full \
@@ -25,26 +26,24 @@ VALGRIND = \
 
 OBJ = \
 	src/kiss.o \
-	src/dir.o
+	src/str.o \
+	src/util.o
 
 HDR = \
-	src/dir.h \
 	src/str.h \
-	src/vec.h
+	src/vec.h \
+	src/util.h
 
 kiss: $(OBJ)
-	$(CC) $(BUILD_FLAGS) $(CFLAGS) -o $@ $(OBJ) $(LDFLAGS)
+	$(CC) $(BUILD_FLAGS) $(CFLAGS) -O0 -g -o $@ $(OBJ) $(LDFLAGS)
 
 .c.o:
-	$(CC) $(BUILD_FLAGS) $(CFLAGS) -c -o $@ $<
+	$(CC) $(BUILD_FLAGS) $(CFLAGS) -O0 -g -c -o $@ $<
 
 $(OBJ): $(HDR)
 
 check:
-	valgrind $(VALGRIND) ./kiss
-	valgrind $(VALGRIND) ./kiss s zlib
-	valgrind $(VALGRIND) ./kiss v
-	valgrind $(VALGRIND) ./kiss b
+	valgrind $(VALGRIND) ./kiss l
 
 clean:
 	rm -f kiss $(OBJ)

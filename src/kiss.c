@@ -1,28 +1,29 @@
 #include <dirent.h>
-#include <errno.h>
 #include <glob.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/stat.h>
 
-#include "dir.h"
 #include "log.h"
-#include "vec.h"
 #include "str.h"
+#include "vec.h"
+#include "util.h"
 
-#define DB_DIR "/var/db/kiss/installed"
+// String holding the value of getenv("KISS_PATH") in addition to
+// getenv("KISS_ROOT")/var/db/kiss/installed.
+static str *KISS_PATH = 0;
 
-typedef struct pkg {
-    char *name;
-    char *path;
-} pkg;
+// Vector holding pointers to each individual repository, fields split from
+// KISS_PATH. ie, they share the same memory.
+static char **repos = 0;
 
-static pkg  **pkgs  = NULL;
-static char **repos = NULL;
-static str *cac_dir = NULL;
-static str *tmp_str = NULL;
+// String for use with throwaway string operations. A chunk of memory is
+// allocated early on and is used in place of multiple temporary variables. This
+// removes the need to keep allocating memory. Functions using this should first
+// run str_undo_l(&tmp_str, tmp_str->len); to reset the string. This will not
+// zero the memory, use str_zero(&tmp_str); if needed. This memory is later
+// freed at exit.
+static str *tmp_str = 0;
 
 enum actions {
     ACTION_ALTERNATIVES,
@@ -40,135 +41,106 @@ enum actions {
     ACTION_VERSION,
 };
 
-static const char *state_dirs[] = {
-    "build",
-    "extract",
-    "pkg",
-};
-
-static const char *cache_dirs[] = {
-    "bin",
-    "logs",
-    "sources",
-};
-
-// repositories {{{
+// Repositories {{{
 
 static void repo_init(void) {
-    str_zero(&tmp_str);
-    str_push(&tmp_str, getenv("KISS_PATH"));
+    if (!(KISS_PATH = str_init(128))) {
+        die("failed to allocate memory");
+    }
 
-    char *p = NULL;
+    str_push_s(&KISS_PATH, xgetenv("KISS_PATH", ""));
+    str_push_c(&KISS_PATH, ':');
+    str_push_s(&KISS_PATH, xgetenv("KISS_ROOT", "/"));
+    str_push_l(&KISS_PATH, "var/db/kiss/installed", 21);
 
-    for (char *tok = strtok_r(tmp_str->buf, ":", &p);
-         tok != NULL;
-         tok = strtok_r(NULL, ":", &p)) {
+    if (KISS_PATH->err != STR_OK) {
+        die("failed to read KISS_PATH");
+    }
 
-        if (tok[0] != '/') {
+    for (char *t = strtok(KISS_PATH->buf, ":"); t; t = strtok(0, ":")) {
+        if (t[0] != '/') {
             die("relative path found in KISS_PATH");
         }
 
-        vec_push(repos, strdup(tok));
+        vec_push(repos, path_normalize(t));
+    }
+}
+
+static void repo_find_all(char *query) {
+    glob_t buf = {0};
+
+    for (size_t j = 0; j < vec_size(repos); j++) {
+        str_undo_l(&tmp_str, tmp_str->len);
+        str_push_s(&tmp_str, repos[j]);
+        str_push_c(&tmp_str, '/');
+        str_push_s(&tmp_str, query);
+        str_push_c(&tmp_str, '/');
+
+        if (tmp_str->err != STR_OK) {
+            die("failed to construct glob");
+        }
+
+        glob(tmp_str->buf, j ? GLOB_APPEND : 0, 0, &buf);
     }
 
-    vec_push(repos, strdup(DB_DIR));
+    if (buf.gl_pathc == 0) {
+        globfree(&buf);
+        die("no results for '%s'", query);
+    }
+
+    for (size_t j = 0; j < buf.gl_pathc; j++) {
+        puts(buf.gl_pathv[j]);
+    }
+
+    globfree(&buf);
 }
 
 static void repo_free(void) {
-    for (size_t i = 0; i < vec_size(repos); i++) {
-        free(repos[i]);
-    }
+    str_free(KISS_PATH);
     vec_free(repos);
-}
-
-static void repo_find_all(void) {
-    for (size_t i = 0; i < vec_size(pkgs); i++) {
-        glob_t buf = {0};
-
-        for (size_t j = 0; j < vec_size(repos); j++) {
-            str_zero(&tmp_str);
-            str_fmt(&tmp_str, "%s/%s/", repos[j], pkgs[i]->name);
-
-            glob(tmp_str->buf, j ? GLOB_APPEND : 0, NULL, &buf);
-        }
-
-        if (buf.gl_pathc == 0) {
-            globfree(&buf);
-            die("no results for '%s'", pkgs[i]->name);
-        }
-
-        for (size_t j = 0; j < buf.gl_pathc; j++) {
-            puts(buf.gl_pathv[j]);
-        }
-
-        globfree(&buf);
-    }
 }
 
 // }}}
 
-// packages {{{
+// Packages {{{
 
-static pkg *pkg_init(const char *name) {
-    pkg *p = malloc(sizeof(pkg));
+static char *pkg_version(char *pkg, char *repo) {
+    str_undo_l(&tmp_str, tmp_str->len);
+    str_push_s(&tmp_str, repo);
+    str_push_c(&tmp_str, '/');
+    str_push_s(&tmp_str, pkg);
+    str_push_l(&tmp_str, "/version", 8);
 
-    if (!p) {
-        perror("malloc");
-        exit(EXIT_FAILURE);
+    if (tmp_str->err != STR_OK) {
+        return NULL;
     }
 
-    p->name = strdup(name);
-
-    if (!p->name || errno == ENOMEM) {
-        perror("strdup");
-        exit(EXIT_FAILURE);
-    }
-
-    return p;
-}
-
-static void pkg_free(void) {
-    for (size_t i = 0; i < vec_size(pkgs); i++) {
-        free(pkgs[i]->name);
-        free(pkgs[i]);
-    }
-    vec_free(pkgs);
-}
-
-static int pkg_version(str **s, const char *p, const char *db) {
-    str_zero(s);
-    str_fmt(s, "%s/%s/version", db, p);
-
-    FILE *f = fopen((*s)->buf, "r");
+    FILE *f = fopen(tmp_str->buf, "r");
 
     if (!f) {
-        return 1;
+        return NULL;
     }
 
-    str_getline(s, f);
+    str_getline(&tmp_str, f);
     fclose(f);
 
-    return !(*s)->buf;
+    return tmp_str->err == STR_OK ? tmp_str->buf : 0;
 }
 
 static void pkg_list_all(void) {
     struct dirent **list;
-    int len = scandir(DB_DIR, &list, NULL, alphasort);
+
+    int len = scandir(repos[vec_size(repos) - 1], &list, 0, alphasort);
 
     // '.' and '..'
     free(list[0]);
     free(list[1]);
 
-    str_zero(&tmp_str);
-
     for (int i = 2; i < len; i++) {
-        if (pkg_version(&tmp_str, list[i]->d_name, DB_DIR) != 0) {
-            free(list[i]);
-            free(list);
-            die("package '%s' not installed", pkgs[i]->name);
-        }
+        char *ver = pkg_version(list[i]->d_name, repos[vec_size(repos) - 1]);
 
-        printf("%s %s\n", list[i]->d_name, tmp_str->buf);
+        printf("%s %s\n", list[i]->d_name, ver ? ver : "null");
+
         free(list[i]);
     }
 
@@ -179,127 +151,13 @@ static void pkg_list_all(void) {
     }
 }
 
-static void pkg_list_vec(void) {
-    str_zero(&tmp_str);
-
-    for (size_t i = 0; i < vec_size(pkgs); i++) {
-        if (pkg_version(&tmp_str, pkgs[i]->name, DB_DIR) != 0) {
-            die("package '%s' not installed", pkgs[i]->name);
-        }
-
-        printf("%s %s\n", pkgs[i]->name, tmp_str->buf);
-    }
-}
-
 // }}}
 
-// cache {{{
-
-static void get_xdg_cache(str **s) {
-    char *env = getenv("XDG_CACHE_HOME");
-
-    if (env && env[0]) {
-        str_fmt(s, "%s/kiss/", env);
-
-    } else {
-        env = getenv("HOME");
-
-        if (env && env[0]) {
-            str_fmt(s, "%s/.cache/kiss/", env);
-        }
-    }
-
-    if (!env || !env[0]) {
-        die("failed to construct cache path");
-    }
-}
-
-static void cache_init(void) {
-    get_xdg_cache(&cac_dir);
-
-    if (mkdir_p(cac_dir->buf, 0755) != 0) {
-        die("failed to create directory");
-    }
-
-    for (int i = 0; i < 3; i++) {
-        str_push(&cac_dir, cache_dirs[i]);
-
-        if (mkdir(cac_dir->buf, 0755) == -1 && errno != EEXIST) {
-            die("failed to create directory");
-        }
-
-        str_undo(&cac_dir, cache_dirs[i]);
-    }
-
-    str_push(&cac_dir, "proc/");
-
-    if (mkdir(cac_dir->buf, 0755) == -1 && errno != EEXIST) {
-        die("failed to create directory");
-    }
-
-    pid_t pid = getpid();
-    str_fmt(&cac_dir, "%u/", pid);
-
-    if (mkdir(cac_dir->buf, 0755) == -1 && errno != EEXIST) {
-        die("failed to create directory");
-    }
-
-    for (int i = 0; i < 3; i++) {
-        str_push(&cac_dir, state_dirs[i]);
-
-        if (mkdir(cac_dir->buf, 0755) == -1 && errno != EEXIST) {
-            die("failed to create directory");
-        }
-
-        str_undo(&cac_dir, state_dirs[i]);
-    }
-}
-
-static void cache_free(void) {
-    if (cac_dir->len) {
-        rm_rf(cac_dir->buf);
-        str_free(&cac_dir);
-    }
-}
-
-// }}}
-
-// arguments {{{
+// Arguments {{{
 
 static void exit_handler(void) {
-    cache_free();
+    str_free(tmp_str);
     repo_free();
-    pkg_free();
-
-    str_free(&tmp_str);
-}
-
-static void crux_like(void) {
-    str_zero(&tmp_str);
-    str_push(&tmp_str, getenv("PWD"));
-    str_path(&tmp_str);
-
-    char *base = strrchr(tmp_str->buf, '/');
-
-    vec_push(pkgs, pkg_init(base + 1));
-    str_undo(&tmp_str, base);
-    str_push(&tmp_str, ":");
-    str_push(&tmp_str, getenv("KISS_PATH"));
-
-    int err = setenv("KISS_PATH", tmp_str->buf, 1);
-
-    if (err == -1) {
-        die("failed to prepend to KISS_PATH");
-    }
-}
-
-static void run_extension(char *argv[]) {
-    str_zero(&tmp_str);
-    str_fmt(&tmp_str, "kiss-%s", argv[1]);
-
-    if (execvp(tmp_str->buf, ++argv) == -1) {
-        die("failed to execute extension %s", argv[0]);
-    }
 }
 
 static void usage(void) {
@@ -314,110 +172,155 @@ static void usage(void) {
     puts("search       Search for a package");
     puts("update       Update the system");
     puts("version      Package manager version");
+
     puts("\nRun 'kiss help-ext' to see all actions");
 }
 
-static int run_action(int action) {
-    switch (action) {
+static void run_extension(char *argv[]) {
+    str_undo_l(&tmp_str, tmp_str->len);
+    str_push_l(&tmp_str, "kiss-", 5);
+    str_push_s(&tmp_str, *argv);
+
+    if (tmp_str->err != STR_OK) {
+        die("failed to construct string 'kiss-%s'", *argv);
+    }
+
+    execvp(tmp_str->buf, argv);
+    die("failed to execute extension %s", *argv);
+}
+
+static int run_action(enum actions action, int argc, char *argv[]) {
+    switch (action) { // throwaway buffer.
+        case ACTION_EXTENSION:
+        case ACTION_LIST:
+        case ACTION_SEARCH:
+            if (!(tmp_str = str_init(256))) {
+                die("failed to allocate memory");
+            }
+    }
+
+    /* switch (action) { // actions taking packages as arguments. */
+    /*     case ACTION_BUILD: */
+    /*     case ACTION_CHECKSUM: */
+    /*     case ACTION_DOWNLOAD: */
+    /*     case ACTION_INSTALL: */
+    /*     case ACTION_REMOVE: */
+    /*         for (int i = 2; i < argc; i++) { */
+    /*             vec_push(pkgs, pkg_init(argv[i])); */
+    /*         } */
+    /* } */
+
+    switch (action) { // actions requiring repository access.
         case ACTION_BUILD:
         case ACTION_CHECKSUM:
         case ACTION_DOWNLOAD:
         case ACTION_INSTALL:
-        case ACTION_REMOVE: {
-            cache_init();
+        case ACTION_LIST:
+        case ACTION_REMOVE:
+        case ACTION_SEARCH:
+        case ACTION_UPDATE:
             repo_init();
-
-            if (vec_size(pkgs) == 0) {
-                crux_like();
-            }
-
-            break;
-        }
     }
 
     switch (action) {
+        case ACTION_ALTERNATIVES:
+            break;
+
+        case ACTION_BUILD:
+            break;
+
+        case ACTION_CHECKSUM:
+            break;
+
+        case ACTION_DOWNLOAD:
+            break;
+
+        case ACTION_INSTALL:
+            break;
+
         case ACTION_LIST:
-            if (vec_size(pkgs)) {
-                pkg_list_vec();
-            } else {
-                pkg_list_all();
-            }
+            pkg_list_all();
+            break;
+
+        case ACTION_REMOVE:
             break;
 
         case ACTION_SEARCH:
-            repo_init();
-            repo_find_all();
+            for (int i = 2; i < argc; i++) {
+                repo_find_all(argv[i]);
+            }
+            break;
+
+        case ACTION_VERSION:
+            puts("0.0.1");
+            break;
+
+        case ACTION_EXTENSION:
+            run_extension(argv + 1);
+            break;
+
+        default:
+            usage();
             break;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int main (int argc, char *argv[]) {
-    int action = 0;
+    enum actions action = ACTION_USAGE;
 
     if (argc < 2 || !argv[1] || !argv[1][0] ||
-        argv[1][0] == '-' || argc > 4096) {
-        usage();
-        exit(EXIT_SUCCESS);
+        argv[1][0] == '=' || argc > 1024) {
+        action = ACTION_USAGE;
 
-    } else if (strcmp(argv[1], "alternatives") == 0 ||
-               strcmp(argv[1], "a") == 0) {
+    } else if ((argv[1][0] == 'a') && (!argv[1][1] ||
+               strcmp(argv[1], "alternatives") == 0)) {
         action = ACTION_ALTERNATIVES;
 
-    } else if (strcmp(argv[1], "build") == 0 ||
-               strcmp(argv[1], "b") == 0) {
+    } else if ((argv[1][0] == 'b') && (!argv[1][1] ||
+               strcmp(argv[1], "build") == 0)) {
         action = ACTION_BUILD;
 
-    } else if (strcmp(argv[1], "checksum") == 0 ||
-               strcmp(argv[1], "c") == 0) {
+    } else if ((argv[1][0] == 'c') && (!argv[1][1] ||
+               strcmp(argv[1], "checksum") == 0)) {
         action = ACTION_CHECKSUM;
 
-    } else if (strcmp(argv[1], "download") == 0 ||
-               strcmp(argv[1], "d") == 0) {
+    } else if ((argv[1][0] == 'd') && (!argv[1][1] ||
+               strcmp(argv[1], "download") == 0)) {
         action = ACTION_DOWNLOAD;
 
-    } else if (strcmp(argv[1], "help-ext") == 0) {
-        action = ACTION_HELPEXT;
-
-    } else if (strcmp(argv[1], "install") == 0 ||
-               strcmp(argv[1], "i") == 0) {
+    } else if ((argv[1][0] == 'i') && (!argv[1][1] ||
+               strcmp(argv[1], "install") == 0)) {
         action = ACTION_INSTALL;
 
-    } else if (strcmp(argv[1], "list") == 0 ||
-               strcmp(argv[1], "l") == 0) {
+    } else if ((argv[1][0] == 'l') && (!argv[1][1] ||
+               strcmp(argv[1], "list") == 0)) {
         action = ACTION_LIST;
 
-    } else if (strcmp(argv[1], "remove") == 0 ||
-               strcmp(argv[1], "r") == 0) {
+    } else if ((argv[1][0] == 'r') && (!argv[1][1] ||
+               strcmp(argv[1], "remove") == 0)) {
         action = ACTION_REMOVE;
 
-    } else if (strcmp(argv[1], "search") == 0 ||
-               strcmp(argv[1], "s") == 0) {
+    } else if ((argv[1][0] == 's') && (!argv[1][1] ||
+               strcmp(argv[1], "search") == 0)) {
         action = ACTION_SEARCH;
 
-    } else if (strcmp(argv[1], "update") == 0 ||
-               strcmp(argv[1], "u") == 0) {
+    } else if ((argv[1][0] == 'u') && (!argv[1][1] ||
+               strcmp(argv[1], "update") == 0)) {
         action = ACTION_UPDATE;
 
-    } else if (strcmp(argv[1], "version") == 0 ||
-               strcmp(argv[1], "v") == 0) {
-        puts("0.0.1");
-        exit(EXIT_SUCCESS);
+    } else if ((argv[1][0] == 'v') && (!argv[1][1] ||
+               strcmp(argv[1], "version") == 0)) {
+        action = ACTION_VERSION;
 
     } else {
-        run_extension(argv);
+        action = ACTION_EXTENSION;
     }
 
     atexit(exit_handler);
-    str_alloc(&tmp_str, 256);
-    str_alloc(&cac_dir, 32);
 
-    for (int i = 2; i < argc; i++) {
-        vec_push(pkgs, pkg_init(argv[i]));
-    }
-
-    return run_action(action);
+    return run_action(action, argc, argv);
 }
 
 // }}}
