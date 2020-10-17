@@ -201,12 +201,20 @@ static int run_action(enum kiss_actions action, int argc, char *argv[]) {
             if (!(tmp_str = str_init(256))) {
                 die("failed to allocate memory");
             }
+
+        // to make compiler happy, temporary
+        default:
+            break;
     }
 
     switch (action) { // actions requiring repository access.
         case ACTION_LIST:
         case ACTION_SEARCH:
             repo_init();
+
+        // to make compiler happy, temporary
+        default:
+            break;
     }
 
     switch (action) {
