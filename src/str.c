@@ -161,6 +161,11 @@ void str_printf(str **s, const char *f, ...) {
     va_end(ap);
 }
 
+void str_path_normalize(str **s) {
+    for (; (*s)->buf[(*s)->len - 1] == '/';
+           (*s)->buf[--(*s)->len] = 0);
+}
+
 void str_free(str *s) {
     if (s) {
         free(s);

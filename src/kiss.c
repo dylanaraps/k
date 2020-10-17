@@ -1,15 +1,21 @@
+#include <errno.h>
 #include <dirent.h>
 #include <glob.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
+#include "cache.h"
 #include "log.h"
 #include "str.h"
 #include "vec.h"
 #include "util.h"
 
 #define ARG(a, n) ((a[0]) == (n[0]) && ((!a[1]) || strcmp(a, n) == 0))
+
+// String holding the location to the cache directory.
+static str *cac_dir = 0;
 
 // String holding the value of getenv("KISS_PATH") in addition to
 // getenv("KISS_ROOT")/var/db/kiss/installed.
@@ -177,6 +183,7 @@ static void pkg_list_all(void) {
 static void exit_handler(void) {
     str_free(tmp_str);
     str_free(KISS_PATH);
+    str_free(cac_dir);
     vec_free(repos);
 }
 
@@ -215,6 +222,11 @@ static int run_action(int action, int argc, char *argv[]) {
             if (!(tmp_str = str_init(256))) {
                 die("failed to allocate memory");
             }
+    }
+
+    switch (action) {
+        case ACTION_BUILD:
+            cac_dir = cache_init();
     }
 
     switch (action) {

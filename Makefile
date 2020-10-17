@@ -24,10 +24,12 @@ VALGRIND = \
 
 OBJ = \
 	src/kiss.o \
+	src/cache.o \
 	src/str.o \
 	src/util.o
 
 HDR = \
+	src/cache.h \
 	src/str.h \
 	src/vec.h \
 	src/util.h

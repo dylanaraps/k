@@ -32,6 +32,7 @@ void str_getline(str **s, FILE *f);
 void str_vprintf(str **s, const char *f, va_list ap);
 void str_printf(str **s, const char *f, ...);
 size_t str_tok(str *s, char c, size_t tok);
+void str_path_normalize(str **s);
 void str_free(str *s);
 
 #endif
