@@ -9,6 +9,8 @@
 #include "vec.h"
 #include "util.h"
 
+#define ARG(a, n) ((a[0]) == (n[0]) && ((!a[1]) || strcmp(a, n) == 0))
+
 // String holding the value of getenv("KISS_PATH") in addition to
 // getenv("KISS_ROOT")/var/db/kiss/installed.
 static str *KISS_PATH = 0;
@@ -25,20 +27,34 @@ static char **repos = 0;
 // freed at exit.
 static str *tmp_str = 0;
 
-enum kiss_actions {
-    ACTION_ALTERNATIVES,
+enum action_type {
+    ACTION_ALT,
     ACTION_BUILD,
     ACTION_CHECKSUM,
     ACTION_DOWNLOAD,
-    ACTION_EXTENSION,
-    ACTION_HELPEXT,
     ACTION_INSTALL,
     ACTION_LIST,
     ACTION_REMOVE,
     ACTION_SEARCH,
     ACTION_UPDATE,
-    ACTION_USAGE,
     ACTION_VERSION,
+
+    ACTION_USAGE,
+    ACTION_EXT,
+    ACTION_HELPEXT,
+};
+
+static const char *actions[] = {
+    "alt",      "list and swap to alternatives",
+    "build",    "build packages",
+    "checksum", "generate checksums",
+    "download", "pre-download sources",
+    "install",  "install packages",
+    "list",     "list installed packages",
+    "remove",   "remove packages",
+    "search",   "search for packages (glob)",
+    "update",   "update the system",
+    "version",  "show version information",
 };
 
 // Repositories {{{
@@ -164,20 +180,18 @@ static void exit_handler(void) {
     vec_free(repos);
 }
 
-static void usage(void) {
-    puts("kiss [a|b|c|d|i|l|r|s|u|v] [pkg]...");
-    puts("alternatives List and swap to alternatives");
-    puts("build        Build a package");
-    puts("checksum     Generate checksums");
-    puts("download     Pre-download all sources");
-    puts("install      Install a package");
-    puts("list         List installed packages");
-    puts("remove       Remove a package");
-    puts("search       Search for a package");
-    puts("update       Update the system");
-    puts("version      Package manager version");
+static void usage(char *arg0) {
+    printf("%s [", arg0);
 
-    puts("\nRun 'kiss help-ext' to see all actions");
+    for (int i = ACTION_ALT; i < ACTION_USAGE * 2; i += 2) {
+        printf("%c%c", actions[i][0], i == ACTION_VERSION ? ']' : '|');
+    }
+
+    printf(" [pkg]...\n");
+
+    for (int i = ACTION_ALT; i < ACTION_USAGE * 2; i += 2) {
+        printf("%-8s %s\n", actions[i], actions[i + 1]);
+    }
 }
 
 static void run_extension(char *argv[]) {
@@ -193,9 +207,9 @@ static void run_extension(char *argv[]) {
     die("failed to execute extension %s", *argv);
 }
 
-static int run_action(enum kiss_actions action, int argc, char *argv[]) {
+static int run_action(int action, int argc, char *argv[]) {
     switch (action) { // throwaway buffer.
-        case ACTION_EXTENSION:
+        case ACTION_EXT:
         case ACTION_LIST:
         case ACTION_SEARCH:
             if (!(tmp_str = str_init(256))) {
@@ -239,12 +253,12 @@ static int run_action(enum kiss_actions action, int argc, char *argv[]) {
             puts("0.0.1");
             break;
 
-        case ACTION_EXTENSION:
+        case ACTION_EXT:
             run_extension(argv + 1);
             break;
 
         default:
-            usage();
+            usage(argv[0]);
             break;
     }
 
@@ -252,57 +266,19 @@ static int run_action(enum kiss_actions action, int argc, char *argv[]) {
 }
 
 int main (int argc, char *argv[]) {
-    enum kiss_actions action = ACTION_USAGE;
+    int action = ACTION_EXT;
 
     if (argc < 2 || !argv[1] || !argv[1][0] ||
-        argv[1][0] == '=' || argc > 1024) {
+        argv[1][0] == '-' || argc > 1024) {
         action = ACTION_USAGE;
 
-    } else if ((argv[1][0] == 'a') && (!argv[1][1] ||
-               strcmp(argv[1], "alternatives") == 0)) {
-        action = ACTION_ALTERNATIVES;
-
-    } else if ((argv[1][0] == 'b') && (!argv[1][1] ||
-               strcmp(argv[1], "build") == 0)) {
-        action = ACTION_BUILD;
-
-    } else if ((argv[1][0] == 'c') && (!argv[1][1] ||
-               strcmp(argv[1], "checksum") == 0)) {
-        action = ACTION_CHECKSUM;
-
-    } else if ((argv[1][0] == 'd') && (!argv[1][1] ||
-               strcmp(argv[1], "download") == 0)) {
-        action = ACTION_DOWNLOAD;
-
-    } else if ((argv[1][0] == 'i') && (!argv[1][1] ||
-               strcmp(argv[1], "install") == 0)) {
-        action = ACTION_INSTALL;
-
-    } else if ((argv[1][0] == 'l') && (!argv[1][1] ||
-               strcmp(argv[1], "list") == 0)) {
-        action = ACTION_LIST;
-
-    } else if ((argv[1][0] == 'r') && (!argv[1][1] ||
-               strcmp(argv[1], "remove") == 0)) {
-        action = ACTION_REMOVE;
-
-    } else if ((argv[1][0] == 's') && (!argv[1][1] ||
-               strcmp(argv[1], "search") == 0)) {
-        action = ACTION_SEARCH;
-
-    } else if ((argv[1][0] == 'u') && (!argv[1][1] ||
-               strcmp(argv[1], "update") == 0)) {
-        action = ACTION_UPDATE;
-
-    } else if ((argv[1][0] == 'v') && (!argv[1][1] ||
-               strcmp(argv[1], "version") == 0)) {
-        action = ACTION_VERSION;
-
     } else {
-        action = ACTION_EXTENSION;
-    }
+        for (int i = ACTION_ALT; i < ACTION_USAGE; i++) {
+            action = ARG(argv[1], actions[i + i]) ? i : action;
+        }
 
-    atexit(exit_handler);
+        atexit(exit_handler);
+    }
 
     return run_action(action, argc, argv);
 }
