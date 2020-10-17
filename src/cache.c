@@ -22,12 +22,12 @@ static const size_t cache_lens[] = {
     5, 7, 3,
 };
 
-static void mkdir_die(str *s, mode_t m) {
+static void mkdir_die(str *s) {
     if (s->err != STR_OK) {
        return;
     }
 
-    if (mkdir(s->buf, m) == -1) {
+    if (mkdir(s->buf, 0755) == -1) {
         switch (errno) {
             case EEXIST:
                 break;
@@ -62,7 +62,7 @@ static void get_xdg_cache(str **s) {
 static void cache_create(str *s, size_t off) {
     for (size_t i = off; i < off + 3; i++) {
         str_push_l(&s, cache_dirs[i], cache_lens[i]);
-        mkdir_die(s, 755);
+        mkdir_die(s);
         str_undo_l(&s, cache_lens[i]);
     }
 }
@@ -75,18 +75,18 @@ str *cache_init(void) {
     }
 
     get_xdg_cache(&cache_dir);
-    mkdir_die(cache_dir, 755);
+    mkdir_die(cache_dir);
 
     str_push_l(&cache_dir, "/kiss/", 6);
-    mkdir_die(cache_dir, 755);
+    mkdir_die(cache_dir);
 
     cache_create(cache_dir, CACHE_PERM);
 
     str_push_l(&cache_dir, "proc", 4);
-    mkdir_die(cache_dir, 755);
+    mkdir_die(cache_dir);
 
     str_printf(&cache_dir, "/%u/", getpid());
-    mkdir_die(cache_dir, 755);
+    mkdir_die(cache_dir);
 
     cache_create(cache_dir, CACHE_TEMP);
 
