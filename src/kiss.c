@@ -25,7 +25,7 @@ static char **repos = 0;
 // freed at exit.
 static str *tmp_str = 0;
 
-enum actions {
+enum kiss_actions {
     ACTION_ALTERNATIVES,
     ACTION_BUILD,
     ACTION_CHECKSUM,
@@ -95,11 +95,6 @@ static void repo_find_all(char *query) {
     globfree(&buf);
 }
 
-static void repo_free(void) {
-    str_free(KISS_PATH);
-    vec_free(repos);
-}
-
 // }}}
 
 // Packages {{{
@@ -132,6 +127,7 @@ static void pkg_list_print(char *pkg) {
 
     if (ver) {
         printf("%s %s\n", pkg, ver);
+
     } else {
         die("package '%s' not installed", pkg);
     }
@@ -164,7 +160,8 @@ static void pkg_list_all(void) {
 
 static void exit_handler(void) {
     str_free(tmp_str);
-    repo_free();
+    str_free(KISS_PATH);
+    vec_free(repos);
 }
 
 static void usage(void) {
@@ -196,7 +193,7 @@ static void run_extension(char *argv[]) {
     die("failed to execute extension %s", *argv);
 }
 
-static int run_action(enum actions action, int argc, char *argv[]) {
+static int run_action(enum kiss_actions action, int argc, char *argv[]) {
     switch (action) { // throwaway buffer.
         case ACTION_EXTENSION:
         case ACTION_LIST:
@@ -206,45 +203,13 @@ static int run_action(enum actions action, int argc, char *argv[]) {
             }
     }
 
-    /* switch (action) { // actions taking packages as arguments. */
-    /*     case ACTION_BUILD: */
-    /*     case ACTION_CHECKSUM: */
-    /*     case ACTION_DOWNLOAD: */
-    /*     case ACTION_INSTALL: */
-    /*     case ACTION_REMOVE: */
-    /*         for (int i = 2; i < argc; i++) { */
-    /*             vec_push(pkgs, pkg_init(argv[i])); */
-    /*         } */
-    /* } */
-
     switch (action) { // actions requiring repository access.
-        case ACTION_BUILD:
-        case ACTION_CHECKSUM:
-        case ACTION_DOWNLOAD:
-        case ACTION_INSTALL:
         case ACTION_LIST:
-        case ACTION_REMOVE:
         case ACTION_SEARCH:
-        case ACTION_UPDATE:
             repo_init();
     }
 
     switch (action) {
-        case ACTION_ALTERNATIVES:
-            break;
-
-        case ACTION_BUILD:
-            break;
-
-        case ACTION_CHECKSUM:
-            break;
-
-        case ACTION_DOWNLOAD:
-            break;
-
-        case ACTION_INSTALL:
-            break;
-
         case ACTION_LIST:
             if (argc == 2) {
                 pkg_list_all();
@@ -254,9 +219,6 @@ static int run_action(enum actions action, int argc, char *argv[]) {
                     pkg_list_print(argv[i]);
                 }
             }
-            break;
-
-        case ACTION_REMOVE:
             break;
 
         case ACTION_SEARCH:
@@ -282,7 +244,7 @@ static int run_action(enum actions action, int argc, char *argv[]) {
 }
 
 int main (int argc, char *argv[]) {
-    enum actions action = ACTION_USAGE;
+    enum kiss_actions action = ACTION_USAGE;
 
     if (argc < 2 || !argv[1] || !argv[1][0] ||
         argv[1][0] == '=' || argc > 1024) {

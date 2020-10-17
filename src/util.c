@@ -11,13 +11,10 @@ const char *xgetenv(const char *var, const char *fallback) {
 
 char *path_normalize(char *s) {
     if (s) {
-        for (
-            size_t i = 1, l = strlen(s);
-            s[l - i] == '/';
-            s[l - i] = 0, i++
-        );
+        for (size_t i = 1, l = strlen(s);
+             s[l - i] == '/';
+             s[l - i] = 0, i++);
     }
 
     return s;
 }
-
