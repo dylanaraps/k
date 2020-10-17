@@ -27,7 +27,7 @@ static void mkdir_die(str *s) {
        return;
     }
 
-    if (mkdir(s->buf, 755) == -1) {
+    if (mkdir(s->buf, 0755) == -1) {
         switch (errno) {
             case EEXIST:
                 break;
