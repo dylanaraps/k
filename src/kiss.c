@@ -127,6 +127,16 @@ static char *pkg_version(char *pkg, char *repo) {
     return tmp_str->err == STR_OK ? tmp_str->buf : 0;
 }
 
+static void pkg_list_print(char *pkg) {
+    char *ver = pkg_version(pkg, repos[vec_size(repos) - 1]);
+
+    if (ver) {
+        printf("%s %s\n", pkg, ver);
+    } else {
+        die("package '%s' not installed", pkg);
+    }
+}
+
 static void pkg_list_all(void) {
     struct dirent **list;
 
@@ -137,10 +147,7 @@ static void pkg_list_all(void) {
     free(list[1]);
 
     for (int i = 2; i < len; i++) {
-        char *ver = pkg_version(list[i]->d_name, repos[vec_size(repos) - 1]);
-
-        printf("%s %s\n", list[i]->d_name, ver ? ver : "null");
-
+        pkg_list_print(list[i]->d_name);
         free(list[i]);
     }
 
@@ -239,7 +246,14 @@ static int run_action(enum actions action, int argc, char *argv[]) {
             break;
 
         case ACTION_LIST:
-            pkg_list_all();
+            if (argc == 2) {
+                pkg_list_all();
+
+            } else {
+                for (int i = 2; i < argc; i++) {
+                    pkg_list_print(argv[i]);
+                }
+            }
             break;
 
         case ACTION_REMOVE:
