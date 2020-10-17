@@ -138,6 +138,10 @@ static void pkg_list_all(void) {
 
     int len = scandir(repos[vec_size(repos) - 1], &list, 0, alphasort);
 
+    if (len == -1) {
+        die("database not accessible");
+    }
+
     // '.' and '..'
     free(list[0]);
     free(list[1]);
@@ -148,10 +152,6 @@ static void pkg_list_all(void) {
     }
 
     free(list);
-
-    if (len == -1) {
-        die("database not accessible");
-    }
 }
 
 // }}}
