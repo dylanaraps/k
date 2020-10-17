@@ -12,6 +12,11 @@
 #include "vec.h"
 #include "util.h"
 
+typedef struct pkg {
+    char *name;
+    char *path;
+} pkg;
+
 #define ARG(a, n) ((a[0]) == (n[0]) && ((!a[1]) || strcmp(a, n) == 0))
 
 // String holding the location to the cache directory.
@@ -24,6 +29,9 @@ static str *KISS_PATH = 0;
 // Vector holding pointers to each individual repository, fields split from
 // KISS_PATH. ie, they share the same memory.
 static char **repos = 0;
+
+// Vector holding the package list.
+static pkg **pkgs = 0;
 
 // String for use with throwaway string operations. A chunk of memory is
 // allocated early on and is used in place of multiple temporary variables. This
@@ -45,6 +53,7 @@ enum action_type {
     ACTION_UPDATE,
     ACTION_VERSION,
 
+    // hidden actions
     ACTION_USAGE,
     ACTION_EXT,
     ACTION_HELPEXT,
@@ -121,11 +130,23 @@ static void repo_find_all(char *query) {
 
 // Packages {{{
 
-static char *pkg_version(char *pkg, char *repo) {
+static pkg *pkg_init(char *name) {
+    pkg *new = malloc(sizeof *new);
+
+    if (!new) {
+        die("failed to allocate memory");
+    }
+
+    new->name = name;
+
+    return new;
+}
+
+static char *pkg_version(const char *name, const char *repo) {
     str_undo_l(&tmp_str, tmp_str->len);
     str_push_s(&tmp_str, repo);
     str_push_c(&tmp_str, '/');
-    str_push_s(&tmp_str, pkg);
+    str_push_s(&tmp_str, name);
     str_push_l(&tmp_str, "/version", 8);
 
     if (tmp_str->err != STR_OK) {
@@ -144,14 +165,14 @@ static char *pkg_version(char *pkg, char *repo) {
     return tmp_str->err == STR_OK ? tmp_str->buf : 0;
 }
 
-static void pkg_list_print(char *pkg) {
-    char *ver = pkg_version(pkg, repos[vec_size(repos) - 1]);
+static void pkg_list_print(char *name) {
+    char *ver = pkg_version(name, repos[vec_size(repos) - 1]);
 
     if (ver) {
-        printf("%s %s\n", pkg, ver);
+        printf("%s %s\n", name, ver);
 
     } else {
-        die("package '%s' not installed", pkg);
+        die("package '%s' not installed", name);
     }
 }
 
@@ -185,6 +206,12 @@ static void exit_handler(void) {
     str_free(KISS_PATH);
     str_free(cac_dir);
     vec_free(repos);
+
+    for (size_t i = 0; i < vec_size(pkgs); i++) {
+        free(pkgs[i]);
+    }
+
+    vec_free(pkgs);
 }
 
 static void usage(char *arg0) {
@@ -225,14 +252,23 @@ static int run_action(int action, int argc, char *argv[]) {
     }
 
     switch (action) {
-        case ACTION_BUILD:
+        case ACTION_DOWNLOAD:
             cac_dir = cache_init();
     }
 
     switch (action) {
+        case ACTION_DOWNLOAD:
         case ACTION_LIST:
         case ACTION_SEARCH:
             repo_init();
+    }
+
+    switch (action) {
+        case ACTION_DOWNLOAD: {
+            for (int i = 2; i < argc; i++) {
+                vec_push(pkgs, pkg_init(argv[i]));
+            }
+        }
     }
 
     switch (action) {
