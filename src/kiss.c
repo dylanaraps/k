@@ -196,8 +196,13 @@ static void pkg_list_all(void) {
 static void exit_handler(void) {
     str_free(tmp_str);
     str_free(KISS_PATH);
-    str_free(cac_dir);
     vec_free(repos);
+
+    if (cac_dir && cac_dir->err == STR_OK) {
+        rm_rf(cac_dir->buf);
+    }
+
+    str_free(cac_dir);
 }
 
 static void usage(char *arg0) {

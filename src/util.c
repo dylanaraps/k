@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <ftw.h>
 
 #include "log.h"
 #include "str.h"
@@ -22,3 +23,16 @@ char *path_normalize(char *s) {
 
     return s;
 }
+
+static int _rm_rf(const char *p, const struct stat *b, int t, struct FTW *f) {
+    (void) b;
+    (void) t;
+    (void) f;
+
+    return remove(p);
+}
+
+int rm_rf(const char *d) {
+    return nftw(d, _rm_rf, 512, FTW_DEPTH | FTW_MOUNT | FTW_PHYS);
+}
+
