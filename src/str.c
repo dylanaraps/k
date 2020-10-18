@@ -103,7 +103,9 @@ void str_getline(str **s, FILE *f) {
             str_push_c(s, c);
         }
 
-        (*s)->err = c == EOF ? STR_EOF : (*s)->err;
+        if ((*s)->err == STR_OK) {
+            (*s)->err = c == EOF ? STR_EOF : (*s)->err;
+        }
 
     } else {
         (*s)->err = STR_EINVAL;

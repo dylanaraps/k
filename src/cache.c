@@ -7,6 +7,8 @@
 #include "cache.h"
 #include "util.h"
 
+static str *cache_dir = 0;
+
 enum cache_type {
     CACHE_PERM = 0,
     CACHE_TEMP = 3,
@@ -68,7 +70,7 @@ static void cache_create(str *s, size_t off) {
 }
 
 str *cache_init(void) {
-    str *cache_dir = str_init(64);
+    cache_dir = str_init(64);
 
     if (!cache_dir) {
         die("failed to allocate memory");
@@ -96,3 +98,12 @@ str *cache_init(void) {
 
     return cache_dir;
 }
+
+void cache_free(void) {
+    if (cache_dir && cache_dir->err == STR_OK) {
+        rm_rf(cache_dir->buf);
+    }
+
+    str_free(cache_dir);
+}
+

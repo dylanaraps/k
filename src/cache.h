@@ -4,5 +4,6 @@
 #include "str.h"
 
 str *cache_init(void);
+void cache_free(void);
 
 #endif

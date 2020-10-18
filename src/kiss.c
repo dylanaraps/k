@@ -14,9 +14,6 @@
 
 #define ARG(a, n) ((a[0]) == (n[0]) && ((!a[1]) || strcmp(a, n) == 0))
 
-// String holding the location to the cache directory.
-static str *cac_dir = 0;
-
 // String holding the value of getenv("KISS_PATH") in addition to
 // getenv("KISS_ROOT")/var/db/kiss/installed.
 static str *KISS_PATH = 0;
@@ -183,11 +180,7 @@ static void exit_handler(void) {
     str_free(KISS_PATH);
     vec_free(repos);
 
-    if (cac_dir && cac_dir->err == STR_OK) {
-        rm_rf(cac_dir->buf);
-    }
-
-    str_free(cac_dir);
+    cache_free();
 }
 
 static void usage(char *arg0) {
@@ -234,7 +227,7 @@ static int run_action(int action, int argc, char *argv[]) {
         case ACTION_DOWNLOAD:
         case ACTION_INSTALL:
         case ACTION_REMOVE:
-            cac_dir = cache_init();
+            cache_init();
     }
 
     switch (action) {
