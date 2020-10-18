@@ -89,21 +89,6 @@ static void repo_init(void) {
     }
 }
 
-static char *repo_find(char *name) {
-    for (size_t j = 0; j < vec_size(repos); j++) {
-        str_undo_l(&tmp_str, tmp_str->len);
-        str_push_s(&tmp_str, repos[j]);
-        str_push_c(&tmp_str, '/');
-        str_push_s(&tmp_str, name);
-
-        if (access(tmp_str->buf, F_OK) != -1) {
-            return tmp_str->buf;
-        }
-    }
-
-    die("package '%s' not in any repository", name);
-}
-
 static void repo_find_all(char *query) {
     glob_t buf = {0};
 

@@ -6,7 +6,7 @@ rule cc
   depfile = $out.d
   deps = gcc
 rule link
-  command = $cc $cflags $ldflags -o $out $in
+  command = $cc $ldflags -o $out $in
 
 build src/cache.o: cc src/cache.c
 build src/str.o:   cc src/str.c
