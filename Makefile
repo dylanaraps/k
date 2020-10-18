@@ -5,6 +5,7 @@ PREFIX = /usr/local
 BUILD_FLAGS = \
 	-std=c99 \
 	-D_POSIX_C_SOURCE=200809L \
+	-D_XOPEN_SOURCE=500 \
 	-Wall \
 	-Wextra \
 	-pedantic \

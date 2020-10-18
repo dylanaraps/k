@@ -3,7 +3,6 @@
 
 #include <sys/stat.h>
 #include <stdlib.h>
-#include <ftw.h>
 
 #include "str.h"
 
