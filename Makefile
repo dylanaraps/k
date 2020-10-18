@@ -49,6 +49,9 @@ check:
 	valgrind $(VALGRIND) ./kiss v
 	valgrind $(VALGRIND) ./kiss b
 
+compdb:
+	ninja -t compdb cc > compile_commands.json
+
 clean:
 	rm -f kiss $(OBJ)
 

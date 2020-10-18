@@ -31,13 +31,13 @@ void str_alloc(str **s, size_t l) {
     }
 }
 
-void str_push_c(str **s, char d) {
+void str_push_c(str **s, int c) {
     if ((*s)->len + 1 >= (*s)->cap) {
         str_alloc(s, ((*s)->cap + ((*s)->cap >> 1)));
     }
 
     if ((*s)->err == STR_OK) {
-        (*s)->buf[(*s)->len] = d;
+        (*s)->buf[(*s)->len] = c;
         (*s)->buf[(*s)->len += 1] = 0;
     }
 }
@@ -49,8 +49,9 @@ void str_push_l(str **s, const char *d, size_t l) {
         }
 
         if ((*s)->err == STR_OK) {
-            memcpy((*s)->buf + (*s)->len, d, l);
-            (*s)->buf[(*s)->len += l] = 0;
+            for (size_t i = 0; i < l; i++) {
+                str_push_c(s, d[i]);
+            }
         }
     } else {
         (*s)->err = STR_EINVAL;
@@ -60,7 +61,11 @@ void str_push_l(str **s, const char *d, size_t l) {
 void str_push_s(str **s, const char *d) {
     if (d) {
         if ((*s)->err == STR_OK) {
-            str_push_l(s, d, strlen(d));
+            size_t l = 0;
+
+            while (d[l]) l++;
+
+            str_push_l(s, d, l);
         }
     } else {
         (*s)->err = STR_EINVAL;
@@ -80,29 +85,26 @@ void str_undo_l(str **s, size_t l) {
 void str_undo_s(str **s, const char *d) {
     if (d) {
         if ((*s)->err == STR_OK) {
-            str_undo_l(s, strlen(d));
+            size_t l = 0;
+
+            while (d[l]) l++;
+
+            str_undo_l(s, l);
         }
     } else {
         (*s)->err = STR_EINVAL;
     }
 }
 
-void str_zero(str **s) {
-    if ((*s)->err == STR_OK) {
-        memset((*s)->buf, 0, (*s)->len);
-        (*s)->len = 0;
-    }
-}
-
 void str_getline(str **s, FILE *f) {
     if (f) {
-        str_undo_l(s, (*s)->len);
-
         int c;
 
         while ((c = fgetc(f)) != '\n' && c != EOF) {
             str_push_c(s, c);
         }
+
+        (*s)->err = c == EOF ? STR_EOF : (*s)->err;
 
     } else {
         (*s)->err = STR_EINVAL;
@@ -171,3 +173,4 @@ void str_free(str *s) {
         free(s);
     }
 }
+

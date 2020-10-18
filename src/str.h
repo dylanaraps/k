@@ -16,17 +16,17 @@ enum str_error {
     STR_OK,
     STR_ERROR,
     STR_ENOMEM,
-    STR_EINVAL
+    STR_EINVAL,
+    STR_EOF,
 };
 
 str *str_init(size_t l);
 void str_alloc(str **s, size_t l);
-void str_push_c(str **s, char d);
+void str_push_c(str **s, int c);
 void str_push_l(str **s, const char *d, size_t l);
 void str_push_s(str **s, const char *d);
 void str_undo_l(str **s, size_t l);
 void str_undo_s(str **s, const char *d);
-void str_zero(str **s);
 str *str_dup(str **s);
 void str_getline(str **s, FILE *f);
 void str_vprintf(str **s, const char *f, va_list ap);
