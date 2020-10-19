@@ -127,14 +127,14 @@ str *str_dup(str **s) {
         str_free(n);
     }
 
-    return NULL;
+    return 0;
 }
 
 void str_vprintf(str **s, const char *f, va_list ap) {
     va_list ap2;
     va_copy(ap2, ap);
 
-    int l1 = vsnprintf(NULL, 0, f, ap2);
+    int l1 = vsnprintf((char *) 0, 0, f, ap2);
 
     va_end(ap2);
 

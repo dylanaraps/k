@@ -10,24 +10,18 @@
 #include "log.h"
 #include "str.h"
 #include "vec.h"
+#include "repo.h"
 #include "util.h"
 
+// Check equality of arguments. If both first characters match, the comparison
+// continues, if not the strcmp() call is skipped entirely. This matches
+// 'b' -> 'b' or 'build' -> 'build'.
 #define ARG(a, n) ((a[0]) == (n[0]) && ((!a[1]) || strcmp(a, n) == 0))
-
-// String holding the value of getenv("KISS_PATH") in addition to
-// getenv("KISS_ROOT")/var/db/kiss/installed.
-static str *KISS_PATH = 0;
-
-// Vector holding pointers to each individual repository, fields split from
-// KISS_PATH. ie, they share the same memory.
-static char **repos = 0;
 
 // String for use with throwaway string operations. A chunk of memory is
 // allocated early on and is used in place of multiple temporary variables. This
 // removes the need to keep allocating memory. Functions using this should first
-// run str_undo_l(&tmp_str, tmp_str->len); to reset the string. This will not
-// zero the memory, use str_zero(&tmp_str); if needed. This memory is later
-// freed at exit.
+// run str_undo_l(&tmp_str, tmp_str->len); to reset the string.
 static str *tmp_str = 0;
 
 enum action_type {
@@ -61,91 +55,35 @@ static const char *actions[] = {
     "version",  "show version information",
 };
 
-// Repositories
+static void pkg_version(str **s, const char *name, const char *repo) {
+    str_undo_l(s, tmp_str->len);
+    str_push_s(s, repo);
+    str_push_c(s, '/');
+    str_push_s(s, name);
+    str_push_l(s, "/version", 8);
 
-static void repo_init(void) {
-    if (!(KISS_PATH = str_init(128))) {
-        die("failed to allocate memory");
-    }
+    if ((*s)->err == STR_OK) {
+        FILE *f = fopen((*s)->buf, "r");
 
-    str_push_s(&KISS_PATH, xgetenv("KISS_PATH", ""));
-    str_push_c(&KISS_PATH, ':');
-    str_push_s(&KISS_PATH, xgetenv("KISS_ROOT", "/"));
-    str_push_l(&KISS_PATH, "var/db/kiss/installed", 21);
+        if (f) {
+            str_undo_l(s, (*s)->len);
+            str_getline(s, f);
+            fclose(f);
 
-    if (KISS_PATH->err != STR_OK) {
-        die("failed to read KISS_PATH");
-    }
-
-    for (char *t = strtok(KISS_PATH->buf, ":"); t; t = strtok(0, ":")) {
-        if (t[0] != '/') {
-            die("relative path found in KISS_PATH");
+            if ((*s)->err == STR_OK && (*s)->len > 0) {
+                return;
+            }
         }
-
-        vec_push(repos, path_normalize(t));
-    }
-}
-
-static void repo_find_all(char *query) {
-    glob_t buf = {0};
-
-    for (size_t j = 0; j < vec_size(repos); j++) {
-        str_undo_l(&tmp_str, tmp_str->len);
-        str_push_s(&tmp_str, repos[j]);
-        str_push_c(&tmp_str, '/');
-        str_push_s(&tmp_str, query);
-        str_push_c(&tmp_str, '/');
-
-        if (tmp_str->err != STR_OK) {
-            die("failed to construct glob");
-        }
-
-        glob(tmp_str->buf, j ? GLOB_APPEND : 0, 0, &buf);
     }
 
-    if (buf.gl_pathc == 0) {
-        globfree(&buf);
-        die("no results for '%s'", query);
-    }
-
-    for (size_t j = 0; j < buf.gl_pathc; j++) {
-        puts(buf.gl_pathv[j]);
-    }
-
-    globfree(&buf);
-}
-
-// Packages
-
-static char *pkg_version(const char *name, const char *repo) {
-    str_undo_l(&tmp_str, tmp_str->len);
-    str_push_s(&tmp_str, repo);
-    str_push_c(&tmp_str, '/');
-    str_push_s(&tmp_str, name);
-    str_push_l(&tmp_str, "/version", 8);
-
-    if (tmp_str->err != STR_OK) {
-        return NULL;
-    }
-
-    FILE *f = fopen(tmp_str->buf, "r");
-
-    if (!f) {
-        return NULL;
-    }
-
-    str_undo_l(&tmp_str, tmp_str->len);
-    str_getline(&tmp_str, f);
-    fclose(f);
-
-    return tmp_str->err == STR_OK ? tmp_str->buf : 0;
+    (*s)->err = STR_ERROR;
 }
 
 static void pkg_list_print(char *name) {
-    char *ver = pkg_version(name, repos[vec_size(repos) - 1]);
+    pkg_version(&tmp_str, name, get_db_dir());
 
-    if (ver) {
-        printf("%s %s\n", name, ver);
+    if (tmp_str->err == STR_OK) {
+        printf("%s %s\n", name, tmp_str->buf);
 
     } else {
         die("package '%s' not installed", name);
@@ -155,7 +93,7 @@ static void pkg_list_print(char *name) {
 static void pkg_list_all(void) {
     struct dirent **list;
 
-    int len = scandir(repos[vec_size(repos) - 1], &list, 0, alphasort);
+    int len = scandir(get_db_dir(), &list, 0, alphasort);
 
     if (len == -1) {
         die("database not accessible");
@@ -173,14 +111,11 @@ static void pkg_list_all(void) {
     free(list);
 }
 
-// Arguments
-
 static void exit_handler(void) {
     str_free(tmp_str);
-    str_free(KISS_PATH);
-    vec_free(repos);
 
     cache_free();
+    repo_free();
 }
 
 static void usage(char *arg0) {
@@ -211,6 +146,7 @@ static void run_extension(char *argv[]) {
 }
 
 static int run_action(int action, int argc, char *argv[]) {
+    // Actions requiring temporary buffer.
     switch (action) {
         case ACTION_DOWNLOAD:
         case ACTION_EXT:
@@ -221,6 +157,7 @@ static int run_action(int action, int argc, char *argv[]) {
             }
     }
 
+    // Actions requiring cache access.
     switch (action) {
         case ACTION_BUILD:
         case ACTION_CHECKSUM:
@@ -230,6 +167,7 @@ static int run_action(int action, int argc, char *argv[]) {
             cache_init();
     }
 
+    // Actions requiring repository access.
     switch (action) {
         case ACTION_BUILD:
         case ACTION_CHECKSUM:
@@ -241,6 +179,7 @@ static int run_action(int action, int argc, char *argv[]) {
             repo_init();
     }
 
+    // Actions that take package lists as input.
     switch (action) {
         case ACTION_BUILD:
         case ACTION_CHECKSUM:
@@ -269,7 +208,7 @@ static int run_action(int action, int argc, char *argv[]) {
 
         case ACTION_SEARCH:
             for (int i = 2; i < argc; i++) {
-                repo_find_all(argv[i]);
+                repo_find_all(&tmp_str, argv[i]);
             }
             break;
 
@@ -298,7 +237,10 @@ int main (int argc, char *argv[]) {
 
     } else {
         for (int i = ACTION_ALT; i < ACTION_USAGE; i++) {
-            action = ARG(argv[1], actions[i + i]) ? i : action;
+            if (ARG(argv[1], actions[i + i])) {
+                action = i;
+                break;
+            }
         }
 
         atexit(exit_handler);

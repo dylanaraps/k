@@ -28,6 +28,7 @@ OBJ = \
 	src/kiss.o \
 	src/cache.o \
 	src/str.o \
+	src/repo.o \
 	src/util.o
 
 kiss: $(OBJ)
@@ -36,7 +37,7 @@ kiss: $(OBJ)
 .c.o:
 	$(CC) $(BUILD_FLAGS) -c -o $@ $<
 
-$(OBJ): src/cache.h src/str.h src/vec.h src/util.h
+$(OBJ): src/cache.h src/str.h src/vec.h src/repo.h src/util.h
 
 check:
 	valgrind $(VALGRIND) ./kiss
