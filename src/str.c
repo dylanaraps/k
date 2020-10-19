@@ -164,6 +164,14 @@ void str_printf(str **s, const char *f, ...) {
     va_end(ap);
 }
 
+size_t str_rchr(str *s, int c) {
+    size_t l = s->len;
+
+    while (l && s->buf[l] != c) l--;
+
+    return l;
+}
+
 void str_path_normalize(str **s) {
     for (; (*s)->buf[(*s)->len - 1] == '/';
            (*s)->buf[--(*s)->len] = 0);

@@ -11,6 +11,7 @@
 #include "str.h"
 #include "vec.h"
 #include "repo.h"
+#include "pkg.h"
 #include "util.h"
 
 // Check equality of arguments. If both first characters match, the comparison
@@ -42,7 +43,7 @@ enum action_type {
     ACTION_HELPEXT,
 };
 
-static const char *actions[] = {
+static const char *const actions[] = {
     "alt",      "list and swap to alternatives",
     "build",    "build packages",
     "checksum", "generate checksums",
@@ -55,62 +56,6 @@ static const char *actions[] = {
     "version",  "show version information",
 };
 
-static void pkg_version(str **s, const char *name, const char *repo) {
-    str_undo_l(s, tmp_str->len);
-    str_push_s(s, repo);
-    str_push_c(s, '/');
-    str_push_s(s, name);
-    str_push_l(s, "/version", 8);
-
-    if ((*s)->err == STR_OK) {
-        FILE *f = fopen((*s)->buf, "r");
-
-        if (f) {
-            str_undo_l(s, (*s)->len);
-            str_getline(s, f);
-            fclose(f);
-
-            if ((*s)->err == STR_OK && (*s)->len > 0) {
-                return;
-            }
-        }
-    }
-
-    (*s)->err = STR_ERROR;
-}
-
-static void pkg_list_print(char *name) {
-    pkg_version(&tmp_str, name, get_db_dir());
-
-    if (tmp_str->err == STR_OK) {
-        printf("%s %s\n", name, tmp_str->buf);
-
-    } else {
-        die("package '%s' not installed", name);
-    }
-}
-
-static void pkg_list_all(void) {
-    struct dirent **list;
-
-    int len = scandir(get_db_dir(), &list, 0, alphasort);
-
-    if (len == -1) {
-        die("database not accessible");
-    }
-
-    // '.' and '..'
-    free(list[0]);
-    free(list[1]);
-
-    for (int i = 2; i < len; i++) {
-        pkg_list_print(list[i]->d_name);
-        free(list[i]);
-    }
-
-    free(list);
-}
-
 static void exit_handler(void) {
     str_free(tmp_str);
 
@@ -121,14 +66,35 @@ static void exit_handler(void) {
 static void usage(char *arg0) {
     printf("%s [", arg0);
 
-    for (int i = ACTION_ALT; i < ACTION_USAGE * 2; i += 2) {
-        printf("%c%c", actions[i][0], i == ACTION_VERSION ? ']' : '|');
+    for (int i = ACTION_ALT; i < ACTION_USAGE; i++) {
+        printf("%c%c", actions[i + i][0], i == ACTION_USAGE - 1 ? ']' : '|');
     }
 
     printf(" [pkg]...\n");
 
-    for (int i = ACTION_ALT; i < ACTION_USAGE * 2; i += 2) {
-        printf("%-8s %s\n", actions[i], actions[i + 1]);
+    for (int i = ACTION_ALT; i < ACTION_USAGE; i++) {
+        printf("%-8s %s\n", actions[i + i], actions[i + i + 1]);
+    }
+}
+
+static void crux_like(void) {
+    str_undo_l(&tmp_str, tmp_str->len);
+    str_push_s(&tmp_str, path_normalize(getenv("PWD")));
+
+    size_t basename = str_rchr(tmp_str, '/');
+
+    if (!basename) {
+        die("PWD is invalid");
+    }
+
+    /* vec_push(pkgs, pkg_init(tmp_str->buf + basename + 1)); */
+
+    str_undo_l(&tmp_str, tmp_str->len - basename);
+    str_push_c(&tmp_str, ':');
+    str_push_s(&tmp_str, xgetenv("KISS_PATH", ""));
+
+    if (setenv("KISS_PATH", tmp_str->buf, 1) == -1) {
+        die("failed to prepend to KISS_PATH");
     }
 }
 
@@ -148,6 +114,7 @@ static void run_extension(char *argv[]) {
 static int run_action(int action, int argc, char *argv[]) {
     // Actions requiring temporary buffer.
     switch (action) {
+        case ACTION_BUILD:
         case ACTION_DOWNLOAD:
         case ACTION_EXT:
         case ACTION_LIST:
@@ -189,6 +156,10 @@ static int run_action(int action, int argc, char *argv[]) {
             for (int i = 2; i < argc; i++) {
                 //
             }
+
+            if (argc < 3) {
+                crux_like();
+            }
     }
 
     switch (action) {
@@ -197,11 +168,11 @@ static int run_action(int action, int argc, char *argv[]) {
 
         case ACTION_LIST:
             if (argc == 2) {
-                pkg_list_all();
+                pkg_list_all(&tmp_str);
 
             } else {
                 for (int i = 2; i < argc; i++) {
-                    pkg_list_print(argv[i]);
+                    pkg_list_print(&tmp_str, argv[i]);
                 }
             }
             break;

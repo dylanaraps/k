@@ -5,3 +5,5 @@ kiss-install
 compile_commands.json
 .ninja*
 .cache
+*.s
+*/*.s

@@ -48,6 +48,9 @@ void repo_init(void) {
 char *get_db_dir(void) {
     return db_dir;
 }
+char *get_kiss_path(void) {
+    return KISS_PATH->buf;
+}
 
 void repo_find(str **buf, char *query) {
     for (size_t j = 0; j < vec_size(repos); j++) {
