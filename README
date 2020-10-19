@@ -8,3 +8,10 @@ ________________________________________________________________________________
 
 The at-some-point-in-the-future C replacement for the current POSIX shell
 package manager.
+
+
+Differences from shell version
+________________________________________________________________________________
+
+- 'alternatives' action renamed to 'alt'.
+- ...
