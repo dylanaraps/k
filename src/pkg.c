@@ -43,7 +43,7 @@ void pkg_list_print(str **s, char *name) {
     }
 }
 
-void pkg_list_all(str **s) {
+void pkg_list_installed(str **s) {
     struct dirent **list;
 
     int len = scandir(get_db_dir(), &list, 0, alphasort);

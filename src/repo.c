@@ -52,7 +52,7 @@ char *get_kiss_path(void) {
     return KISS_PATH->buf;
 }
 
-void repo_find(str **buf, char *query) {
+void repo_find(str **buf, const char *query) {
     for (size_t j = 0; j < vec_size(repos); j++) {
         str_undo_l(buf, (*buf)->len);
         str_push_s(buf, repos[j]);
@@ -68,7 +68,7 @@ void repo_find(str **buf, char *query) {
     (*buf)->err = STR_ERROR;
 }
 
-void repo_find_all(str **s, char *query) {
+void repo_find_all(str **s, const char *query) {
     glob_t buf = {0};
 
     for (size_t j = 0; j < vec_size(repos); j++) {
@@ -85,13 +85,12 @@ void repo_find_all(str **s, char *query) {
         glob((*s)->buf, j ? GLOB_APPEND : 0, 0, &buf);
     }
 
-    if (buf.gl_pathc == 0) {
-        globfree(&buf);
-        die("no results for '%s'", query);
-    }
-
     for (size_t j = 0; j < buf.gl_pathc; j++) {
         puts(buf.gl_pathv[j]);
+    }
+
+    if (buf.gl_pathc == 0) {
+        die("no results for '%s'", query);
     }
 
     globfree(&buf);

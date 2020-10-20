@@ -3,6 +3,6 @@
 
 void pkg_version(str **s, const char *name, const char *repo);
 void pkg_list_print(str **s, char *name);
-void pkg_list_all(str **s);
+void pkg_list_installed(str **s);
 
 #endif

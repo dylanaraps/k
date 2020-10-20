@@ -25,37 +25,6 @@
 // run str_undo_l(&tmp_str, tmp_str->len); to reset the string.
 static str *tmp_str = 0;
 
-enum action_type {
-    ACTION_ALT,
-    ACTION_BUILD,
-    ACTION_CHECKSUM,
-    ACTION_DOWNLOAD,
-    ACTION_INSTALL,
-    ACTION_LIST,
-    ACTION_REMOVE,
-    ACTION_SEARCH,
-    ACTION_UPDATE,
-    ACTION_VERSION,
-
-    // hidden actions
-    ACTION_USAGE,
-    ACTION_EXT,
-    ACTION_HELPEXT,
-};
-
-static const char *const actions[] = {
-    "alt",      "list and swap to alternatives",
-    "build",    "build packages",
-    "checksum", "generate checksums",
-    "download", "pre-download sources",
-    "install",  "install packages",
-    "list",     "list installed packages",
-    "remove",   "remove packages",
-    "search",   "search for packages (glob)",
-    "update",   "update the system",
-    "version",  "show version information",
-};
-
 static void exit_handler(void) {
     str_free(tmp_str);
 
@@ -64,22 +33,25 @@ static void exit_handler(void) {
 }
 
 static void usage(char *arg0) {
-    printf("%s [", arg0);
+    fputs(arg0, stdout);
+    fputs(" [a|b|c|d|i|l|r|s|u|v] [pkg]...\n", stdout);
 
-    for (int i = ACTION_ALT; i < ACTION_USAGE; i++) {
-        printf("%c%c", actions[i + i][0], i == ACTION_USAGE - 1 ? ']' : '|');
-    }
-
-    printf(" [pkg]...\n");
-
-    for (int i = ACTION_ALT; i < ACTION_USAGE; i++) {
-        printf("%-8s %s\n", actions[i + i], actions[i + i + 1]);
-    }
+    puts("alternatives List and swap to alternatives");
+    puts("build        Build a package");
+    puts("checksum     Generate checksums");
+    puts("download     Pre-download all sources");
+    puts("install      Install a package");
+    puts("list         List installed packages");
+    puts("remove       Remove a package");
+    puts("search       Search for a package");
+    puts("update       Update the system");
+    puts("version      Package manager version");
 }
 
 static void crux_like(void) {
     str_undo_l(&tmp_str, tmp_str->len);
-    str_push_s(&tmp_str, path_normalize(getenv("PWD")));
+    str_push_s(&tmp_str, getenv("PWD"));
+    str_path_normalize(&tmp_str);
 
     size_t basename = str_rchr(tmp_str, '/');
 
@@ -87,11 +59,17 @@ static void crux_like(void) {
         die("PWD is invalid");
     }
 
-    /* vec_push(pkgs, pkg_init(tmp_str->buf + basename + 1)); */
+    if (tmp_str->err == STR_OK) {
+        /* vec_push(pkgs, pkg_init(tmp_str->buf + basename + 1)); */
+    }
 
     str_undo_l(&tmp_str, tmp_str->len - basename);
     str_push_c(&tmp_str, ':');
     str_push_s(&tmp_str, xgetenv("KISS_PATH", ""));
+
+    if (tmp_str->err != STR_OK) {
+        die("failed to construct string");
+    }
 
     if (setenv("KISS_PATH", tmp_str->buf, 1) == -1) {
         die("failed to prepend to KISS_PATH");
@@ -99,76 +77,30 @@ static void crux_like(void) {
 }
 
 static void run_extension(char *argv[]) {
-    str_undo_l(&tmp_str, tmp_str->len);
-    str_push_l(&tmp_str, "kiss-", 5);
-    str_push_s(&tmp_str, *argv);
+    str *ext = str_init(32);
 
-    if (tmp_str->err != STR_OK) {
+    if (!ext) {
+        die("failed to allocate memory");
+    }
+
+    str_push_l(&ext, "kiss-", 5);
+    str_push_s(&ext, *argv);
+
+    if (ext->err != STR_OK) {
         die("failed to construct string 'kiss-%s'", *argv);
     }
 
-    execvp(tmp_str->buf, argv);
-    die("failed to execute extension %s", *argv);
+    execvp(ext->buf, argv);
+    die("failed to execute extension kiss-%s", *argv);
 }
 
-static int run_action(int action, int argc, char *argv[]) {
-    // Actions requiring temporary buffer.
-    switch (action) {
-        case ACTION_BUILD:
-        case ACTION_DOWNLOAD:
-        case ACTION_EXT:
-        case ACTION_LIST:
-        case ACTION_SEARCH:
-            if (!(tmp_str = str_init(256))) {
-                die("failed to allocate memory");
-            }
-    }
+static int run_query(int argc, char *argv[]) {
+    repo_init();
 
-    // Actions requiring cache access.
-    switch (action) {
-        case ACTION_BUILD:
-        case ACTION_CHECKSUM:
-        case ACTION_DOWNLOAD:
-        case ACTION_INSTALL:
-        case ACTION_REMOVE:
-            cache_init();
-    }
-
-    // Actions requiring repository access.
-    switch (action) {
-        case ACTION_BUILD:
-        case ACTION_CHECKSUM:
-        case ACTION_DOWNLOAD:
-        case ACTION_INSTALL:
-        case ACTION_LIST:
-        case ACTION_REMOVE:
-        case ACTION_SEARCH:
-            repo_init();
-    }
-
-    // Actions that take package lists as input.
-    switch (action) {
-        case ACTION_BUILD:
-        case ACTION_CHECKSUM:
-        case ACTION_DOWNLOAD:
-        case ACTION_INSTALL:
-        case ACTION_REMOVE:
-            for (int i = 2; i < argc; i++) {
-                //
-            }
-
-            if (argc < 3) {
-                crux_like();
-            }
-    }
-
-    switch (action) {
-        case ACTION_DOWNLOAD:
-            break;
-
-        case ACTION_LIST:
+    switch (argv[1][0]) {
+        case 'l':
             if (argc == 2) {
-                pkg_list_all(&tmp_str);
+                pkg_list_installed(&tmp_str);
 
             } else {
                 for (int i = 2; i < argc; i++) {
@@ -177,22 +109,35 @@ static int run_action(int action, int argc, char *argv[]) {
             }
             break;
 
-        case ACTION_SEARCH:
+        case 's':
             for (int i = 2; i < argc; i++) {
                 repo_find_all(&tmp_str, argv[i]);
             }
             break;
+    }
 
-        case ACTION_VERSION:
-            puts("0.0.1");
-            break;
+    return EXIT_SUCCESS;
+}
 
-        case ACTION_EXT:
-            run_extension(argv + 1);
+static int run_action(int argc, char *argv[]) {
+    repo_init();
+    cache_init();
+
+    switch (argc) {
+        case 2:
+            crux_like();
             break;
 
         default:
-            usage(argv[0]);
+            for (int i = 2; i < argc; i++) {
+                if (strchr(argv[i], '/')) {
+                    die("Argument contains invalid char '/'");
+                }
+            }
+    }
+
+    switch (argv[1][0]) {
+        case 'd':
             break;
     }
 
@@ -200,23 +145,38 @@ static int run_action(int action, int argc, char *argv[]) {
 }
 
 int main (int argc, char *argv[]) {
-    int action = ACTION_EXT;
-
     if (argc < 2 || !argv[1] || !argv[1][0] ||
         argv[1][0] == '-' || argc > 1024) {
-        action = ACTION_USAGE;
+        usage(argv[0]);
+
+    } else if (ARG(argv[1], "version")) {
+        puts("0.0.1");
 
     } else {
-        for (int i = ACTION_ALT; i < ACTION_USAGE; i++) {
-            if (ARG(argv[1], actions[i + i])) {
-                action = i;
-                break;
-            }
+        atexit(exit_handler);
+
+        if (!(tmp_str = str_init(256))) {
+            die("failed to allocate memory");
         }
 
-        atexit(exit_handler);
+        if (ARG(argv[1], "list") ||
+            ARG(argv[1], "search")) {
+            run_query(argc, argv);
+
+        } else if (ARG(argv[1], "alt")      ||
+                   ARG(argv[1], "build")    ||
+                   ARG(argv[1], "checksum") ||
+                   ARG(argv[1], "download") ||
+                   ARG(argv[1], "install")  ||
+                   ARG(argv[1], "remove")   ||
+                   ARG(argv[1], "update")) {
+            run_action(argc, argv);
+
+        } else {
+            run_extension(argv + 1);
+        }
     }
 
-    return run_action(action, argc, argv);
+    return EXIT_SUCCESS;
 }
 
