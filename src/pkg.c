@@ -32,8 +32,8 @@ void pkg_version(str **s, const char *name, const char *repo) {
     (*s)->err = STR_ERROR;
 }
 
-void pkg_list_print(str **s, char *name) {
-    pkg_version(s, name, get_db_dir());
+void pkg_list_print(str **s, const char *name, const char *repo) {
+    pkg_version(s, name, repo);
 
     if ((*s)->err == STR_OK) {
         printf("%s %s\n", name, (*s)->buf);
@@ -43,17 +43,17 @@ void pkg_list_print(str **s, char *name) {
     }
 }
 
-void pkg_list_installed(str **s) {
+void pkg_list_installed(str **s, const char *repo) {
     struct dirent **list;
 
-    int len = scandir(get_db_dir(), &list, 0, alphasort);
+    int len = scandir(repo, &list, 0, alphasort);
 
     if (len > 0) {
         free(list[0]);
         free(list[1]);
 
         for (int i = 2; i < len; i++) {
-            pkg_list_print(s, list[i]->d_name);
+            pkg_list_print(s, list[i]->d_name, repo);
             free(list[i]);
         }
 

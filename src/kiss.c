@@ -87,17 +87,16 @@ static void run_extension(char *argv[]) {
 
 static int run_query(int argc, char *argv[]) {
     tmp_str = str_init_die(64);
-
-    repo_init();
+    char **repo = repo_init();
 
     switch (argv[1][0]) {
         case 'l':
             if (argc == 2) {
-                pkg_list_installed(&tmp_str);
+                pkg_list_installed(&tmp_str, repo[vec_size(repo) - 1]);
 
             } else {
                 for (int i = 2; i < argc; i++) {
-                    pkg_list_print(&tmp_str, argv[i]);
+                    pkg_list_print(&tmp_str, argv[i], repo[vec_size(repo) - 1]);
                 }
             }
             break;
@@ -120,8 +119,8 @@ static int run_query(int argc, char *argv[]) {
 static int run_action(int argc, char *argv[]) {
     tmp_str = str_init_die(512);
 
-    repo_init();
-    cache_init();
+    /* char **repos = repo_init(); */
+    /* str *cac_dir = cache_init(); */
 
     if (argc < 3) {
         crux_like(&tmp_str);

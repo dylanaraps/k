@@ -16,10 +16,7 @@ static str *KISS_PATH = 0;
 // KISS_PATH. ie, they share the same memory.
 static char **repos = 0;
 
-// Pointer to the database directory.
-static char *db_dir = 0;
-
-void repo_init(void) {
+char **repo_init(void) {
     KISS_PATH = str_init_die(512);
 
     str_push_s(&KISS_PATH, xgetenv("KISS_PATH", ""));
@@ -39,15 +36,7 @@ void repo_init(void) {
         vec_push(repos, path_normalize(t));
     }
 
-    db_dir = repos[vec_size(repos) - 1];
-}
-
-char *get_db_dir(void) {
-    return db_dir;
-}
-
-char *get_kiss_path(void) {
-    return KISS_PATH->buf;
+    return repos;
 }
 
 void repo_find(str **buf, const char *query) {
