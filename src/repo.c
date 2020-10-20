@@ -20,9 +20,7 @@ static char **repos = 0;
 static char *db_dir = 0;
 
 void repo_init(void) {
-    if (!(KISS_PATH = str_init(512))) {
-        die("failed to allocate memory");
-    }
+    KISS_PATH = str_init_die(512);
 
     str_push_s(&KISS_PATH, xgetenv("KISS_PATH", ""));
     str_push_c(&KISS_PATH, ':');

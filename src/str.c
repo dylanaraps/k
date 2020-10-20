@@ -17,6 +17,17 @@ str *str_init(size_t l) {
     return s;
 }
 
+str *str_init_die(size_t l) {
+    str *s = str_init(l);
+
+    if (!s) {
+        fputs("failed to allocate memory", stderr);
+        exit(EXIT_FAILURE);
+    }
+
+    return s;
+}
+
 void str_alloc(str **s, size_t l) {
     if ((*s)->err == STR_OK && l != 0) {
         str *s2 = realloc(*s, sizeof (str) + (*s)->cap + l);

@@ -70,11 +70,7 @@ static void cache_create(str *s, size_t off) {
 }
 
 str *cache_init(void) {
-    cache_dir = str_init(64);
-
-    if (!cache_dir) {
-        die("failed to allocate memory");
-    }
+    cache_dir = str_init_die(64);
 
     get_xdg_cache(&cache_dir);
     mkdir_die(cache_dir);

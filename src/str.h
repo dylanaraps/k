@@ -21,6 +21,7 @@ enum str_error {
 };
 
 str *str_init(size_t l);
+str *str_init_die(size_t l);
 void str_alloc(str **s, size_t l);
 void str_push_c(str **s, int c);
 void str_push_l(str **s, const char *d, size_t l);

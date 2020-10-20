@@ -1,10 +1,6 @@
-#include <errno.h>
-#include <dirent.h>
-#include <glob.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/stat.h>
 
 #include "cache.h"
 #include "log.h"
@@ -27,17 +23,8 @@ static str *tmp_str = 0;
 
 static void exit_handler(void) {
     str_free(tmp_str);
-
     cache_free();
     repo_free();
-}
-
-static void tmp_str_init(void) {
-    assert(!tmp_str);
-
-    if (!(tmp_str = str_init(256))) {
-        die("failed to allocate memory");
-    }
 }
 
 static void usage(char *arg0) {
@@ -56,40 +43,36 @@ static void usage(char *arg0) {
     puts("version      Package manager version");
 }
 
-static void crux_like(void) {
-    str_undo_l(&tmp_str, tmp_str->len);
-    str_push_s(&tmp_str, getenv("PWD"));
-    str_path_normalize(&tmp_str);
+static void crux_like(str **s) {
+    str_undo_l(s, (*s)->len);
+    str_push_s(s, getenv("PWD"));
+    str_path_normalize(s);
 
-    size_t basename = str_rchr(tmp_str, '/');
+    size_t basename = str_rchr(*s, '/');
 
     if (!basename) {
         die("PWD is invalid");
     }
 
-    if (tmp_str->err == STR_OK) {
+    if ((*s)->err == STR_OK) {
         /* vec_push(pkgs, pkg_init(tmp_str->buf + basename + 1)); */
     }
 
-    str_undo_l(&tmp_str, tmp_str->len - basename);
-    str_push_c(&tmp_str, ':');
-    str_push_s(&tmp_str, xgetenv("KISS_PATH", ""));
+    str_undo_l(s, (*s)->len - basename);
+    str_push_c(s, ':');
+    str_push_s(s, xgetenv("KISS_PATH", ""));
 
-    if (tmp_str->err != STR_OK) {
+    if ((*s)->err != STR_OK) {
         die("failed to construct string");
     }
 
-    if (setenv("KISS_PATH", tmp_str->buf, 1) == -1) {
+    if (setenv("KISS_PATH", (*s)->buf, 1) == -1) {
         die("failed to prepend to KISS_PATH");
     }
 }
 
 static void run_extension(char *argv[]) {
-    str *ext = str_init(32);
-
-    if (!ext) {
-        die("failed to allocate memory");
-    }
+    str *ext = str_init_die(32);
 
     str_push_l(&ext, "kiss-", 5);
     str_push_s(&ext, *argv);
@@ -103,7 +86,8 @@ static void run_extension(char *argv[]) {
 }
 
 static int run_query(int argc, char *argv[]) {
-    tmp_str_init();
+    tmp_str = str_init_die(64);
+
     repo_init();
 
     switch (argv[1][0]) {
@@ -129,13 +113,14 @@ static int run_query(int argc, char *argv[]) {
 }
 
 static int run_action(int argc, char *argv[]) {
-    tmp_str_init();
+    tmp_str = str_init_die(512);
+
     repo_init();
     cache_init();
 
     switch (argc) {
         case 2:
-            crux_like();
+            crux_like(&tmp_str);
             break;
 
         default:
