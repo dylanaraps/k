@@ -69,7 +69,7 @@ static void cache_create(str *s, size_t off) {
     }
 }
 
-str *cache_init(void) {
+void cache_init(void) {
     cache_dir = str_init_die(64);
 
     get_xdg_cache(&cache_dir);
@@ -91,8 +91,6 @@ str *cache_init(void) {
     if (cache_dir->err != STR_OK) {
         die("failed to create cache");
     }
-
-    return cache_dir;
 }
 
 void cache_free(void) {
@@ -101,5 +99,9 @@ void cache_free(void) {
     }
 
     str_free(cache_dir);
+}
+
+char *get_cache_dir(void) {
+    return cache_dir->buf;
 }
 

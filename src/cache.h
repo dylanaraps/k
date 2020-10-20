@@ -3,7 +3,8 @@
 
 #include "str.h"
 
-str *cache_init(void);
+void cache_init(void);
 void cache_free(void);
+char *get_cache_dir(void);
 
 #endif

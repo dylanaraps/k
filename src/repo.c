@@ -42,10 +42,10 @@ void repo_init(void) {
     db_dir = repos[vec_size(repos) - 1];
 }
 
-// temporary
 char *get_db_dir(void) {
     return db_dir;
 }
+
 char *get_kiss_path(void) {
     return KISS_PATH->buf;
 }

@@ -14,14 +14,14 @@ const char *xgetenv(const char *var, const char *fallback) {
     return env ? env : fallback;
 }
 
-char *path_normalize(char *s) {
-    if (s) {
-        for (size_t i = 1, l = strlen(s);
-             s[l - i] == '/';
-             s[l - i] = 0, i++);
+char *path_normalize(char *d) {
+    if (d) {
+        for (size_t i = 1, l = strlen(d);
+             d[l - i] == '/';
+             d[l - i] = 0, i++);
     }
 
-    return s;
+    return d;
 }
 
 static int _rm_rf(const char *p, const struct stat *b, int t, struct FTW *f) {
