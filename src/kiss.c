@@ -32,6 +32,14 @@ static void exit_handler(void) {
     repo_free();
 }
 
+static void tmp_str_init(void) {
+    assert(!tmp_str);
+
+    if (!(tmp_str = str_init(256))) {
+        die("failed to allocate memory");
+    }
+}
+
 static void usage(char *arg0) {
     fputs(arg0, stdout);
     fputs(" [a|b|c|d|i|l|r|s|u|v] [pkg]...\n", stdout);
@@ -95,6 +103,7 @@ static void run_extension(char *argv[]) {
 }
 
 static int run_query(int argc, char *argv[]) {
+    tmp_str_init();
     repo_init();
 
     switch (argv[1][0]) {
@@ -120,6 +129,7 @@ static int run_query(int argc, char *argv[]) {
 }
 
 static int run_action(int argc, char *argv[]) {
+    tmp_str_init();
     repo_init();
     cache_init();
 
@@ -145,6 +155,8 @@ static int run_action(int argc, char *argv[]) {
 }
 
 int main (int argc, char *argv[]) {
+    atexit(exit_handler);
+
     if (argc < 2 || !argv[1] || !argv[1][0] ||
         argv[1][0] == '-' || argc > 1024) {
         usage(argv[0]);
@@ -152,29 +164,21 @@ int main (int argc, char *argv[]) {
     } else if (ARG(argv[1], "version")) {
         puts("0.0.1");
 
+    } else if (ARG(argv[1], "list") ||
+               ARG(argv[1], "search")) {
+        run_query(argc, argv);
+
+    } else if (ARG(argv[1], "alt")      ||
+               ARG(argv[1], "build")    ||
+               ARG(argv[1], "checksum") ||
+               ARG(argv[1], "download") ||
+               ARG(argv[1], "install")  ||
+               ARG(argv[1], "remove")   ||
+               ARG(argv[1], "update")) {
+        run_action(argc, argv);
+
     } else {
-        atexit(exit_handler);
-
-        if (!(tmp_str = str_init(256))) {
-            die("failed to allocate memory");
-        }
-
-        if (ARG(argv[1], "list") ||
-            ARG(argv[1], "search")) {
-            run_query(argc, argv);
-
-        } else if (ARG(argv[1], "alt")      ||
-                   ARG(argv[1], "build")    ||
-                   ARG(argv[1], "checksum") ||
-                   ARG(argv[1], "download") ||
-                   ARG(argv[1], "install")  ||
-                   ARG(argv[1], "remove")   ||
-                   ARG(argv[1], "update")) {
-            run_action(argc, argv);
-
-        } else {
-            run_extension(argv + 1);
-        }
+        run_extension(argv + 1);
     }
 
     return EXIT_SUCCESS;
