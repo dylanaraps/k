@@ -103,8 +103,13 @@ static int run_query(int argc, char *argv[]) {
             break;
 
         case 's':
-            for (int i = 2; i < argc; i++) {
-                repo_find_all(&tmp_str, argv[i]);
+            if (argc == 2) {
+                msg("usage: %s %s <search query>", argv[0], argv[1]);
+
+            } else {
+                for (int i = 2; i < argc; i++) {
+                    repo_find_all(&tmp_str, argv[i]);
+                }
             }
             break;
     }
