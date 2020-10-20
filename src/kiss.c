@@ -123,17 +123,15 @@ static int run_action(int argc, char *argv[]) {
     repo_init();
     cache_init();
 
-    switch (argc) {
-        case 2:
-            crux_like(&tmp_str);
-            break;
+    if (argc < 3) {
+        crux_like(&tmp_str);
 
-        default:
-            for (int i = 2; i < argc; i++) {
-                if (strchr(argv[i], '/')) {
-                    die("Argument contains invalid char '/'");
-                }
+    } else {
+        for (int i = 2; i < argc; i++) {
+            if (strchr(argv[i], '/')) {
+                die("Argument contains invalid char '/'");
             }
+        }
     }
 
     switch (argv[1][0]) {
