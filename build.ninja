@@ -1,5 +1,5 @@
 cc = cc
-cflags = -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wwrite-strings -Wshadow -Wundef -Wsign-conversion
+cflags = -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic
 
 rule cc
   command = $cc -MD -MF $out.d $cflags -c -o $out $in
@@ -8,12 +8,7 @@ rule cc
 rule link
   command = $cc $ldflags -o $out $in
 
-build src/cache.o: cc src/cache.c
-build src/str.o:   cc src/str.c
-build src/repo.o:  cc src/repo.c
-build src/pkg.o:   cc src/pkg.c
-build src/kiss.o:  cc src/kiss.c
-build src/util.o:  cc src/util.c
-build kiss: link src/cache.o src/str.o src/pkg.o src/repo.o src/util.o src/kiss.o
+build src/kiss.o:   cc src/kiss.c
+build kiss:       link src/kiss.o
 
 default kiss

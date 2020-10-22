@@ -4,17 +4,10 @@ PREFIX = /usr/local
 
 BUILD_FLAGS = \
 	-std=c99 \
-	-D_POSIX_C_SOURCE=200809L \
-	-D_XOPEN_SOURCE=500 \
 	-Wall \
 	-Wextra \
-	-pedantic \
-	-Wmissing-prototypes \
-	-Wstrict-prototypes \
-	-Wwrite-strings \
-	-Wshadow \
-	-Wundef \
-	-Wsign-conversion \
+	-Wpedantic \
+	-D_POSIX_C_SOURCE=200809L \
 	$(CFLAGS)
 
 VALGRIND = \
@@ -25,20 +18,18 @@ VALGRIND = \
 	--trace-children=yes
 
 OBJ = \
-	src/kiss.o \
-	src/cache.o \
-	src/str.o \
-	src/repo.o \
-	src/pkg.o \
-	src/util.o
+	src/kiss.o
+
+HDR = \
+
 
 kiss: $(OBJ)
-	$(CC) $(BUILD_FLAGS) -o $@ $(OBJ) $(LDFLAGS)
+	$(CC) -o $@ $(OBJ) $(LDFLAGS)
 
 .c.o:
 	$(CC) $(BUILD_FLAGS) -c -o $@ $<
 
-$(OBJ): src/cache.h src/str.h src/vec.h src/repo.h src/pkg.h src/util.h
+$(OBJ): $(HDR)
 
 check:
 	valgrind $(VALGRIND) ./kiss
