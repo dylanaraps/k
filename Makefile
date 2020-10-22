@@ -21,7 +21,7 @@ OBJ = \
 	src/kiss.o
 
 HDR = \
-
+	src/util.h
 
 kiss: $(OBJ)
 	$(CC) -o $@ $(OBJ) $(LDFLAGS)
