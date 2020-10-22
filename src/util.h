@@ -1,18 +1,13 @@
 #ifndef KISS_UTIL_H_
 #define KISS_UTIL_H_
 
-#define msg(...) do {             \
-    fprintf(stderr, __VA_ARGS__); \
-    fputc('\n', stderr);          \
-} while (0)
+#include <sys/stat.h>
+#include <stdlib.h>
 
-#define die(...) do {                           \
-    fprintf(stderr, "error: ");                 \
-    fprintf(stderr, __VA_ARGS__);               \
-    fprintf(stderr, " (%s in %s() at line %d)", \
-        __FILE__, __func__, __LINE__);          \
-    fputc('\n', stderr);                        \
-    exit(EXIT_FAILURE);                         \
-} while (0)
+#include "str.h"
+
+const char *xgetenv(const char *var, const char *fallback);
+char *path_normalize(char *d);
+int rm_rf(const char *d);
 
 #endif
