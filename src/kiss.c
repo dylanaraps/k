@@ -21,10 +21,18 @@
 // run str_undo_l(&tmp_str, tmp_str->len); to reset the string.
 static str *tmp_str = 0;
 
+static pkg **pkgs = 0;
+
 static void exit_handler(void) {
     str_free(tmp_str);
     cache_free();
     repo_free();
+
+    for (size_t i = 0; i < vec_size(pkgs); i++) {
+        pkg_free(&pkgs[i]);
+    }
+
+    vec_free(pkgs);
 }
 
 static void usage(char *arg0) {
@@ -55,7 +63,7 @@ static void crux_like(str **s) {
     }
 
     if ((*s)->err == STR_OK) {
-        /* vec_push(pkgs, pkg_init(tmp_str->buf + basename + 1)); */
+        vec_push(pkgs, pkg_init_die(tmp_str->buf + basename + 1));
     }
 
     str_undo_l(s, (*s)->len - basename);
@@ -130,6 +138,8 @@ static int run_action(int argc, char *argv[]) {
             if (strchr(argv[i], '/')) {
                 die("Argument contains invalid char '/'");
             }
+
+            vec_push(pkgs, pkg_init_die(argv[i]));
         }
     }
 

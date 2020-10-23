@@ -8,6 +8,44 @@
 #include "repo.h"
 #include "pkg.h"
 
+pkg *pkg_init(const char *name) {
+    pkg *new = malloc(sizeof *new);
+
+    if (new) {
+        new->name = strdup(name);
+
+        if (!new->name) {
+            free(new);
+            return NULL;
+        }
+
+        new->path = 0;
+        new->depends = 0;
+        new->sources = 0;
+        new->version.ver = 0;
+        new->version.rel = 0;
+    }
+
+    return new;
+}
+
+pkg *pkg_init_die(const char *name) {
+    pkg *new = pkg_init(name);
+
+    if (!new) {
+        die("failed to allocate memory");
+    }
+
+    return new;
+}
+
+void pkg_free(pkg **p) {
+    free((*p)->name);
+    free(*p);
+    *p = NULL;
+}
+
+
 void pkg_version(str **s, const char *name, const char *repo) {
     str_undo_l(s, (*s)->len);
     str_push_s(s, repo);
