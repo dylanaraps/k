@@ -213,3 +213,4 @@ void pkg_list_installed(str **s, const char *repo) {
         die("database not accessible");
     }
 }
+
