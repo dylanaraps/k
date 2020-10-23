@@ -4,8 +4,9 @@
 
 #include "log.h"
 #include "str.h"
-#include "cache.h"
 #include "util.h"
+#include "file.h"
+#include "cache.h"
 
 static str *cache_dir = 0;
 
@@ -23,25 +24,6 @@ static const size_t cache_lens[] = {
     3, 7, 4,
     5, 7, 3,
 };
-
-static void mkdir_die(str *s) {
-    if (s->err != STR_OK) {
-       return;
-    }
-
-    if (mkdir(s->buf, 0755) == -1) {
-        switch (errno) {
-            case EEXIST:
-                break;
-
-            case ENOENT:
-                die("directory component does not exist '%s'", s->buf);
-
-            default:
-                die("failed to create directory '%s'", s->buf);
-        }
-    }
-}
 
 static void get_xdg_cache(str **s) {
     str_push_s(s, getenv("XDG_CACHE_HOME"));
@@ -100,5 +82,6 @@ void cache_free(void) {
         rm_rf(cache_dir->buf);
     }
 
-    str_free(cache_dir);
+    str_free(&cache_dir);
 }
+

@@ -106,7 +106,7 @@ void str_undo_s(str **s, const char *d) {
     }
 }
 
-void str_getline(str **s, FILE *f) {
+size_t str_getline(str **s, FILE *f) {
     if (f) {
         int c;
 
@@ -118,8 +118,12 @@ void str_getline(str **s, FILE *f) {
             (*s)->err = c == EOF ? STR_EOF : (*s)->err;
         }
 
+        return (*s)->len;
+
     } else {
         (*s)->err = STR_EINVAL;
+
+        return 0;
     }
 }
 
@@ -135,10 +139,21 @@ str *str_dup(str **s) {
             }
         }
 
-        str_free(n);
+        str_free(&n);
     }
 
     return 0;
+}
+
+str *str_dup_die(str **s) {
+    str *n = str_dup(s);
+
+    if (!n) {
+        fputs("failed to allocate memory", stderr);
+        exit(EXIT_FAILURE);
+    }
+
+    return n;
 }
 
 void str_vprintf(str **s, const char *f, va_list ap) {
@@ -188,9 +203,10 @@ void str_path_normalize(str **s) {
            (*s)->buf[--(*s)->len] = 0);
 }
 
-void str_free(str *s) {
-    if (s) {
-        free(s);
+void str_free(str **s) {
+    if (*s) {
+        free(*s);
+        *s = NULL;
     }
 }
 

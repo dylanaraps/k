@@ -4,6 +4,7 @@
 
 #include "log.h"
 #include "util.h"
+#include "file.h"
 #include "str.h"
 #include "vec.h"
 #include "repo.h"
@@ -84,7 +85,7 @@ void repo_find_all(str **s, const char *query) {
 }
 
 void repo_free(void) {
-    str_free(KISS_PATH);
+    str_free(&KISS_PATH);
     vec_free(repos);
 }
 

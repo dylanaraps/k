@@ -24,7 +24,7 @@ static str *tmp_str = 0;
 static pkg **pkgs = 0;
 
 static void exit_handler(void) {
-    str_free(tmp_str);
+    str_free(&tmp_str);
     cache_free();
     repo_free();
 
@@ -63,7 +63,7 @@ static void crux_like(str **s) {
     }
 
     if ((*s)->err == STR_OK) {
-        vec_push(pkgs, pkg_init_die(tmp_str->buf + basename + 1));
+        vec_push(pkgs, pkg_init(tmp_str->buf + basename + 1));
     }
 
     str_undo_l(s, (*s)->len - basename);
@@ -127,8 +127,8 @@ static int run_query(int argc, char *argv[]) {
 static int run_action(int argc, char *argv[]) {
     tmp_str = str_init_die(512);
 
-    /* char **repos = repo_init(); */
-    /* str *cac_dir = cache_init(); */
+    repo_init();
+    cache_init();
 
     if (argc < 3) {
         crux_like(&tmp_str);
@@ -139,7 +139,7 @@ static int run_action(int argc, char *argv[]) {
                 die("Argument contains invalid char '/'");
             }
 
-            vec_push(pkgs, pkg_init_die(argv[i]));
+            vec_push(pkgs, pkg_init(argv[i]));
         }
     }
 

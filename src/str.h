@@ -29,12 +29,13 @@ void str_push_s(str **s, const char *d);
 void str_undo_l(str **s, size_t l);
 void str_undo_s(str **s, const char *d);
 str *str_dup(str **s);
-void str_getline(str **s, FILE *f);
+str *str_dup_die(str **s);
+size_t str_getline(str **s, FILE *f);
 void str_vprintf(str **s, const char *f, va_list ap);
 void str_printf(str **s, const char *f, ...);
 size_t str_tok(str *s, char c, size_t tok);
 void str_path_normalize(str **s);
 size_t str_rchr(str *s, int c);
-void str_free(str *s);
+void str_free(str **s);
 
 #endif

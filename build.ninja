@@ -11,9 +11,10 @@ rule link
 build src/cache.o: cc src/cache.c
 build src/str.o:   cc src/str.c
 build src/repo.o:  cc src/repo.c
+build src/file.o:  cc src/file.c
 build src/pkg.o:   cc src/pkg.c
 build src/kiss.o:  cc src/kiss.c
 build src/util.o:  cc src/util.c
-build kiss: link src/cache.o src/str.o src/pkg.o src/repo.o src/util.o src/kiss.o
+build kiss: link src/cache.o src/str.o src/file.o src/pkg.o src/repo.o src/util.o src/kiss.o
 
 default kiss

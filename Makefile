@@ -29,16 +29,26 @@ OBJ = \
 	src/cache.o \
 	src/str.o \
 	src/repo.o \
+	src/file.o \
 	src/pkg.o \
 	src/util.o
 
+HDR = \
+	src/vec.h \
+	src/cache.h \
+	src/str.h \
+	src/repo.h \
+	src/file.h \
+	src/pkg.h \
+	src/util.h
+
 kiss: $(OBJ)
-	$(CC) $(BUILD_FLAGS) -o $@ $(OBJ) $(LDFLAGS)
+	$(CC) -o $@ $(OBJ) $(LDFLAGS)
 
 .c.o:
-	$(CC) $(BUILD_FLAGS) -c -o $@ $<
+	$(CC) $(BUILD_FLAGS) -g -O0 -c -o $@ $<
 
-$(OBJ): src/cache.h src/str.h src/vec.h src/repo.h src/pkg.h src/util.h
+$(OBJ): $(HDR)
 
 check:
 	valgrind $(VALGRIND) ./kiss

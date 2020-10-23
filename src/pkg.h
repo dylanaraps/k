@@ -3,35 +3,29 @@
 
 #include <stdlib.h>
 
-struct version {
-    char *ver;
-    char *rel;
-};
-
-struct sources {
-    char *path;
-    char *dest;
-};
-
-struct depends {
-    char *name;
-    char *type;
-};
-
 typedef struct pkg {
-    char *name;
-    char *path; // path to location on disk.
+    str *name;
+    str *repo; 
+    str *version;
 
-    struct depends *depends;
-    struct sources *sources;
-    struct version version;
+    str **source;
+    size_t *src_off;
+
+    str **depend;
+    size_t *dep_off;
 } pkg;
 
+pkg *pkg_create(void);
 pkg *pkg_init(const char *name);
-pkg *pkg_init_die(const char *name);
+void pkg_init_name(pkg **p, const char *name);
+void pkg_init_repo(pkg **p, const char *repo);
+void pkg_init_sources(pkg **p);
+int pkg_init_version(pkg **p);
+void pkg_init_depends(pkg **p);
 void pkg_free(pkg **p);
 
-void pkg_version(str **s, const char *name, const char *repo);
+FILE *pkg_fopen(pkg **p, const char *file, size_t len);
+
 void pkg_list_print(str **s, const char *name, const char *repo);
 void pkg_list_installed(str **s, const char *repo);
 
