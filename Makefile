@@ -5,16 +5,9 @@ PREFIX = /usr/local
 BUILD_FLAGS = \
 	-std=c99 \
 	-D_POSIX_C_SOURCE=200809L \
-	-D_XOPEN_SOURCE=500 \
 	-Wall \
 	-Wextra \
 	-pedantic \
-	-Wmissing-prototypes \
-	-Wstrict-prototypes \
-	-Wwrite-strings \
-	-Wshadow \
-	-Wundef \
-	-Wsign-conversion \
 	$(CFLAGS)
 
 BUILD_LDFLAGS = \

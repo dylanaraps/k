@@ -1,5 +1,5 @@
 cc = cc
-cflags = -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wwrite-strings -Wshadow -Wundef -Wsign-conversion
+cflags = -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 
 ldflags = -lcurl
 
 rule cc
