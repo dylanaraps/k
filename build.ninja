@@ -1,5 +1,6 @@
 cc = cc
 cflags = -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wwrite-strings -Wshadow -Wundef -Wsign-conversion
+ldflags = -lcurl
 
 rule cc
   command = $cc -MD -MF $out.d $cflags -c -o $out $in
@@ -8,13 +9,10 @@ rule cc
 rule link
   command = $cc $ldflags -o $out $in
 
-build src/cache.o: cc src/cache.c
-build src/str.o:   cc src/str.c
-build src/repo.o:  cc src/repo.c
-build src/file.o:  cc src/file.c
-build src/pkg.o:   cc src/pkg.c
-build src/kiss.o:  cc src/kiss.c
-build src/util.o:  cc src/util.c
-build kiss: link src/cache.o src/str.o src/file.o src/pkg.o src/repo.o src/util.o src/kiss.o
+build src/str.o:  cc src/str.c
+build src/download.o: cc src/download.c
+build src/kiss.o: cc src/kiss.c
+build src/util.o: cc src/util.c
+build kiss: link src/str.o src/download.o src/util.o src/kiss.o
 
 default kiss
