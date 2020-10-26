@@ -17,6 +17,10 @@ BUILD_FLAGS = \
 	-Wsign-conversion \
 	$(CFLAGS)
 
+BUILD_LDFLAGS = \
+	-lcurl \
+	$(LDFLAGS)
+
 VALGRIND = \
 	--leak-check=full \
 	--show-leak-kinds=all \
@@ -26,32 +30,19 @@ VALGRIND = \
 
 OBJ = \
 	src/kiss.o \
-	src/cache.o \
 	src/str.o \
-	src/repo.o \
-	src/file.o \
-	src/pkg.o \
+	src/download.o \
 	src/util.o
 
-HDR = \
-	src/vec.h \
-	src/cache.h \
-	src/str.h \
-	src/repo.h \
-	src/file.h \
-	src/pkg.h \
-	src/util.h
-
 kiss: $(OBJ)
-	$(CC) -o $@ $(OBJ) $(LDFLAGS)
+	$(CC) -o $@ $(OBJ) $(BUILD_LDFLAGS)
 
 .c.o:
 	$(CC) $(BUILD_FLAGS) -g -O0 -c -o $@ $<
 
-$(OBJ): $(HDR)
-
 check:
 	valgrind $(VALGRIND) ./kiss
+	valgrind $(VALGRIND) ./kiss d xz samurai
 	valgrind $(VALGRIND) ./kiss d
 	valgrind $(VALGRIND) ./kiss s zlib
 	valgrind $(VALGRIND) ./kiss v

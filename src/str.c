@@ -198,8 +198,8 @@ size_t str_rchr(str *s, int c) {
     return l;
 }
 
-void str_path_normalize(str **s) {
-    for (; (*s)->buf[(*s)->len - 1] == '/';
+void str_rstrip(str **s, int c) {
+    for (; (*s)->buf[(*s)->len - 1] == c;
            (*s)->buf[--(*s)->len] = 0);
 }
 
