@@ -16,7 +16,7 @@
 #include "vec.h"
 
 struct pkg {
-    str *name;
+    char *name;
     char *repo;
 };
 
@@ -26,7 +26,7 @@ static struct pkg **pkgs = 0;
 // pkgs {{{
 
 static void pkg_free(struct pkg **p) {
-    str_free(&(*p)->name); 
+    free((*p)->name); 
     free(*p);
     *p = NULL;
 }
@@ -38,7 +38,7 @@ static FILE *pkg_fopen(struct pkg *p, const char *f) {
         return NULL;
     }
 
-    int pkg_fd = openat(repo_fd, p->name->buf, O_RDONLY);
+    int pkg_fd = openat(repo_fd, p->name, O_RDONLY);
     close(repo_fd);
 
     if (pkg_fd == -1) {
@@ -55,17 +55,16 @@ static FILE *pkg_fopen(struct pkg *p, const char *f) {
     return fdopen(fd, "r");
 }
 
-static void pkg_source(struct pkg *p) {
+static int pkg_source(struct pkg *p) {
     FILE *f = pkg_fopen(p, "sources");
 
     if (!f) {
-        if (errno == ENOENT) {
-            msg("[%s] no sources file, skipping", p->name->buf);
-            return;
+        switch (errno) {
+            case ENOENT:
+                return -3;
 
-        } else {
-            die("[%s] failed to open sources file: %s", 
-                    p->name->buf, strerror(errno));
+            default:
+                return -1;
         }
     }
 
@@ -81,122 +80,22 @@ static void pkg_source(struct pkg *p) {
         char *des = strtok(NULL, " \n");
 
         if (!src) {
-            die("[%s] invalid sources file", p->name->buf);
+            return -2;
         }
 
         if (strncmp(src, "git+", 4) == 0) {
-            msg("[%s] found git %s", p->name->buf, src);    
+            msg("[%s] found git %s", p->name, src);    
 
         } else if (strstr(src, "://")) {
-            str_undo_l(&tmp, tmp->len);
-            cache_get_base(&tmp);
-            str_push_l(&tmp, "/sources/", 9);
-            str_push_l(&tmp, p->name->buf, p->name->len);
-            str_push_c(&tmp, '/');
 
-            if (des) {
-                str_push_s(&tmp, des);
-                str_rstrip(&tmp, '/');
-                str_push_c(&tmp, '/');
-            }
-
-            if (tmp->err != STR_OK) {
-                die("string error");                
-            }
-
-            mkdir_p_die(tmp->buf);
-
-            char *basename = strrchr(src, '/');
-
-            if (!basename) {
-                die("[%s] invalid source found '%s'", p->name->buf, src);
-            }
-
-            str_push_s(&tmp, basename + 1);
-            
-            if (access(tmp->buf, F_OK) == 0) {
-                msg("[%s] found cache %s", p->name->buf, basename + 1);
-
-            } else if (errno == ENOENT) {
-                msg("[%s] downloading %s", p->name->buf, basename + 1);
-
-                if (source_download(src, tmp->buf) == -1) {
-                    die("[%s] failed to download source %s", 
-                        p->name->buf, src);
-                }
-
-            } else {
-                die("[%s] error accessing file %s: %s", 
-                    p->name->buf, tmp->buf, strerror(errno));
-            }
-
-            /* str_undo_l(&tmp, tmp->len); */
-
-            /* cache_get_base(&tmp); */
-
-            /* str_push_l(&tmp, "../../sources/", 14); */
-            /* str_push_l(&tmp, p->name->buf, p->name->len); */
-            /* str_push_c(&tmp, '/'); */
-
-            /* if (des) { */
-            /*     str_push_s(&tmp, des); */
-            /*     str_rstrip(&tmp, '/'); */
-            /*     str_push_c(&tmp, '/'); */
-            /* } */
-
-            /* if (tmp->err != STR_OK) { */
-            /*     die("string error"); */                
-            /* } */
-
-            /* mkdir_p_die(tmp->buf); */
-
-            /* char *basename = strrchr(src, '/'); */
-
-            /* if (!basename) { */
-            /*     die("[%s] invalid source found '%s'", p->name->buf, src); */
-            /* } */
-
-            /* str_push_s(&tmp, basename + 1); */
-
-            /* if (access(tmp->buf, F_OK) == 0) { */
-            /*     msg("[%s] found cache %s", p->name->buf, basename + 1); */
-
-            /* } else if (errno == ENOENT) { */
-            /*     msg("[%s] downloading %s", p->name->buf, basename + 1); */
-
-            /*     if (source_download(src, tmp->buf) == -1) { */
-            /*         die("[%s] failed to download source %s", */ 
-            /*             p->name->buf, src); */
-            /*     } */
-
-            /* } else { */
-            /*     die("[%s] error accessing file %s: %s", */ 
-            /*         p->name->buf, tmp->buf, strerror(errno)); */
-            /* } */
-
-        } else {
-            /* str_undo_l(&tmp, tmp->len); */
-            /* str_push_s(&tmp, p->repo); */
-            /* str_push_c(&tmp, '/'); */
-            /* str_push_l(&tmp, p->name->buf, p->name->len); */
-            /* str_push_c(&tmp, '/'); */
-            /* str_push_s(&tmp, src); */
-
-            /* if (access(tmp->buf, F_OK) == 0) { */
-            /*     msg("[%s] found relative %s", p->name->buf, src); */
-
-            /* } else if (access(src, F_OK) == 0) { */
-            /*     msg("[%s] found absolute %s", p->name->buf, src); */
-
-            /* } else { */
-            /*     die("[%s] source not found %s", p->name->buf, src); */
-            /* } */
         }
     }
 
     str_free(&tmp);
     free(line);
     fclose(f);
+
+    return 0;
 }
 
 static struct pkg *pkg_init(const char *name) {
@@ -206,7 +105,15 @@ static struct pkg *pkg_init(const char *name) {
         die("failed to allocate memory");
     }
 
-    p->name = str_init_die(0);
+    if (!name || !name[0]) {
+        die("invalid input");
+    }
+
+    p->name = strdup(name);
+
+    if (!p->name) {
+        die("failed to allocate memory");
+    }
 
     switch (repo_find(&p->repo, name)) {
         case -1:
@@ -217,13 +124,6 @@ static struct pkg *pkg_init(const char *name) {
 
         case -3:
             die("repo string error");
-    }
-
-    str_push_s(&p->name, name);
-
-    if (p->name->err != STR_OK) {
-        pkg_free(&p);
-        die("failed to create strings");
     }
 
     return p;
@@ -293,7 +193,17 @@ static int run_action(int argc, char *argv[]) {
 
     if (argv[1][0] == 'd' || argv[1][0] == 'c' || argv[1][0] == 'b') {
         for (size_t i = 0; i < vec_size(pkgs); i++) {
-            pkg_source(pkgs[i]);
+            switch (pkg_source(pkgs[i])) {
+                case -1:
+                    die("[%s] failed to open sources file: %s", 
+                        pkgs[i]->name, strerror(errno));
+
+                case -2:
+                    die("[%s] invalid/empty sources file", pkgs[i]->name);
+
+                case -3:
+                    msg("[%s] no sources file, skipping", pkgs[i]->name);
+            }
         }
     }
 
