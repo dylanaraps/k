@@ -56,17 +56,16 @@ static int pkg_source(struct pkg *p) {
     FILE *f = pkg_fopen(p, "sources");
 
     if (!f) {
-        switch (errno) {
-            case ENOENT:
-                return -3;
+        return errno == ENOENT ? -3 : -1;
+    }
 
-            default:
-                return -1;
-        }
+    str *tmp = str_init(256);
+
+    if (!tmp) {
+        return -3;
     }
 
     char *line = 0;
-    str *tmp = str_init_die(256);
 
     while (getline(&line, &(size_t){0}, f) != -1) {
         if (line[0] == '#' || line[0] == '\n') {
