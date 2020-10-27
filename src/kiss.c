@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <glob.h>
 #include <fcntl.h>
 #include <fnmatch.h>
 #include <sys/wait.h>
@@ -38,25 +39,64 @@ static void run_extension(char *argv[]) {
     die("failed to execute extension %s", ext);
 }
 
+static int run_search(int argc, char *argv[], char **repos) {
+    str *buf = str_init(128);
+
+    if (!buf) {
+        err("failed to allocate memory");
+        return -1;
+    }
+
+    glob_t res = {0};
+
+    for (int i = 2; i < argc; i++) {
+        if (repo_glob(&res, buf, argv[i], repos) != 0 ) {
+            globfree(&res);
+            str_free(&buf);
+            return -1;
+        }
+
+        if (res.gl_pathc == 0) {
+            err("no search results for '%s'", argv[i]);
+            globfree(&res);
+            str_free(&buf);
+            return -1;
+        }
+
+        for (size_t j = 0; j < res.gl_pathc; j++) {
+            puts(res.gl_pathv[j]);
+        }
+        
+        globfree(&res);
+    }
+
+    str_free(&buf);
+    return 0;
+}
+
 static int run_action(int argc, char *argv[]) {
     struct repo *repositories = repo_create();
 
     if (!repositories) {
-        die("failed to allocate memory");
+        err("failed to allocate memory");
+        return -1;
     }
 
     if (repo_init(&repositories) != 0) {
-        die("repository init failed");
+        err("repository init failed");
+        return -1;
     }
 
     str *cache_dir = str_init(128);
 
     if (!cache_dir) {
-        die("failed to allocate memory");
+        err("failed to allocate memory");
+        return -1;
     }
 
     if (cache_init(&cache_dir) != 0) {
-        die("cache init failed"); 
+        err("cache init failed"); 
+        return -1;
     }
 
     struct pkg **pkgs = 0;
@@ -65,11 +105,13 @@ static int run_action(int argc, char *argv[]) {
         struct pkg *new = pkg_create(argv[i]);
 
         if (!new) {
-            die("failed to allocate memory"); 
+            err("failed to allocate memory"); 
+            return -1;
         }
 
         if (repo_find(&new->repo, argv[i], repositories->repos) != 0) {
-            die("repository search error");
+            err("repository search error");
+            return -1;
         }
 
         vec_push(pkgs, new);     
@@ -82,8 +124,9 @@ static int run_action(int argc, char *argv[]) {
                 break;
 
             case -1:
-                die("[%s] failed to open sources: %s", pkgs[i]->name, 
+                err("[%s] failed to open sources: %s", pkgs[i]->name, 
                     strerror(errno));
+                return -1;
         }
     }
 
@@ -93,10 +136,13 @@ static int run_action(int argc, char *argv[]) {
         pkg_free(&pkgs[i]);
     }
     vec_free(pkgs);
-    return EXIT_SUCCESS;
+
+    return 0;
 }
 
 int main (int argc, char *argv[]) {
+    int err = EXIT_SUCCESS;
+
     if (argc < 2 || !argv[1] || !argv[1][0] || argv[1][0] == '-') {
         usage(argv[0]);
 
@@ -113,7 +159,7 @@ int main (int argc, char *argv[]) {
     } else if (ARG(argv[1], "build") ||
                ARG(argv[1], "checksum") ||
                ARG(argv[1], "download")) {
-        run_action(argc, argv);
+        err = run_action(argc, argv);
 
     } else if (ARG(argv[1], "install") ||
                ARG(argv[1], "remove")) {
@@ -123,7 +169,22 @@ int main (int argc, char *argv[]) {
         //
 
     } else if (ARG(argv[1], "search")) {
-        //
+        struct repo *r = repo_create();
+
+        if (!r) {
+            err("failed to allocate memory");
+            return -1;
+        }
+
+        if (repo_init(&r) != 0) {
+            err("repository init failed");
+            repo_free(&r);
+            return -1;
+        }
+
+        err = run_search(argc, argv, r->repos);
+
+        repo_free(&r);
 
     } else if (ARG(argv[1], "update")) {
         //
@@ -132,6 +193,6 @@ int main (int argc, char *argv[]) {
         run_extension(argv + 1);
     }
 
-    return EXIT_SUCCESS;
+    return err;
 }
 

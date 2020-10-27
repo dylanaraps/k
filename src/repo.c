@@ -1,3 +1,4 @@
+#include <glob.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -82,6 +83,25 @@ int repo_find(char **buf, const char *name, char **repos) {
 
     err("package '%s' not in any repository", name);
     return -2;
+}
+
+int repo_glob(glob_t *res, str *buf, const char *query, char **repos) {
+    for (size_t i = 0; i < vec_size(repos); i++) {
+        str_undo_l(&buf, buf->len);
+        str_push_s(&buf, repos[i]);
+        str_push_c(&buf, '/');
+        str_push_s(&buf, query);
+        str_push_c(&buf, '/');
+
+        if (buf->err != STR_OK) {
+            err("string error");
+            return -1;
+        }
+
+        glob(buf->buf, i ? GLOB_APPEND : 0, NULL, res);
+    }
+
+    return 0;
 }
 
 void repo_free(struct repo **r) {
