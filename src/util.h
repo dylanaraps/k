@@ -6,11 +6,7 @@
 
 const char *xgetenv(const char *var, const char *fallback);
 char *path_normalize(char *d);
-void mkdir_die(const char *d);
-void mkdir_p_die(const char *d);
 int mkdir_p(const char* d);
-void mkdir_at_die(int fd, const char *d);
-void mkdir_at_str(const char *p, const char *d);
 int run_cmd(const char *cmd);
 int is_dir(const char *path);
 
@@ -19,13 +15,17 @@ int is_dir(const char *path);
     fputc('\n', stderr);          \
 } while (0)
 
-#define die(...) do {                           \
+#define err(...) do {                           \
     fprintf(stderr, "error: ");                 \
     fprintf(stderr, __VA_ARGS__);               \
     fprintf(stderr, " (%s in %s() at line %d)", \
         __FILE__, __func__, __LINE__);          \
     fputc('\n', stderr);                        \
-    exit(EXIT_FAILURE);                         \
+} while (0)
+
+#define die(...) do {   \
+    err(__VA_ARGS__);   \
+    exit(EXIT_FAILURE); \
 } while (0)
 
 #endif

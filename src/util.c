@@ -11,7 +11,7 @@
 const char *xgetenv(const char *var, const char *fallback) {
     char *env = getenv(var);
 
-    return env ? env : fallback;
+    return env ? env[0] ? env : fallback : fallback;
 }
 
 char *path_normalize(char *d) {
@@ -22,49 +22,6 @@ char *path_normalize(char *d) {
     }
 
     return d;
-}
-
-void mkdir_at_die(int fd, const char *d) {
-    if (mkdirat(fd, d, 0755) == -1) {
-        switch (errno) {
-            case EEXIST:
-                break;
-
-            default:
-                close(fd);
-                die("failed to create directory '%s': %s", d, strerror(errno));
-        }
-    }
-}
-
-void mkdir_die(const char *d) {
-    mkdir_at_die(AT_FDCWD, d);
-}
-
-void mkdir_at_str(const char *p, const char *d) {
-    int fd = open(p, O_RDONLY);    
-
-    if (fd == -1) {
-        die("failed to open directory %s: %s", p, strerror(errno));
-    }
-
-    mkdir_at_die(fd, d);
-    close(fd);
-}
-
-void mkdir_p_die(const char *d) {
-    if (mkdir_p(d) == -1) {
-        switch (errno) {
-            case EEXIST:
-                break;
-
-            case ENOENT:
-                die("directory component does not exist '%s'", d);
-
-            default:
-                die("failed to create directory '%s': %s", d, strerror(errno));
-        }
-    }
 }
 
 int mkdir_p(const char* d) {

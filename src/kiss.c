@@ -11,128 +11,10 @@
 #include "download.h"
 #include "file.h"
 #include "repo.h"
+#include "pkg.h"
 #include "str.h"
 #include "util.h"
 #include "vec.h"
-
-struct pkg {
-    char *name;
-    char *repo;
-};
-
-// pkgs {{{
-
-static void pkg_free(struct pkg **p) {
-    free((*p)->name); 
-    free(*p);
-    *p = NULL;
-}
-
-static FILE *pkg_fopen(struct pkg *p, const char *f) {
-    int repo_fd = open(p->repo, O_RDONLY);    
-
-    if (repo_fd == -1) {
-        return NULL;
-    }
-
-    int pkg_fd = openat(repo_fd, p->name, O_RDONLY);
-    close(repo_fd);
-
-    if (pkg_fd == -1) {
-        return NULL;
-    }
-
-    int fd = openat(pkg_fd, f, O_RDONLY);
-    close(pkg_fd);
-
-    if (fd == -1) {
-        return NULL;
-    }
-
-    return fdopen(fd, "r");
-}
-
-static int pkg_source(struct pkg *p) {
-    FILE *f = pkg_fopen(p, "sources");
-
-    if (!f) {
-        return errno == ENOENT ? -3 : -1;
-    }
-
-    str *tmp = str_init(256);
-
-    if (!tmp) {
-        return -3;
-    }
-
-    char *line = 0;
-
-    while (getline(&line, &(size_t){0}, f) != -1) {
-        if (line[0] == '#' || line[0] == '\n') {
-            continue; 
-        }
-
-        char *src = strtok(line, " \n");
-        char *des = strtok(NULL, " \n");
-
-        if (!src) {
-            return -2;
-        }
-
-        if (strncmp(src, "git+", 4) == 0) {
-            msg("[%s] found git %s", p->name, src);    
-
-        } else if (strstr(src, "://")) {
-
-        }
-    }
-
-    str_free(&tmp);
-    free(line);
-    fclose(f);
-
-    return 0;
-}
-
-static struct pkg *pkg_init(const char *name) {
-    struct pkg *p = malloc(sizeof *p);    
-
-    if (!p) {
-        die("failed to allocate memory");
-    }
-
-    if (!name || !name[0]) {
-        die("invalid input");
-    }
-
-    p->name = strdup(name);
-
-    if (!p->name) {
-        die("failed to allocate memory");
-    }
-
-    switch (repo_find(&p->repo, name)) {
-        case -1:
-            die("error during search: %s", strerror(errno));
-
-        case -2:
-            die("package '%s' not in any repository", name);
-
-        case -3:
-            die("repo string error");
-    }
-
-    return p;
-}
-
-static void pkg_free_all(struct pkg **p) {
-    for (size_t i = 0; i < vec_size(p); i++) {
-        pkg_free(&p[i]);
-    }
-    vec_free(p);
-}
-
-// }}}
 
 static void usage(char *arg0) {
     fputs(arg0, stdout);
@@ -157,61 +39,60 @@ static void run_extension(char *argv[]) {
 }
 
 static int run_action(int argc, char *argv[]) {
-    atexit(repo_free);
-    atexit(cache_free);
+    struct repo *repositories = repo_create();
 
-    switch (repo_init()) {
-        case -4:
-            die("relative path found in KISS_PATH");
-
-        case -3:
-            die("string error");
-
-        case -2:
-            die("failed to allocate memory");
-
-        case -1:
-            die("repository in KISS_PATH inaccessible: %s", strerror(errno));
+    if (!repositories) {
+        die("failed to allocate memory");
     }
 
-    switch (cache_init()) {
-        case -4:
-            die("cache directory not absolute or HOME unset");
+    if (repo_init(&repositories) != 0) {
+        die("repository init failed");
+    }
 
-        case -3:
-            die("string error");
+    str *cache_dir = str_init(128);
 
-        case -2:
-            die("failed to allocate memory");
+    if (!cache_dir) {
+        die("failed to allocate memory");
+    }
 
-        case -1:
-            die("failed to create cache directory: %s", strerror(errno));
+    if (cache_init(&cache_dir) != 0) {
+        die("cache init failed"); 
     }
 
     struct pkg **pkgs = 0;
 
     for (int i = 2; i < argc; i++) {
-        vec_push(pkgs, pkg_init(argv[i]));     
+        struct pkg *new = pkg_create(argv[i]);
+
+        if (!new) {
+            die("failed to allocate memory"); 
+        }
+
+        if (repo_find(&new->repo, argv[i], repositories->repos) != 0) {
+            die("repository search error");
+        }
+
+        vec_push(pkgs, new);     
     }
 
     for (size_t i = 0; i < vec_size(pkgs); i++) {
         switch (pkg_source(pkgs[i])) {
-            case -3:
+            case -2:
                 msg("[%s] no sources, skipping", pkgs[i]->name);
                 break;
 
-            case -2:
-                pkg_free_all(pkgs);
-                die("[%s] invalid sources", pkgs[i]->name);
-
             case -1:
-                pkg_free_all(pkgs);
                 die("[%s] failed to open sources: %s", pkgs[i]->name, 
                     strerror(errno));
         }
     }
 
-    pkg_free_all(pkgs);
+    repo_free(&repositories);
+    str_free(&cache_dir);
+    for (size_t i = 0; i < vec_size(pkgs); i++) {
+        pkg_free(&pkgs[i]);
+    }
+    vec_free(pkgs);
     return EXIT_SUCCESS;
 }
 
@@ -226,10 +107,26 @@ int main (int argc, char *argv[]) {
     } else if (ARG(argv[1], "version")) {
         puts("0.0.1");
 
+    } else if (ARG(argv[1], "alt")) {
+        //
+
     } else if (ARG(argv[1], "build") ||
                ARG(argv[1], "checksum") ||
                ARG(argv[1], "download")) {
         run_action(argc, argv);
+
+    } else if (ARG(argv[1], "install") ||
+               ARG(argv[1], "remove")) {
+        //
+
+    } else if (ARG(argv[1], "list")) {
+        //
+
+    } else if (ARG(argv[1], "search")) {
+        //
+
+    } else if (ARG(argv[1], "update")) {
+        //
 
     } else {
         run_extension(argv + 1);

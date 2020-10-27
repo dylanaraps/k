@@ -26,6 +26,7 @@ OBJ = \
 	src/str.o \
 	src/cache.o \
 	src/file.o \
+	src/pkg.o \
 	src/repo.o \
 	src/download.o \
 	src/util.o
