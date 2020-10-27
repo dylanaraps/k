@@ -45,6 +45,10 @@ int cache_create(void) {
 
     int cache_fd = open(cache_dir->buf, O_RDONLY);
 
+    if (cache_fd == -1) {
+        return -1;
+    }
+
     for (size_t i = 0; i < 5; i++) {
         if (mkdirat(cache_fd, caches[i], 0755) == -1 && errno != EEXIST) {
             return -1;
