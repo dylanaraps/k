@@ -157,31 +157,38 @@ static void usage(char *arg0) {
 }
 
 static void run_extension(char *argv[]) {
-    str *ext = str_init_die(32);
+    char ext[64] = "kiss-";
 
-    str_push_l(&ext, "kiss-", 5);
-    str_push_s(&ext, *argv);
+    strncat(ext, *argv, 63);
+    execvp(ext, argv);
 
-    if (ext->err != STR_OK) {
-        die("failed to construct string 'kiss-%s'", *argv);
-    }
-
-    execvp(ext->buf, argv);
-    die("failed to execute extension kiss-%s", *argv);
+    die("failed to execute extension %s", ext);
 }
 
 static int run_action(int argc, char *argv[]) {
-    repo_init();
+    switch (repo_init()) {
+        case -4:
+            die("relative path found in KISS_PATH");
+
+        case -3:
+            die("string error");
+
+        case -2:
+            die("failed to allocate memory");
+
+        case -1:
+            die("repository in KISS_PATH inaccessible: %s", strerror(errno));
+    }
 
     switch (cache_init()) {
         case -4:
-            die("failed to allocate memory");
-
-        case -3:
             die("cache directory not absolute or HOME unset");
 
-        case -2:
+        case -3:
             die("string error");
+
+        case -2:
+            die("failed to allocate memory");
 
         case -1:
             die("failed to create cache directory: %s", strerror(errno));
@@ -194,15 +201,16 @@ static int run_action(int argc, char *argv[]) {
     if (argv[1][0] == 'd' || argv[1][0] == 'c' || argv[1][0] == 'b') {
         for (size_t i = 0; i < vec_size(pkgs); i++) {
             switch (pkg_source(pkgs[i])) {
-                case -1:
-                    die("[%s] failed to open sources file: %s", 
-                        pkgs[i]->name, strerror(errno));
+                case -3:
+                    msg("[%s] no sources, skipping", pkgs[i]->name);
+                    break;
 
                 case -2:
-                    die("[%s] invalid/empty sources file", pkgs[i]->name);
+                    die("[%s] invalid sources", pkgs[i]->name);
 
-                case -3:
-                    msg("[%s] no sources file, skipping", pkgs[i]->name);
+                case -1:
+                    die("[%s] failed to open sources: %s", pkgs[i]->name, 
+                        strerror(errno));
             }
         }
     }

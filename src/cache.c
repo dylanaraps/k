@@ -14,17 +14,17 @@ int cache_init(void) {
     cache_dir = str_init(256);    
 
     if (!cache_dir) {
-        return -4;
+        return -2;
     }
 
     if (cache_get_base(&cache_dir) != 0) {
-        return -3;
+        return -4;
     }
 
     str_printf(&cache_dir, "/proc/%u/", getpid());
 
     if (cache_dir->err != STR_OK) {
-        return -2;
+        return -3;
     }
 
     if (mkdir_p(cache_dir->buf) != 0) {

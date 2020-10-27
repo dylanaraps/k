@@ -17,13 +17,13 @@ int repo_init(void) {
     KISS_PATH = str_init(512);
 
     if (!KISS_PATH) {
-        return -1;
+        return -2;
     }
 
     repo = str_init(128);
 
     if (!repo) {
-        return -1;
+        return -2;
     }
 
     str_push_s(&KISS_PATH, xgetenv("KISS_PATH", ""));
@@ -32,12 +32,12 @@ int repo_init(void) {
     str_push_l(&KISS_PATH, "var/db/kiss/installed", 21);
 
     if (KISS_PATH->err != STR_OK) {
-        return -1;
+        return -3;
     }
 
     for (char *t = strtok(KISS_PATH->buf, ":"); t; t = strtok(0, ":")) {
         if (t[0] != '/') {
-            return -1;
+            return -4;
         }
 
         if (access(t, F_OK) != 0) {
