@@ -20,9 +20,6 @@ struct pkg {
     char *repo;
 };
 
-// A vector holding the package queue.
-static struct pkg **pkgs = 0;
-
 // pkgs {{{
 
 static void pkg_free(struct pkg **p) {
@@ -129,19 +126,14 @@ static struct pkg *pkg_init(const char *name) {
     return p;
 }
 
-// }}}
-
-
-static void exit_handler(void) {
-    repo_free(); 
-    cache_free();
-
-    for (size_t i = 0; i < vec_size(pkgs); i++) {
-        pkg_free(&pkgs[i]);
+static void pkg_free_all(struct pkg **p) {
+    for (size_t i = 0; i < vec_size(p); i++) {
+        pkg_free(&p[i]);
     }
-
-    vec_free(pkgs);
+    vec_free(p);
 }
+
+// }}}
 
 static void usage(char *arg0) {
     fputs(arg0, stdout);
@@ -166,6 +158,9 @@ static void run_extension(char *argv[]) {
 }
 
 static int run_action(int argc, char *argv[]) {
+    atexit(repo_free);
+    atexit(cache_free);
+
     switch (repo_init()) {
         case -4:
             die("relative path found in KISS_PATH");
@@ -194,51 +189,47 @@ static int run_action(int argc, char *argv[]) {
             die("failed to create cache directory: %s", strerror(errno));
     }
 
+    struct pkg **pkgs = 0;
+
     for (int i = 2; i < argc; i++) {
         vec_push(pkgs, pkg_init(argv[i]));     
     }
 
-    if (argv[1][0] == 'd' || argv[1][0] == 'c' || argv[1][0] == 'b') {
-        for (size_t i = 0; i < vec_size(pkgs); i++) {
-            switch (pkg_source(pkgs[i])) {
-                case -3:
-                    msg("[%s] no sources, skipping", pkgs[i]->name);
-                    break;
+    for (size_t i = 0; i < vec_size(pkgs); i++) {
+        switch (pkg_source(pkgs[i])) {
+            case -3:
+                msg("[%s] no sources, skipping", pkgs[i]->name);
+                break;
 
-                case -2:
-                    die("[%s] invalid sources", pkgs[i]->name);
+            case -2:
+                pkg_free_all(pkgs);
+                die("[%s] invalid sources", pkgs[i]->name);
 
-                case -1:
-                    die("[%s] failed to open sources: %s", pkgs[i]->name, 
-                        strerror(errno));
-            }
+            case -1:
+                pkg_free_all(pkgs);
+                die("[%s] failed to open sources: %s", pkgs[i]->name, 
+                    strerror(errno));
         }
     }
 
+    pkg_free_all(pkgs);
     return EXIT_SUCCESS;
 }
 
 int main (int argc, char *argv[]) {
-// Check equality of arguments. If both first characters match, the comparison
-// continues, if not the strcmp() call is skipped entirely. This matches
-// 'b' -> 'b' or 'build' -> 'build'.
-#define ARG(a, n) ((a[0]) == (n[0]) && ((!a[1]) || strcmp(a, n) == 0))
-
-    atexit(exit_handler);
-
-    if (argc < 2 || !argv[1] || !argv[1][0] ||
-        argv[1][0] == '-' || argc > 1024) {
+    if (argc < 2 || !argv[1] || !argv[1][0] || argv[1][0] == '-') {
         usage(argv[0]);
+
+// Check if argument matches an action. True for b==build and build==build
+// strcmp is only reached when both first characters match.
+#define ARG(a, b) ((a[0]) == (b[0]) && ((!a[1]) || strcmp(a, b) == 0)) 
 
     } else if (ARG(argv[1], "version")) {
         puts("0.0.1");
 
-    } else if (ARG(argv[1], "build")    ||
+    } else if (ARG(argv[1], "build") ||
                ARG(argv[1], "checksum") ||
-               ARG(argv[1], "download") ||
-               ARG(argv[1], "install")  ||
-               ARG(argv[1], "remove")   ||
-               ARG(argv[1], "update")) {
+               ARG(argv[1], "download")) {
         run_action(argc, argv);
 
     } else {
