@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <string.h>
 
 const char *xgetenv(const char *var, const char *fallback);
 char *path_normalize(char *d);
