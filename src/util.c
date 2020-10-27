@@ -26,14 +26,14 @@ char *path_normalize(char *d) {
 
 int mkdir_p(const char* d) {
     for (char* p = strchr(d + 1, '/'); p; p = strchr(p + 1, '/')) {
-        *p = '\0';
+        *p = 0;
+        int ret = mkdir(d, 0755);
+        *p = '/';
 
-        if (mkdir(d, 0755) == -1 && errno != EEXIST) {
-            *p = '/';
+        if (ret == -1 && errno != EEXIST) {
+            err("failed to create directory '%s': %s", d, strerror(errno));
             return -1;
         }
-
-        *p = '/';
     }
 
     return 0;
@@ -43,6 +43,7 @@ int run_cmd(const char *cmd) {
     pid_t pid = fork();
 
     if (pid == -1) {
+        err("failed to fork");
         return -1;
 
     } else if (pid == 0) {
@@ -54,6 +55,7 @@ int run_cmd(const char *cmd) {
         waitpid(pid, &status, 0);
 
         if (WEXITSTATUS(status)) {
+            err("command '%s' exited non-zero", cmd);
             return -1;
         }
     }
@@ -65,8 +67,10 @@ int is_dir(const char *path) {
    struct stat statbuf;
 
    if (stat(path, &statbuf) != 0) {
+       err("failed to stat path '%s': %s", path, strerror(errno));
        return 0;
    }
 
    return S_ISDIR(statbuf.st_mode);
 }
+
