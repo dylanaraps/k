@@ -4,181 +4,68 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <fnmatch.h>
 #include <sys/wait.h>
 
+#include "cache.h"
 #include "download.h"
+#include "file.h"
+#include "repo.h"
 #include "str.h"
 #include "util.h"
 #include "vec.h"
 
 struct pkg {
     str *name;
-    str *repo;
+    char *repo;
 };
-
-// Holds the list of repositories with the database directory tacked on
-// the end. This variable should not be directly accessed. Use **repos
-// which stores pointers to each repository in this string.
-static str *KISS_PATH = 0;
-
-// A vector holding each repository. Points to slices of memory from
-// KISS_PATH above. This vector must be freed. Its elements on the other
-// hand are automatically freed with KISS_PATH.
-static char **repos = 0;
 
 // A vector holding the package queue.
 static struct pkg **pkgs = 0;
-
-// Holds the cache directory + /proc/ + <pid>.
-static str *cache_dir = 0;
-
-// repo {{{
-
-static void repo_free(void) {
-    str_free(&KISS_PATH);
-    vec_free(repos);
-}
-
-static void repo_init(void) {
-    KISS_PATH = str_init_die(512);
-
-    str_push_s(&KISS_PATH, xgetenv("KISS_PATH", ""));
-    str_push_c(&KISS_PATH, ':');
-    str_push_s(&KISS_PATH, xgetenv("KISS_ROOT", "/"));
-    str_push_l(&KISS_PATH, "var/db/kiss/installed", 21);
-
-    if (KISS_PATH->err != STR_OK) {
-        die("failed to read KISS_PATH");
-    }
-
-    for (char *t = strtok(KISS_PATH->buf, ":"); t; t = strtok(0, ":")) {
-        if (t[0] != '/') {
-            die("relative path found in KISS_PATH");
-        }
-
-        if (access(t, F_OK) != 0) {
-            die("error found in KISS_PATH '%s': %s", t, strerror(errno));
-        }
-
-        vec_push(repos, path_normalize(t));
-    }
-}
-
-static str* repo_find(const char *name) {
-    str *repo = str_init_die(0);
-
-    for (size_t i = 0; i < vec_size(repos); i++) {
-        str_push_s(&repo, repos[i]);   
-        str_push_c(&repo, '/');
-        str_push_s(&repo, name);
-        str_push_c(&repo, '/');
-
-        if (access(repo->buf, F_OK) == 0) {
-            return repo;
-
-        } else if (errno != ENOENT) {
-            die("failed to stat package '%s': %s", name, strerror(errno));
-        }
-
-        str_undo_l(&repo, repo->len);
-    }
-
-    die("package '%s' not in any repository", name);
-}
-
-// }}}
-
-// cache {{{
-
-static void cache_free(void) {
-    str_free(&cache_dir);
-}
-
-static void cache_get_base(str **s) {
-    str_push_s(s, getenv("XDG_CACHE_HOME"));
-
-    if ((*s)->err != STR_OK) {
-        (*s)->err = STR_OK;
-
-        str_push_s(s, getenv("HOME"));
-
-        if ((*s)->err != STR_OK) {
-            die("HOME is unset");
-        }
-
-        str_rstrip(s, '/');
-        str_push_l(s, "/.cache", 7);
-    }
-
-    if ((*s)->buf[0] != '/') {
-        die("Cache directory is relative '%s'", (*s)->buf);
-    }
-
-    str_rstrip(s, '/');
-    str_push_l(s, "/kiss/", 6);
-}
-
-static void cache_create(str *s, const char *p, size_t l) {
-    str_push_l(&s, p, l);
-
-    if (s->err == STR_OK) {
-        mkdir_die(s->buf);
-    }
-
-    str_undo_l(&s, l);
-}
-
-static void cache_init(void) {
-    cache_dir = str_init_die(256);    
-
-    // Attempt to create the system's cache directory and fail if one 
-    // or more path components does not exist. This is a naive safegaurd
-    // as we will only continue if XDG_CACHE_HOME or HOME/.cache already
-    // exists in the system.
-    cache_get_base(&cache_dir);
-
-    // Permanent cache directories.
-    cache_create(cache_dir, "bin", 3);
-    cache_create(cache_dir, "sources", 7);
-
-    str_push_l(&cache_dir, "proc", 4);
-    str_printf(&cache_dir, "/%u/", getpid());
-
-    // Temporary cache directories.
-    cache_create(cache_dir, "build", 5);
-    cache_create(cache_dir, "extract", 7);
-    cache_create(cache_dir, "pkg", 3);
-
-    if (cache_dir->err != STR_OK) {
-        die("failed to create cache"); 
-    }
-}
-
-// }}}
 
 // pkgs {{{
 
 static void pkg_free(struct pkg **p) {
     str_free(&(*p)->name); 
-    str_free(&(*p)->repo); 
     free(*p);
     *p = NULL;
 }
 
+static FILE *pkg_fopen(struct pkg *p, const char *f) {
+    int repo_fd = open(p->repo, O_RDONLY);    
+
+    if (repo_fd == -1) {
+        return NULL;
+    }
+
+    int pkg_fd = openat(repo_fd, p->name->buf, O_RDONLY);
+    close(repo_fd);
+
+    if (pkg_fd == -1) {
+        return NULL;
+    }
+
+    int fd = openat(pkg_fd, f, O_RDONLY);
+    close(pkg_fd);
+
+    if (fd == -1) {
+        return NULL;
+    }
+
+    return fdopen(fd, "r");
+}
+
 static void pkg_source(struct pkg *p) {
-    str_push_l(&p->repo, "sources", 7);
-    FILE *f = fopen(p->repo->buf, "r");
-    str_undo_l(&p->repo, 7);
+    FILE *f = pkg_fopen(p, "sources");
 
     if (!f) {
-        switch (errno) {
-            case ENOENT:
-                msg("[%s] no sources file, skipping", p->name->buf);
-                return;
+        if (errno == ENOENT) {
+            msg("[%s] no sources file, skipping", p->name->buf);
+            return;
 
-            default:
-                die("[%s] failed to open sources file: %s", 
-                        p->name->buf, strerror(errno));
+        } else {
+            die("[%s] failed to open sources file: %s", 
+                    p->name->buf, strerror(errno));
         }
     }
 
@@ -198,13 +85,12 @@ static void pkg_source(struct pkg *p) {
         }
 
         if (strncmp(src, "git+", 4) == 0) {
-            die("[%s] found git %s", p->name->buf, src);    
+            msg("[%s] found git %s", p->name->buf, src);    
 
         } else if (strstr(src, "://")) {
             str_undo_l(&tmp, tmp->len);
             cache_get_base(&tmp);
-
-            str_push_l(&tmp, "sources/", 8);
+            str_push_l(&tmp, "/sources/", 9);
             str_push_l(&tmp, p->name->buf, p->name->len);
             str_push_c(&tmp, '/');
 
@@ -214,9 +100,11 @@ static void pkg_source(struct pkg *p) {
                 str_push_c(&tmp, '/');
             }
 
-            if (tmp->err == STR_OK) {
-                mkdir_die(tmp->buf);
+            if (tmp->err != STR_OK) {
+                die("string error");                
             }
+
+            mkdir_p_die(tmp->buf);
 
             char *basename = strrchr(src, '/');
 
@@ -225,15 +113,16 @@ static void pkg_source(struct pkg *p) {
             }
 
             str_push_s(&tmp, basename + 1);
-
+            
             if (access(tmp->buf, F_OK) == 0) {
                 msg("[%s] found cache %s", p->name->buf, basename + 1);
 
             } else if (errno == ENOENT) {
                 msg("[%s] downloading %s", p->name->buf, basename + 1);
 
-                if (source_download(src, tmp->buf) != 0) {
-                    die("[%s] failed to download source %s", p->name->buf, src);
+                if (source_download(src, tmp->buf) == -1) {
+                    die("[%s] failed to download source %s", 
+                        p->name->buf, src);
                 }
 
             } else {
@@ -241,23 +130,71 @@ static void pkg_source(struct pkg *p) {
                     p->name->buf, tmp->buf, strerror(errno));
             }
 
+            /* str_undo_l(&tmp, tmp->len); */
+
+            /* cache_get_base(&tmp); */
+
+            /* str_push_l(&tmp, "../../sources/", 14); */
+            /* str_push_l(&tmp, p->name->buf, p->name->len); */
+            /* str_push_c(&tmp, '/'); */
+
+            /* if (des) { */
+            /*     str_push_s(&tmp, des); */
+            /*     str_rstrip(&tmp, '/'); */
+            /*     str_push_c(&tmp, '/'); */
+            /* } */
+
+            /* if (tmp->err != STR_OK) { */
+            /*     die("string error"); */                
+            /* } */
+
+            /* mkdir_p_die(tmp->buf); */
+
+            /* char *basename = strrchr(src, '/'); */
+
+            /* if (!basename) { */
+            /*     die("[%s] invalid source found '%s'", p->name->buf, src); */
+            /* } */
+
+            /* str_push_s(&tmp, basename + 1); */
+
+            /* if (access(tmp->buf, F_OK) == 0) { */
+            /*     msg("[%s] found cache %s", p->name->buf, basename + 1); */
+
+            /* } else if (errno == ENOENT) { */
+            /*     msg("[%s] downloading %s", p->name->buf, basename + 1); */
+
+            /*     if (source_download(src, tmp->buf) == -1) { */
+            /*         die("[%s] failed to download source %s", */ 
+            /*             p->name->buf, src); */
+            /*     } */
+
+            /* } else { */
+            /*     die("[%s] error accessing file %s: %s", */ 
+            /*         p->name->buf, tmp->buf, strerror(errno)); */
+            /* } */
+
         } else {
-            str_push_s(&p->repo, src);
+            /* str_undo_l(&tmp, tmp->len); */
+            /* str_push_s(&tmp, p->repo); */
+            /* str_push_c(&tmp, '/'); */
+            /* str_push_l(&tmp, p->name->buf, p->name->len); */
+            /* str_push_c(&tmp, '/'); */
+            /* str_push_s(&tmp, src); */
 
-            if (access(p->repo->buf, F_OK) == 0) {
-                msg("[%s] found relative %s", p->name->buf, src);
+            /* if (access(tmp->buf, F_OK) == 0) { */
+            /*     msg("[%s] found relative %s", p->name->buf, src); */
 
-            } else if (access(src, F_OK) == 0) {
-                msg("[%s] found absolute %s", p->name->buf, src);
+            /* } else if (access(src, F_OK) == 0) { */
+            /*     msg("[%s] found absolute %s", p->name->buf, src); */
 
-            } else {
-                die("[%s] source not found %s", p->name->buf, src);
-            }
-
-            str_undo_s(&p->repo, src);
+            /* } else { */
+            /*     die("[%s] source not found %s", p->name->buf, src); */
+            /* } */
         }
     }
 
+    str_free(&tmp);
     free(line);
     fclose(f);
 }
@@ -270,12 +207,21 @@ static struct pkg *pkg_init(const char *name) {
     }
 
     p->name = str_init_die(0);
-    p->repo = repo_find(name);
+
+    switch (repo_find(&p->repo, name)) {
+        case -1:
+            die("error during search: %s", strerror(errno));
+
+        case -2:
+            die("package '%s' not in any repository", name);
+
+        case -3:
+            die("repo string error");
+    }
 
     str_push_s(&p->name, name);
 
-    if (p->name->err != STR_OK ||
-        p->repo->err != STR_OK) {
+    if (p->name->err != STR_OK) {
         pkg_free(&p);
         die("failed to create strings");
     }
@@ -326,28 +272,29 @@ static void run_extension(char *argv[]) {
 
 static int run_action(int argc, char *argv[]) {
     repo_init();
-    cache_init();
+
+    switch (cache_init()) {
+        case -4:
+            die("failed to allocate memory");
+
+        case -3:
+            die("cache directory not absolute or HOME unset");
+
+        case -2:
+            die("string error");
+
+        case -1:
+            die("failed to create cache directory: %s", strerror(errno));
+    }
 
     for (int i = 2; i < argc; i++) {
         vec_push(pkgs, pkg_init(argv[i]));     
     }
 
-    for (size_t i = 0; i < vec_size(pkgs); i++) {
-        printf("%s: %s\n", pkgs[i]->name->buf, pkgs[i]->repo->buf);
-    }
-
-    switch (argv[1][0]) {
-        case 'b': 
-            break;
-
-        case 'c': 
-            break;
-
-        case 'd': 
-            for (size_t i = 0; i < vec_size(pkgs); i++) {
-                pkg_source(pkgs[i]);
-            }
-            break;
+    if (argv[1][0] == 'd' || argv[1][0] == 'c' || argv[1][0] == 'b') {
+        for (size_t i = 0; i < vec_size(pkgs); i++) {
+            pkg_source(pkgs[i]);
+        }
     }
 
     return EXIT_SUCCESS;

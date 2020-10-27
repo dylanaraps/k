@@ -24,7 +24,35 @@ char *path_normalize(char *d) {
     return d;
 }
 
+void mkdir_at_die(int fd, const char *d) {
+    if (mkdirat(fd, d, 0755) == -1) {
+        switch (errno) {
+            case EEXIST:
+                break;
+
+            default:
+                close(fd);
+                die("failed to create directory '%s': %s", d, strerror(errno));
+        }
+    }
+}
+
 void mkdir_die(const char *d) {
+    mkdir_at_die(AT_FDCWD, d);
+}
+
+void mkdir_at_str(const char *p, const char *d) {
+    int fd = open(p, O_RDONLY);    
+
+    if (fd == -1) {
+        die("failed to open directory %s: %s", p, strerror(errno));
+    }
+
+    mkdir_at_die(fd, d);
+    close(fd);
+}
+
+void mkdir_p_die(const char *d) {
     if (mkdir_p(d) == -1) {
         switch (errno) {
             case EEXIST:
@@ -40,10 +68,6 @@ void mkdir_die(const char *d) {
 }
 
 int mkdir_p(const char* d) {
-    if (!d || !d[0]) {
-        return -1;
-    }
-
     for (char* p = strchr(d + 1, '/'); p; p = strchr(p + 1, '/')) {
         *p = '\0';
 
@@ -80,3 +104,12 @@ int run_cmd(const char *cmd) {
     return 0;    
 }
 
+int is_dir(const char *path) {
+   struct stat statbuf;
+
+   if (stat(path, &statbuf) != 0) {
+       return 0;
+   }
+
+   return S_ISDIR(statbuf.st_mode);
+}

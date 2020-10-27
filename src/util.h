@@ -7,8 +7,12 @@
 const char *xgetenv(const char *var, const char *fallback);
 char *path_normalize(char *d);
 void mkdir_die(const char *d);
+void mkdir_p_die(const char *d);
 int mkdir_p(const char* d);
+void mkdir_at_die(int fd, const char *d);
+void mkdir_at_str(const char *p, const char *d);
 int run_cmd(const char *cmd);
+int is_dir(const char *path);
 
 #define msg(...) do {             \
     fprintf(stderr, __VA_ARGS__); \

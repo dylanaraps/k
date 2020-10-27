@@ -156,11 +156,11 @@ str *str_dup_die(str **s) {
     return n;
 }
 
-void str_vprintf(str **s, const char *f, va_list ap) {
+size_t str_vprintf(str **s, const char *f, va_list ap) {
     va_list ap2;
     va_copy(ap2, ap);
 
-    int l1 = vsnprintf((char *) 0, 0, f, ap2);
+    int l1 = vsnprintf(NULL, 0, f, ap2);
 
     va_end(ap2);
 
@@ -175,19 +175,22 @@ void str_vprintf(str **s, const char *f, va_list ap) {
 
             if (l1 == l2) {
                 (*s)->len += (size_t) l1;
-                return;
+                return (size_t) l1;
             }
         }
     }
 
     (*s)->err = STR_ERROR;
+    return 0;
 }
 
-void str_printf(str **s, const char *f, ...) {
+size_t str_printf(str **s, const char *f, ...) {
     va_list ap;
     va_start(ap, f);
-    str_vprintf(s, f, ap);
+    size_t ret = str_vprintf(s, f, ap);
     va_end(ap);
+
+    return ret;
 }
 
 size_t str_rchr(str *s, int c) {

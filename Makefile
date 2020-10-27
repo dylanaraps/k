@@ -24,6 +24,9 @@ VALGRIND = \
 OBJ = \
 	src/kiss.o \
 	src/str.o \
+	src/cache.o \
+	src/file.o \
+	src/repo.o \
 	src/download.o \
 	src/util.o
 
