@@ -81,7 +81,7 @@ error:
 
 static int run_list(int argc, char *argv[], char *db, int fd) {
     if (argc == 2) {
-        struct dirent **list;
+        struct dirent **list = 0;
 
         int len = scandir(db, &list, 0, alphasort);
 
@@ -145,14 +145,14 @@ static int run_query(int argc, char *argv[]) {
 }
 
 static int run_action(int argc, char *argv[]) {
-    struct repo *repositories = repo_create();
+    struct repo *repos = repo_create();
 
-    if (!repositories) {
+    if (!repos) {
         err("failed to allocate memory");
         return -1;
     }
 
-    if (repo_init(&repositories) != 0) {
+    if (repo_init(&repos) != 0) {
         err("repository init failed");
         return -1;
     }
@@ -179,7 +179,7 @@ static int run_action(int argc, char *argv[]) {
             return -1;
         }
 
-        if (repo_find(&new->repo, argv[i], repositories->list) != 0) {
+        if (repo_find(&new->repo, argv[i], repos->list) != 0) {
             err("repository search error");
             return -1;
         }
@@ -187,20 +187,7 @@ static int run_action(int argc, char *argv[]) {
         vec_push(pkgs, new);     
     }
 
-    for (size_t i = 0; i < vec_size(pkgs); i++) {
-        switch (pkg_source(pkgs[i])) {
-            case -2:
-                msg("[%s] no sources, skipping", pkgs[i]->name);
-                break;
-
-            case -1:
-                err("[%s] failed to open sources: %s", pkgs[i]->name, 
-                    strerror(errno));
-                return -1;
-        }
-    }
-
-    repo_free(&repositories);
+    repo_free(&repos);
     str_free(&cache_dir);
     for (size_t i = 0; i < vec_size(pkgs); i++) {
         pkg_free(&pkgs[i]);
