@@ -17,14 +17,14 @@ int source_download(const char *url, const char *dest) {
 
     if (ret != 0) {
         err("failed to initialize curl: %s", curl_easy_strerror(ret));
-        return -1;
+        goto file_err;
     }
 
     CURL *curl = curl_easy_init();
 
     if (!curl) {
         err("failed to initialize curl");
-        return -1;
+        goto file_err;
     }
 
     ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
@@ -32,7 +32,7 @@ int source_download(const char *url, const char *dest) {
     if (ret != 0) {
         err("failed to set CURLOPT_WRITEDATA: %s", 
             curl_easy_strerror(ret));
-        return -1;
+        goto curl_err;
     }
 
     ret = curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -40,7 +40,7 @@ int source_download(const char *url, const char *dest) {
     if (ret != 0) {
         err("failed to set CURLOPT_URL to '%s': %s", url,
             curl_easy_strerror(ret));
-        return -1;
+        goto curl_err;
     }
 
     ret = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
@@ -48,7 +48,7 @@ int source_download(const char *url, const char *dest) {
     if (ret != 0) {
         err("failed to set CURLOPT_NOPROGRESS: %s", 
             curl_easy_strerror(ret));
-        return -1;
+        goto curl_err;
     }
 
     ret = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -56,7 +56,7 @@ int source_download(const char *url, const char *dest) {
     if (ret != 0) {
         err("failed to set CURLOPT_FOLLOWLOCATION: %s", 
             curl_easy_strerror(ret));
-        return -1;
+        goto curl_err;
     }
 
     ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
@@ -64,20 +64,27 @@ int source_download(const char *url, const char *dest) {
     if (ret != 0) {
         err("failed to set CURLOPT_WRITEFUNCTION: %s", 
             curl_easy_strerror(ret));
-        return -1;
+        goto curl_err;
     }
 
     ret = curl_easy_perform(curl);
 
-    fclose(file);
-    curl_easy_cleanup(curl);
-
     if (ret != 0) {
         err("failed to download file '%s': %s", url,
             curl_easy_strerror(ret));
-        return -1;
+        goto curl_err;
     }
 
+    curl_easy_cleanup(curl);
+    fclose(file);
+
     return 0;     
+
+curl_err:
+    curl_easy_cleanup(curl);
+file_err:
+    fclose(file);
+
+    return -1;
 }
 
