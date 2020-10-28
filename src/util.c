@@ -74,3 +74,12 @@ int is_dir(const char *path) {
    return S_ISDIR(statbuf.st_mode);
 }
 
+int file_print_line(FILE *f) {
+    for (char c; (c = fgetc(f)) != '\n' && c != EOF; ) {
+        putchar(c);
+    }
+    putchar('\n');
+
+    return ferror(f);
+}
+

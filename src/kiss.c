@@ -1,3 +1,4 @@
+#include <dirent.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,6 +75,39 @@ static int run_search(int argc, char *argv[], char **repos) {
     return 0;
 }
 
+static int run_list(int argc, char *argv[], char *db, int fd) {
+    if (argc == 2) {
+        struct dirent **list;
+
+        int len = scandir(db, &list, 0, alphasort);
+
+        if (len == -1) {
+            err("failed to open repository '%s': %s", db, strerror(errno));
+            return -1;
+        }
+
+        // '.' and '..'
+        free(list[0]);
+        free(list[1]);
+
+        for (int i = 2; i < len; i++) {
+            pkg_list(fd, list[i]->d_name);
+            free(list[i]);
+        }
+
+        free(list);
+
+    } else {
+        for (int i = 2; i < argc; i++) {
+            if (pkg_list(fd, argv[i]) < 0) {
+                return -1;
+            }
+        }
+    }
+
+    return 0;
+}
+
 static int run_action(int argc, char *argv[]) {
     struct repo *repositories = repo_create();
 
@@ -109,7 +143,7 @@ static int run_action(int argc, char *argv[]) {
             return -1;
         }
 
-        if (repo_find(&new->repo, argv[i], repositories->repos) != 0) {
+        if (repo_find(&new->repo, argv[i], repositories->list) != 0) {
             err("repository search error");
             return -1;
         }
@@ -166,7 +200,23 @@ int main (int argc, char *argv[]) {
         //
 
     } else if (ARG(argv[1], "list")) {
-        //
+        struct repo *r = repo_create();
+
+        if (!r) {
+            err("failed to allocate memory");
+            return -1;
+        }
+
+        if (repo_init(&r) != 0) {
+            err("repository init failed");
+            repo_free(&r);
+            return -1;
+        }
+
+        err = run_list(argc, argv, 
+            r->list[vec_size(r->list) - 1], r->fds[vec_size(r->fds) - 1]);
+
+        repo_free(&r);
 
     } else if (ARG(argv[1], "search")) {
         struct repo *r = repo_create();
@@ -182,7 +232,7 @@ int main (int argc, char *argv[]) {
             return -1;
         }
 
-        err = run_search(argc, argv, r->repos);
+        err = run_search(argc, argv, r->list);
 
         repo_free(&r);
 

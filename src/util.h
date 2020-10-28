@@ -10,6 +10,7 @@ const char *xgetenv(const char *var, const char *fallback);
 char *path_normalize(char *d);
 int mkdir_p(const char* d);
 int run_cmd(const char *cmd);
+int file_print_line(FILE *f);
 int is_dir(const char *path);
 
 #define msg(...) do {             \

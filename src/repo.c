@@ -16,7 +16,7 @@ struct repo *repo_create(void) {
     struct repo *r = malloc(sizeof *r);
 
     if (r) {
-        r->repos = 0;
+        r->list = 0;
         r->KISS_PATH = str_init(512);
 
         if (r->KISS_PATH) {
@@ -32,8 +32,7 @@ struct repo *repo_create(void) {
 int repo_init(struct repo **r) {
     str_push_s(&(*r)->KISS_PATH, xgetenv("KISS_PATH", ":"));
     str_push_c(&(*r)->KISS_PATH, ':');
-    str_push_s(&(*r)->KISS_PATH, xgetenv("KISS_ROOT", "/"));
-    str_push_l(&(*r)->KISS_PATH, "var/db/kiss/installed", 21);
+    repo_get_db(&(*r)->KISS_PATH);
 
     if ((*r)->KISS_PATH->err != STR_OK) {
         err("string error");
@@ -46,12 +45,15 @@ int repo_init(struct repo **r) {
             return -1;
         }
 
-        if (access(t, F_OK) != 0) {
+        int repo_fd = open(t, O_RDONLY);
+
+        if (repo_fd == -1) {
             err("failed to access path '%s': %s", t, strerror(errno));
             return -1;
         }
 
-        vec_push((*r)->repos, path_normalize(t));
+        vec_push((*r)->list, path_normalize(t));
+        vec_push((*r)->fds, repo_fd);
     }
 
     return 0;
@@ -104,9 +106,21 @@ int repo_glob(glob_t *res, str *buf, const char *query, char **repos) {
     return 0;
 }
 
+void repo_get_db(str **s) {
+    str_push_s(s, xgetenv("KISS_ROOT", "/"));
+    str_push_l(s, "var/db/kiss/installed", 21);
+}
+
 void repo_free(struct repo **r) {
     str_free(&(*r)->KISS_PATH);
-    vec_free((*r)->repos);
+    vec_free((*r)->list);
+
+    for (size_t i = 0; i < vec_size((*r)->fds); i++) {
+        close((*r)->fds[i]);
+    }
+
+    vec_free((*r)->fds);
+
     free(*r);
     *r = NULL;
 }

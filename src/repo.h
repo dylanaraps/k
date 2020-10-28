@@ -5,13 +5,15 @@
 
 struct repo {
     str *KISS_PATH;   
-    char **repos;
+    char **list;
+    int *fds;
 };
 
 struct repo *repo_create(void);
 int repo_init(struct repo **r);
 int repo_find(char **buf, const char *name, char **repos);
 int repo_glob(glob_t *res, str *buf, const char *query, char **repos);
+void repo_get_db(str **s);
 void repo_free(struct repo **r);
 
 #endif

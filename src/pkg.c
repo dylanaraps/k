@@ -26,21 +26,14 @@ struct pkg *pkg_create(const char *name) {
     return NULL;
 }
 
-FILE *pkg_fopen(struct pkg *p, const char *f) {
-    int repo_fd = open(p->repo, O_RDONLY);    
-
-    if (repo_fd == -1) {
-        return NULL;
-    }
-
-    int pkg_fd = openat(repo_fd, p->name, O_RDONLY);
-    close(repo_fd);
+FILE *pkg_fopen(int repo_fd, char *pkg, const char *file) {
+    int pkg_fd = openat(repo_fd, pkg, O_RDONLY);
 
     if (pkg_fd == -1) {
         return NULL;
     }
 
-    int fd = openat(pkg_fd, f, O_RDONLY);
+    int fd = openat(pkg_fd, file, O_RDONLY);
     close(pkg_fd);
 
     if (fd == -1) {
@@ -51,7 +44,14 @@ FILE *pkg_fopen(struct pkg *p, const char *f) {
 }
 
 int pkg_source(struct pkg *p) {
-    FILE *f = pkg_fopen(p, "sources");
+    int repo_fd = open(p->repo, O_RDONLY);
+
+    if (repo_fd == -1) {
+        err("failed to open repository '%s': %s", p->repo, strerror(errno));
+        return -1;
+    }
+
+    FILE *f = pkg_fopen(repo_fd, p->name, "sources");
 
     if (!f) {
         return errno == ENOENT ? -2 : -1;
@@ -84,6 +84,26 @@ int pkg_source(struct pkg *p) {
     fclose(f);
 
     return 0;
+}
+
+int pkg_list(int repo_fd, char *pkg) {
+    FILE *ver = pkg_fopen(repo_fd, pkg, "version");
+
+    if (!ver) {
+        if (errno == ENOENT) {
+            err("package '%s' not installed", pkg);
+            return -1;
+        }
+
+        err("failed to open pkg '%s': %s", pkg, strerror(errno));
+        return -1;
+    }
+
+    fputs(pkg, stdout);
+    putchar(' ');
+    int err = file_print_line(ver);
+    fclose(ver);
+    return err;
 }
 
 void pkg_free(struct pkg **p) {
