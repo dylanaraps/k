@@ -54,6 +54,7 @@ int pkg_source(struct pkg *p) {
     FILE *f = pkg_fopen(repo_fd, p->name, "sources");
 
     if (!f) {
+        close(repo_fd);
         return errno == ENOENT ? -2 : -1;
     }
 
@@ -69,6 +70,8 @@ int pkg_source(struct pkg *p) {
 
         if (!src) {
             err("[%s] invalid sources file", p->name);
+            close(repo_fd);
+            free(line);
             return -1;
         }
 
@@ -80,6 +83,7 @@ int pkg_source(struct pkg *p) {
         }
     }
 
+    close(repo_fd);
     free(line);
     fclose(f);
 
