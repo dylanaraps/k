@@ -34,6 +34,8 @@ int repo_init(struct repo **r) {
     str_push_s(&(*r)->KISS_PATH, xgetenv("KISS_PATH", ":"));
     str_push_c(&(*r)->KISS_PATH, ':');
     str_push_s(&(*r)->KISS_PATH, xgetenv("KISS_ROOT", "/"));
+    str_rstrip(&(*r)->KISS_PATH, '/');
+    str_push_c(&(*r)->KISS_PATH, '/');
     str_push_l(&(*r)->KISS_PATH, "var/db/kiss/installed", 21);
 
     if ((*r)->KISS_PATH->err != STR_OK) {
