@@ -33,7 +33,8 @@ struct repo *repo_create(void) {
 int repo_init(struct repo **r) {
     str_push_s(&(*r)->KISS_PATH, xgetenv("KISS_PATH", ":"));
     str_push_c(&(*r)->KISS_PATH, ':');
-    repo_get_db(&(*r)->KISS_PATH);
+    str_push_s(&(*r)->KISS_PATH, xgetenv("KISS_ROOT", "/"));
+    str_push_l(&(*r)->KISS_PATH, "var/db/kiss/installed", 21);
 
     if ((*r)->KISS_PATH->err != STR_OK) {
         err("string error");
@@ -105,11 +106,6 @@ int repo_glob(glob_t *res, str *buf, const char *query, char **repos) {
     }
 
     return 0;
-}
-
-void repo_get_db(str **s) {
-    str_push_s(s, xgetenv("KISS_ROOT", "/"));
-    str_push_l(s, "var/db/kiss/installed", 21);
 }
 
 void repo_free(struct repo **r) {
