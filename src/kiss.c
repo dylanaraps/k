@@ -55,16 +55,12 @@ static int run_search(int argc, char *argv[], char **repos) {
 
     for (int i = 2; i < argc; i++) {
         if (repo_glob(&res, buf, argv[i], repos) != 0 ) {
-            globfree(&res);
-            str_free(&buf);
-            return -1;
+            goto error;
         }
 
         if (res.gl_pathc == 0) {
             err("no search results for '%s'", argv[i]);
-            globfree(&res);
-            str_free(&buf);
-            return -1;
+            goto error;
         }
 
         for (size_t j = 0; j < res.gl_pathc; j++) {
@@ -76,6 +72,11 @@ static int run_search(int argc, char *argv[], char **repos) {
 
     str_free(&buf);
     return 0;
+
+error:
+    globfree(&res);
+    str_free(&buf);
+    return -1;
 }
 
 static int run_list(int argc, char *argv[], char *db, int fd) {
