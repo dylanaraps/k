@@ -108,6 +108,38 @@ static int run_list(int argc, char *argv[], char *db, int fd) {
     return 0;
 }
 
+static int run_query(int argc, char *argv[]) {
+    struct repo *r = repo_create();
+
+    if (!r) {
+        err("failed to allocate memory");
+        return -1;
+    }
+
+    if (repo_init(&r) != 0) {
+        err("repository init failed");
+        repo_free(&r);
+        return -1;
+    }
+
+    int err = 0;
+
+    switch (argv[1][0]) {
+        case 'l':
+            err = run_list(argc, argv, 
+                r->list[vec_size(r->list) - 1], 
+                r->fds[vec_size(r->fds) - 1]);
+            break;
+
+        case 's':
+            err = run_search(argc, argv, r->list);
+            break;
+    }
+
+    repo_free(&r);
+    return err;
+}
+
 static int run_action(int argc, char *argv[]) {
     struct repo *repositories = repo_create();
 
@@ -199,42 +231,9 @@ int main (int argc, char *argv[]) {
                ARG(argv[1], "remove")) {
         //
 
-    } else if (ARG(argv[1], "list")) {
-        struct repo *r = repo_create();
-
-        if (!r) {
-            err("failed to allocate memory");
-            return -1;
-        }
-
-        if (repo_init(&r) != 0) {
-            err("repository init failed");
-            repo_free(&r);
-            return -1;
-        }
-
-        err = run_list(argc, argv, 
-            r->list[vec_size(r->list) - 1], r->fds[vec_size(r->fds) - 1]);
-
-        repo_free(&r);
-
-    } else if (ARG(argv[1], "search")) {
-        struct repo *r = repo_create();
-
-        if (!r) {
-            err("failed to allocate memory");
-            return -1;
-        }
-
-        if (repo_init(&r) != 0) {
-            err("repository init failed");
-            repo_free(&r);
-            return -1;
-        }
-
-        err = run_search(argc, argv, r->list);
-
-        repo_free(&r);
+    } else if (ARG(argv[1], "list") || 
+               ARG(argv[1], "search")) {
+        err = run_query(argc, argv);
 
     } else if (ARG(argv[1], "update")) {
         //
