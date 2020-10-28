@@ -65,7 +65,7 @@ int pkg_source(struct pkg *p) {
         }
 
         char *src = strtok(line, " \n");
-        char *des = strtok(NULL, " \n");
+        /* char *des = strtok(NULL, " \n"); */
 
         if (!src) {
             err("[%s] invalid sources file", p->name);
