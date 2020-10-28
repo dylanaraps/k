@@ -59,8 +59,9 @@ int pkg_source(struct pkg *p) {
     }
 
     char *line = 0;
+    size_t len = 0;
 
-    while (getline(&line, &(size_t){0}, f) != -1) {
+    while (getline(&line, &len, f) != -1) {
         if (line[0] == '#' || line[0] == '\n') {
             continue; 
         }
@@ -70,6 +71,7 @@ int pkg_source(struct pkg *p) {
 
         if (!src) {
             err("[%s] invalid sources file", p->name);
+            fclose(f);
             close(repo_fd);
             free(line);
             return -1;
