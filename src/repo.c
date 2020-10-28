@@ -17,6 +17,7 @@ struct repo *repo_create(void) {
 
     if (r) {
         r->list = 0;
+        r->fds  = 0;
         r->KISS_PATH = str_init(512);
 
         if (r->KISS_PATH) {
