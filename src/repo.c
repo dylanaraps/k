@@ -83,29 +83,6 @@ char *repo_find(const char *name, struct repo *repos) {
     return NULL;
 }
 
-static int globat(const char *pwd, const char *query, int opt, glob_t *res) {
-    char buf[512];
-
-    if ((strlen(pwd) + strlen(query) + 2) >= sizeof buf) {
-        err("buffer overflow");
-        return -1;
-    }
-
-    strcpy(buf, pwd);
-    strcat(buf, "/");
-    strcat(buf, query);
-    
-    switch (glob(buf, opt, NULL, res)) {
-        case GLOB_NOSPACE:
-        case GLOB_ABORTED:
-            err("glob error");
-            return -1;
-
-        default:
-            return 0;
-    }
-}
-
 int repo_glob(glob_t *res, const char *query, char **repos) {
     for (size_t i = 0; i < vec_size(repos); i++) {
         if (globat(repos[i], query, i ? GLOB_APPEND : 0, res) < 0) {
