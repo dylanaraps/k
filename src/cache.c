@@ -9,26 +9,51 @@
 #include "util.h"
 #include "cache.h"
 
-int cache_init(str **cache_dir) {
-    if (cache_get_base(cache_dir) != 0) {
+struct cache *cache_create(void) {
+    struct cache *c = malloc(sizeof *c);
+
+    if (c) {
+        c->path = 0;
+        c->fd = 0;
+    }
+
+    return c;
+}
+
+int cache_init(struct cache **cac) {
+    if (str_push_s(&(*cac)->path, getenv("XDG_CACHE_HOME")) < 0) {
+        if (str_push_s(&(*cac)->path, getenv("HOME")) < 0) {
+            err("HOME and XDG_CACHE_HOME are unset");
+            return -1;
+        }
+
+        if (str_push_l(&(*cac)->path, "/.cache", 7) < 0) {
+            return -1;
+        }
+    }
+
+    if (str_printf(&(*cac)->path, "/kiss/proc/%u/", getpid()) < 0) {
         return -1;
     }
 
-    if (str_printf(cache_dir, "/proc/%u/", getpid()) < 0) {
-        err("string error");
+    if (mkdir_p((*cac)->path) != 0) {
+        err("failed to create directory '%s': %s", 
+            (*cac)->path, strerror(errno));
         return -1;
     }
 
-    if (mkdir_p((*cache_dir)->buf) != 0) {
-        err("failed to create directory '%s': %s",
-            (*cache_dir)->buf, strerror(errno));
+    (*cac)->fd = open((*cac)->path, O_RDONLY);
+
+    if ((*cac)->fd == -1) {
+        err("failed to open cache directory '%s': %s", 
+            (*cac)->path, strerror(errno));
         return -1;
     }
 
     return 0;
 }
 
-int cache_mkdir(str *cache_dir) {
+int cache_mkdir(struct cache *cac) {
     static const char *caches[]  = {
         "build", 
         "extract", 
@@ -37,41 +62,21 @@ int cache_mkdir(str *cache_dir) {
         "../../bin"
     };
 
-    int cache_fd = open(cache_dir->buf, O_RDONLY);
-
-    if (cache_fd == -1) {
-        err("failed to open cache directory: %s", strerror(errno));
-        return -1;
-    }
-
     for (size_t i = 0; i < (sizeof caches / sizeof caches[0]); i++) {
-        if (mkdirat(cache_fd, caches[i], 0755) == -1 && errno != EEXIST) {
+        if (mkdirat(cac->fd, caches[i], 0755) == -1 && errno != EEXIST) {
             err("failed to create cache directory '%s': %s", 
                 caches[i], strerror(errno));
             return -1;
         }
     }
 
-    return close(cache_fd);
+    return 0;
 }
 
-int cache_get_base(str **s) {
-    if (str_push_s(s, getenv("XDG_CACHE_HOME")) < 0) {
-        if (str_push_s(s, getenv("HOME")) < 0) {
-            err("HOME is unset");
-            return -1;
-        }
-
-        if (str_push_l(s, "/.cache", 7) < 0) {
-            return -1;
-        }
-    }
-
-    if ((*s)->buf[0] != '/') {
-        err("cache directory not absolute");
-        return -1;
-    }
-
-    return str_push_l(s, "/kiss", 5);
+void cache_free(struct cache **cac) {
+    str_free(&(*cac)->path);
+    close((*cac)->fd);
+    free(*cac);
+    *cac = NULL;
 }
 

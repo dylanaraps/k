@@ -100,4 +100,3 @@ int globat(const char *pwd, const char *query, int opt, glob_t *res) {
             return 0;
     }
 }
-

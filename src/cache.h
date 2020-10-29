@@ -3,8 +3,14 @@
 
 #include "str.h"
 
-int cache_init(str **cache_dir);
-int cache_get_base(str **s);
-int cache_mkdir(str *cache_dir);
+struct cache {
+    str *path;
+    int fd;
+};
+
+struct cache *cache_create(void);
+int cache_init(struct cache **cac);
+int cache_mkdir(struct cache *cac);
+void cache_free(struct cache **cac);
 
 #endif

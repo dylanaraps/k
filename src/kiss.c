@@ -146,16 +146,21 @@ static int run_action(int argc, char *argv[]) {
         return -1;
     }
 
-    str *cache_dir = str_init(128);
+    struct cache *cache_dir = cache_create();
 
     if (!cache_dir) {
         err("failed to allocate memory");
         return -1;
     }
 
-    if (cache_init(&cache_dir) != 0) {
+    if (cache_init(&cache_dir) < 0) {
         err("cache init failed"); 
         return -1;
+    }
+
+    if (cache_mkdir(cache_dir) < 0) {
+        err("cache creation failed"); 
+        return -1; 
     }
 
     struct pkg **pkgs = 0;
@@ -179,7 +184,7 @@ static int run_action(int argc, char *argv[]) {
     }
 
     repo_free(&repos);
-    str_free(&cache_dir);
+    cache_free(&cache_dir);
     for (size_t i = 0; i < vec_size(pkgs); i++) {
         pkg_free(&pkgs[i]);
     }

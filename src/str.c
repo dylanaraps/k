@@ -1,45 +1,22 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "str.h"
 
-str *str_init(size_t l) {
-    str *s = malloc(sizeof (*s) + l + 1);
-
-    if (s) {
-         s->cap = l + 1;
-         s->len = 0;
-        *s->buf = 0;
-    }
-
-    return s;
-}
-
-int str_alloc(str **s, size_t l) {
-    str *s2 = realloc(*s, sizeof (*s2) + (*s)->cap + l);
+str *str_alloc(str **s, size_t l) {
+    size_t *s2 = realloc(*s ? (size_t *) *s - 2 : (size_t *) *s,
+        (sizeof (size_t) * 2) + str_get_cap(*s) + l + 1);
 
     if (!s2) {
-        return -1;
+        return NULL;
     }
 
-    *s = s2;
-    (*s)->cap += l;
+    s2[0] = (*s ? s2[0] : (size_t) 0) + l + 1; // cap
+    s2[1] = (*s ? s2[1] : (size_t) 0);         // len
 
-    return 0;
-}
-
-int str_push_c(str **s, int c) {
-    if ((*s)->len + 1 >= (*s)->cap) {
-        if (str_alloc(s, ((*s)->cap + ((*s)->cap >> 1))) < 0) {
-            return -1;
-        }
-    }
-
-    (*s)->buf[(*s)->len] = c;
-    (*s)->buf[(*s)->len += 1] = 0;
-
-    return 0;
+    return (char *) &s2[2];
 }
 
 int str_push_l(str **s, const char *d, size_t l) {
@@ -47,17 +24,18 @@ int str_push_l(str **s, const char *d, size_t l) {
         return -1;
     }
 
-    if (((*s)->len + l) >= (*s)->cap) {
-        if (str_alloc(s, (l + (l >> 1))) < 0) {
-            return -1;
+    if (str_get_len(*s) + l >= str_get_cap(*s)) {
+        str *n = str_alloc(s, (l + (l >> 1)));
+
+        if (!n) {
+            return -1; 
         }
+
+        *s = n;
     }
 
-    for (size_t i = 0; i < l; i++) {
-        if (str_push_c(s, d[i]) < 0) {
-            return -1;
-        }
-    }
+    memcpy(*s + str_get_len(*s), d, l + 1);
+    str_set_len(s, str_get_len(*s) + l);
 
     return 0;
 }
@@ -67,20 +45,15 @@ int str_push_s(str **s, const char *d) {
         return -1;
     }
 
-    size_t l = 0;
-
-    while (d[l]) l++;
-
-    return str_push_l(s, d, l);
+    return str_push_l(s, d, strlen(d));
 }
 
 int str_undo_l(str **s, size_t l) {
-    if (l > (*s)->len) {
+    if (l > str_get_len(*s)) {
         return -1;
     }
 
-    (*s)->buf[(*s)->len -= l] = 0;
-
+    str_set_len(s, str_get_len(*s) - l);
     return 0;
 }
 
@@ -89,11 +62,7 @@ int str_undo_s(str **s, const char *d) {
         return -1;
     }
 
-    size_t l = 0;
-
-    while (d[l]) l++;
-
-    return str_undo_l(s, l);
+    return str_undo_l(s, strlen(d));
 }
 
 int str_vprintf(str **s, const char *f, va_list ap) {
@@ -106,16 +75,20 @@ int str_vprintf(str **s, const char *f, va_list ap) {
         return -1;
     }
 
-    if (((*s)->len + (size_t) l1) >= (*s)->cap) {
-        if (str_alloc(s, (size_t) l1) < 0) {
-            return -1;
+    if (str_get_len(*s) + (size_t) l1 >= str_get_cap(*s)) {
+        str *n = str_alloc(s, (size_t) l1);
+
+        if (!n) {
+            return -1; 
         }
+
+        *s = n;
     }
 
-    int l2 = vsnprintf((*s)->buf + (*s)->len, (size_t) l1 + 1, f, ap);
+    int l2 = vsnprintf(*s + str_get_len(*s), (size_t) l1 + 1, f, ap);
 
     if (l1 == l2) {
-        (*s)->len += (size_t) l1;
+        str_set_len(s, str_get_len(*s) + (size_t) l1);
         return 0;
     }
 
@@ -127,13 +100,12 @@ int str_printf(str **s, const char *f, ...) {
     va_start(ap, f);
     int ret = str_vprintf(s, f, ap);
     va_end(ap);
-
     return ret;
 }
 
 void str_free(str **s) {
     if (*s) {
-        free(*s);
+        free((size_t *) *s - 2);
         *s = NULL;
     }
 }
