@@ -25,24 +25,21 @@ struct repo *repo_create(void) {
 }
 
 int repo_init(struct repo **r, char *path) {
-    if (!path || !path[0]) {
-        goto db;
-    }
+    if (path && path[0]) {
+        (*r)->KISS_PATH = strdup(path);
 
-    (*r)->KISS_PATH = strdup(path);
+        if (!(*r)->KISS_PATH) {
+            err("failed to allocate memory");
+            return -1; 
+        }
 
-    if (!(*r)->KISS_PATH) {
-        err("failed to allocate memory");
-        return -1; 
-    }
-
-    for (char *t = strtok((*r)->KISS_PATH, ":"); t; t = strtok(0, ":")) {
-        if (repo_add(r, t) < 0) {
-            return -1;
+        for (char *t = strtok((*r)->KISS_PATH, ":"); t; t = strtok(0, ":")) {
+            if (repo_add(r, t) < 0) {
+                return -1;
+            }
         }
     }
 
-db:;
     char *db = repo_get_db();
 
     if (!db) {
@@ -71,32 +68,20 @@ int repo_add(struct repo **r, char *path) {
     return 0;
 }
 
-int repo_find(char **buf, const char *name, char **repos) {
-    for (size_t i = 0; i < vec_size(repos); i++) {
-        int fd = open(repos[i], O_RDONLY);
-
-        if (fd == -1) {
-            err("failed to open repository '%s': %s", 
-                repos[i], strerror(errno));
-            return -1;
-        }
-
-        int err = faccessat(fd, name, F_OK, 0);
-        close(fd);
-
-        if (err != -1) {
-            *buf = repos[i];
-            return 0;
+char *repo_find(const char *name, struct repo *repos) {
+    for (size_t i = 0; i < vec_size(repos->fds); i++) {
+        if (faccessat(repos->fds[i], name, F_OK, 0) != -1) {
+            return repos->list[i];
 
         } else if (errno != ENOENT) {
             err("failed to open pkg '%s/%s': %s", 
-                repos[i], name, strerror(errno));
-            return -1;
+                repos->list[i], name, strerror(errno));
+            return NULL;
         }
     }
 
     err("package '%s' not in any repository", name);
-    return -2;
+    return NULL;
 }
 
 int repo_glob(glob_t *res, const char *query, char **repos) {

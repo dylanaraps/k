@@ -179,7 +179,9 @@ static int run_action(int argc, char *argv[]) {
             return -1;
         }
 
-        if (repo_find(&new->repo, argv[i], repos->list) != 0) {
+        new->repo = repo_find(argv[i], repos);
+
+        if (!new->repo) {
             err("repository search error");
             return -1;
         }
