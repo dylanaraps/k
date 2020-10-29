@@ -84,31 +84,36 @@ char *repo_find(const char *name, struct repo *repos) {
     return NULL;
 }
 
-int repo_glob(glob_t *res, const char *query, char **repos) {
-    str *full_query = str_init(128);
+static int globat(const char *pwd, const char *query, int opt, glob_t *res) {
+    char buf[512];
 
-    if (!full_query) {
-        err("failed to allocate memory");
+    if ((strlen(pwd) + strlen(query) + 2) >= sizeof buf) {
+        err("buffer overflow");
         return -1;
     }
 
-    for (size_t i = 0; i < vec_size(repos); i++) {
-        str_undo_l(&full_query, full_query->len);
-        str_push_s(&full_query, repos[i]);
-        str_push_c(&full_query, '/');
-        str_push_s(&full_query, query);
-        str_push_c(&full_query, '/');
-
-        if (full_query->err != STR_OK) {
-            str_free(&full_query);
-            err("string error");
+    strcpy(buf, pwd);
+    strcat(buf, "/");
+    strcat(buf, query);
+    
+    switch (glob(buf, opt, NULL, res)) {
+        case GLOB_NOSPACE:
+        case GLOB_ABORTED:
+            err("glob error");
             return -1;
-        }
 
-        glob(full_query->buf, i ? GLOB_APPEND : 0, NULL, res);
+        default:
+            return 0;
+    }
+}
+
+int repo_glob(glob_t *res, const char *query, char **repos) {
+    for (size_t i = 0; i < vec_size(repos); i++) {
+        if (globat(repos[i], query, i ? GLOB_APPEND : 0, res) < 0) {
+            return -1; 
+        }
     }
 
-    str_free(&full_query);
     return 0;
 }
 
@@ -116,7 +121,7 @@ char *repo_get_db(void) {
     char *env = getenv("KISS_ROOT");
 
     if (!env || !env[0]) {
-        return strdup(DB_DIR);
+        return strndup(DB_DIR, sizeof (DB_DIR));
     }
 
     if (env[0] != '/') {
@@ -130,7 +135,7 @@ char *repo_get_db(void) {
         len--;
     }
 
-    char *db = malloc(len + sizeof(DB_DIR));
+    char *db = malloc(len + sizeof (DB_DIR));
 
     if (!db) {
         err("failed to allocate memory");
@@ -144,16 +149,19 @@ char *repo_get_db(void) {
 }
 
 void repo_free(struct repo **r) {
+    // Holds memory to list - last element.
+    free((*r)->KISS_PATH);
+
+    // Holds memory to last element in list.
     free((*r)->list[vec_size((*r)->list)  - 1]);
-    vec_free((*r)->list);
 
     for (size_t i = 0; i < vec_size((*r)->fds); i++) {
         close((*r)->fds[i]);
     }
 
     vec_free((*r)->fds);
+    vec_free((*r)->list);
 
-    free((*r)->KISS_PATH);
     free(*r);
     *r = NULL;
 }

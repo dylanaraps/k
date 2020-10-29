@@ -44,23 +44,18 @@ static void run_extension(char *argv[]) {
 }
 
 static int run_search(int argc, char *argv[], char **repos) {
-    str *buf = str_init(128);
-
-    if (!buf) {
-        err("failed to allocate memory");
-        return -1;
-    }
-
     glob_t res = {0};
 
     for (int i = 2; i < argc; i++) {
         if (repo_glob(&res, argv[i], repos) != 0 ) {
-            goto error;
+            globfree(&res);
+            return -1;
         }
 
         if (res.gl_pathc == 0) {
             err("no search results for '%s'", argv[i]);
-            goto error;
+            globfree(&res);
+            return -1;
         }
 
         for (size_t j = 0; j < res.gl_pathc; j++) {
@@ -70,13 +65,7 @@ static int run_search(int argc, char *argv[], char **repos) {
         globfree(&res);
     }
 
-    str_free(&buf);
     return 0;
-
-error:
-    globfree(&res);
-    str_free(&buf);
-    return -1;
 }
 
 static int run_list(int argc, char *argv[], char *db, int fd) {
