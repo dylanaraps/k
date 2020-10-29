@@ -14,9 +14,7 @@ int cache_init(str **cache_dir) {
         return -1;
     }
 
-    str_printf(cache_dir, "/proc/%u/", getpid());
-
-    if ((*cache_dir)->err != STR_OK) {
+    if (str_printf(cache_dir, "/proc/%u/", getpid()) < 0) {
         err("string error");
         return -1;
     }
@@ -58,20 +56,15 @@ int cache_mkdir(str *cache_dir) {
 }
 
 int cache_get_base(str **s) {
-    str_push_s(s, getenv("XDG_CACHE_HOME"));
-
-    if ((*s)->err != STR_OK) {
-        (*s)->err = STR_OK;
-
-        str_push_s(s, getenv("HOME"));
-
-        if ((*s)->err != STR_OK) {
+    if (str_push_s(s, getenv("XDG_CACHE_HOME")) < 0) {
+        if (str_push_s(s, getenv("HOME")) < 0) {
             err("HOME is unset");
             return -1;
         }
 
-        str_rstrip(s, '/');
-        str_push_l(s, "/.cache", 7);
+        if (str_push_l(s, "/.cache", 7) < 0) {
+            return -1;
+        }
     }
 
     if ((*s)->buf[0] != '/') {
@@ -79,8 +72,6 @@ int cache_get_base(str **s) {
         return -1;
     }
 
-    str_rstrip(s, '/');
-    str_push_l(s, "/kiss", 5);
-    return 0;
+    return str_push_l(s, "/kiss", 5);
 }
 
