@@ -7,7 +7,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#include "str.h"
 #include "vec.h"
 #include "util.h"
 #include "repo.h"
@@ -121,7 +120,7 @@ char *repo_get_db(void) {
     char *env = getenv("KISS_ROOT");
 
     if (!env || !env[0]) {
-        return strndup(DB_DIR, sizeof (DB_DIR));
+        return strndup(DB_DIR, sizeof DB_DIR);
     }
 
     if (env[0] != '/') {
@@ -135,7 +134,7 @@ char *repo_get_db(void) {
         len--;
     }
 
-    char *db = malloc(len + sizeof (DB_DIR));
+    char *db = malloc(len + sizeof DB_DIR);
 
     if (!db) {
         err("failed to allocate memory");
@@ -143,7 +142,9 @@ char *repo_get_db(void) {
     }
 
     memcpy(db, env, len);
-    memcpy(db + len, DB_DIR, sizeof (DB_DIR));
+    memcpy(db + len, DB_DIR, sizeof DB_DIR);
+
+    db[len + sizeof DB_DIR] = 0;
 
     return db;
 }
