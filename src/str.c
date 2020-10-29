@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #include "str.h"
 
@@ -19,11 +20,7 @@ str *str_alloc(str **s, size_t l) {
     return (char *) &s2[2];
 }
 
-int str_push_l(str **s, const char *d, size_t l) {
-    if (!d || l == 0) {
-        return -1;
-    }
-
+int str_maybe_alloc(str **s, size_t l) {
     if (str_get_len(*s) + l >= str_get_cap(*s)) {
         str *n = str_alloc(s, (l + (l >> 1)));
 
@@ -32,6 +29,18 @@ int str_push_l(str **s, const char *d, size_t l) {
         }
 
         *s = n;
+    }
+
+    return 0;
+}
+
+int str_push_l(str **s, const char *d, size_t l) {
+    if (!d || l == 0) {
+        return -1;
+    }
+
+    if (str_maybe_alloc(s, l) < 0) {
+        return -1;
     }
 
     memcpy(*s + str_get_len(*s), d, l + 1);
@@ -75,24 +84,18 @@ int str_vprintf(str **s, const char *f, va_list ap) {
         return -1;
     }
 
-    if (str_get_len(*s) + (size_t) l1 >= str_get_cap(*s)) {
-        str *n = str_alloc(s, (size_t) l1);
-
-        if (!n) {
-            return -1; 
-        }
-
-        *s = n;
+    if (str_maybe_alloc(s, (size_t) l1) < 0) {
+        return -1;
     }
 
     int l2 = vsnprintf(*s + str_get_len(*s), (size_t) l1 + 1, f, ap);
 
-    if (l1 == l2) {
-        str_set_len(s, str_get_len(*s) + (size_t) l1);
-        return 0;
+    if (l1 != l2) {
+        return -1;
     }
 
-    return -1;
+    str_set_len(s, str_get_len(*s) + (size_t) l1);
+    return 0;
 }
 
 int str_printf(str **s, const char *f, ...) {
@@ -104,9 +107,11 @@ int str_printf(str **s, const char *f, ...) {
 }
 
 void str_free(str **s) {
-    if (*s) {
-        free((size_t *) *s - 2);
-        *s = NULL;
+    if (!*s) {
+        return;
     }
+
+    free((size_t *) *s - 2);
+    *s = NULL;
 }
 

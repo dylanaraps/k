@@ -32,7 +32,7 @@ int cache_init(struct cache **cac) {
         }
     }
 
-    if (str_printf(&(*cac)->path, "/kiss/proc/%u/", getpid()) < 0) {
+    if (str_printf(&(*cac)->path, "/kiss/proc/%ld/", (long) getpid()) < 0) {
         return -1;
     }
 
