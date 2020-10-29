@@ -8,12 +8,6 @@
 
 #include "util.h"
 
-const char *xgetenv(const char *var, const char *fallback) {
-    char *env = getenv(var);
-
-    return env ? env[0] ? env : fallback : fallback;
-}
-
 char *path_normalize(char *d) {
     if (d) {
         for (size_t i = 1, l = strlen(d);

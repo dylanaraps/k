@@ -6,7 +6,6 @@
 #include <errno.h>
 #include <string.h>
 
-const char *xgetenv(const char *var, const char *fallback);
 char *path_normalize(char *d);
 int mkdir_p(const char* d);
 int run_cmd(const char *cmd);

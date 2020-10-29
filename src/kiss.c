@@ -54,7 +54,7 @@ static int run_search(int argc, char *argv[], char **repos) {
     glob_t res = {0};
 
     for (int i = 2; i < argc; i++) {
-        if (repo_glob(&res, buf, argv[i], repos) != 0 ) {
+        if (repo_glob(&res, argv[i], repos) != 0 ) {
             goto error;
         }
 
@@ -120,7 +120,7 @@ static int run_query(int argc, char *argv[]) {
         return -1;
     }
 
-    if (repo_init(&r) != 0) {
+    if (repo_init(&r, getenv("KISS_PATH")) != 0) {
         err("repository init failed");
         repo_free(&r);
         return -1;
@@ -152,7 +152,7 @@ static int run_action(int argc, char *argv[]) {
         return -1;
     }
 
-    if (repo_init(&repos) != 0) {
+    if (repo_init(&repos, getenv("KISS_PATH")) != 0) {
         err("repository init failed");
         return -1;
     }

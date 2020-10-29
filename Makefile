@@ -19,6 +19,7 @@ VALGRIND = \
 	--show-leak-kinds=all \
 	--track-origins=yes \
 	--error-exitcode=1 \
+	--track-fds=yes \
 	--trace-children=yes
 
 OBJ = \
