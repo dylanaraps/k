@@ -44,6 +44,19 @@ static int run_extension(char *argv[]) {
     return -1;
 }
 
+static int run_download(struct pkg *p) {
+    FILE *src_file = pkg_fopen(p->repo, p->name, "sources");
+
+    if (!src_file) {
+        err("failed to open sources file '%s': %s", 
+            p->name, strerror(errno));
+        return -1;
+    }
+
+    fclose(src_file);
+    return 0;
+}
+
 static int run_search(int argc, char *argv[], struct repo *r) {
     for (int i = 2; i < argc; i++) {
         glob_t res;
@@ -190,13 +203,27 @@ static int run_action(int argc, char *argv[]) {
 
         new->repo = repo_find(argv[i], repos);
 
-        if (!new->repo) {
+        if (new->repo < 0) {
             err("repository search error");
             err = -1;
             goto free_pkg;
         }
 
         vec_push(pkgs, new);     
+    }
+
+    switch (argv[1][0]) {
+        case 'b':
+            break;
+
+        case 'c':
+            break;
+
+        case 'd':
+            for (size_t i = 0; i < vec_size(pkgs); i++) {
+                run_download(pkgs[i]);
+            }
+            break;
     }
 
 free_pkg:
@@ -215,7 +242,7 @@ free_repo:
 }
 
 int main (int argc, char *argv[]) {
-    int err = EXIT_SUCCESS;
+    int err = 0;
 
     if (argc < 2 || !argv[1] || !argv[1][0] || argv[1][0] == '-') {
         usage(argv[0]);

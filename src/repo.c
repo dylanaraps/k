@@ -68,20 +68,20 @@ int repo_add(struct repo **r, char *path) {
     return 0;
 }
 
-char *repo_find(const char *name, struct repo *r) {
+int repo_find(const char *name, struct repo *r) {
     for (size_t i = 0; i < vec_size(r->fds); i++) {
         if (faccessat(r->fds[i], name, F_OK, 0) != -1) {
-            return r->list[i];
+            return r->fds[i];
 
         } else if (errno != ENOENT) {
             err("failed to open pkg '%s/%s': %s", 
                 r->list[i], name, strerror(errno));
-            return NULL;
+            return -1;
         }
     }
 
     err("package '%s' not in any repository", name);
-    return NULL;
+    return -1;
 }
 
 int repo_glob(glob_t *res, const char *query, struct repo *r) {
