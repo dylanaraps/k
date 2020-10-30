@@ -17,6 +17,7 @@ struct repo *repo_create(void) {
     if (r) {
         r->list = 0;
         r->fds  = 0;
+        r->buf  = 0;
         r->KISS_PATH = str_init(256);
 
         if (r->KISS_PATH) {
@@ -77,14 +78,14 @@ int repo_add(struct repo **r, char *path) {
     return 0;
 }
 
-char *repo_find(const char *name, struct repo *repos) {
-    for (size_t i = 0; i < vec_size(repos->fds); i++) {
-        if (faccessat(repos->fds[i], name, F_OK, 0) != -1) {
-            return repos->list[i];
+char *repo_find(const char *name, struct repo *r) {
+    for (size_t i = 0; i < vec_size(r->fds); i++) {
+        if (faccessat(r->fds[i], name, F_OK, 0) != -1) {
+            return r->list[i];
 
         } else if (errno != ENOENT) {
             err("failed to open pkg '%s/%s': %s", 
-                repos->list[i], name, strerror(errno));
+                r->list[i], name, strerror(errno));
             return NULL;
         }
     }
@@ -93,10 +94,23 @@ char *repo_find(const char *name, struct repo *repos) {
     return NULL;
 }
 
-int repo_glob(glob_t *res, const char *query, char **repos) {
-    for (size_t i = 0; i < vec_size(repos); i++) {
-        if (globat(repos[i], query, i ? GLOB_APPEND : 0, res) < 0) {
-            return -1; 
+int repo_glob(glob_t *res, const char *query, struct repo *r) {
+    for (size_t i = 0; i < vec_size(r->list); i++) {
+        if (str_printf(&r->buf, "%s/%s/", r->list[i], query) < 0) {
+            err("failed to construct search query");
+            return -1;
+        }
+
+        switch (glob(r->buf, i ? GLOB_APPEND : 0, NULL, res)) {
+            case GLOB_NOSPACE:
+            case GLOB_ABORTED:
+                err("glob error");
+                return -1;
+        }
+
+        if (str_undo_l(&r->buf, str_get_len(&r->buf)) < 0) {
+            err("string error");
+            return -1;
         }
     }
 
@@ -105,6 +119,7 @@ int repo_glob(glob_t *res, const char *query, char **repos) {
 
 void repo_free(struct repo **r) {
     str_free(&(*r)->KISS_PATH);
+    str_free(&(*r)->buf);
 
     for (size_t i = 0; i < vec_size((*r)->fds); i++) {
         close((*r)->fds[i]);
