@@ -45,6 +45,10 @@ static int run_extension(char *argv[]) {
 }
 
 static int run_download(struct pkg **p) {
+    char *line  = 0;
+    ssize_t len = 0;
+    size_t size = 0;
+
     for (size_t i = 0; i < vec_size(p); i++) {
         FILE *src_file = pkg_fopen(p[i]->repo, p[i]->name, "sources");
 
@@ -54,26 +58,25 @@ static int run_download(struct pkg **p) {
             return -1;
         }
 
-        char *line  = 0;
-        ssize_t len = 0;
-        size_t size = 0;
-
         while ((len = getline(&line, &size, src_file)) > 0) {
             if (line[0] == '\n' || line[0] == '#') {
-                continue; 
+                continue;
             }
 
             if (line[len - 1] == '\n') {
                 line[len - 1] = 0;
             }
 
-            printf("%s\n", line);
+            char *src = strtok(line, " 	");
+            char *des = strtok(NULL, " 	");
+
+            printf("%s -> %s\n", src, des ? des : "");
         }
 
-        free(line);
         fclose(src_file);
     }
 
+    free(line);
     return 0;
 }
 
