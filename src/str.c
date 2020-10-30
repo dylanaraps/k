@@ -16,7 +16,9 @@ str *str_init(size_t l) {
         return NULL;
     }
 
-    s[0] = s[1] = s[2] = 0;     
+    s[0] = l + 1;
+    s[1] = 0;
+    s[2] = 0;     
 
     return (char *) &s[CAP_OFF];
 }
