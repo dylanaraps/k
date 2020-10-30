@@ -22,7 +22,7 @@ str *str_init(size_t l) {
 }
 
 str *str_alloc(str **s, size_t l) {
-    size_t *s2 = realloc((size_t *) *s + -CAP_OFF, 
+    size_t *s2 = realloc((size_t *) *s - CAP_OFF, 
         HDR_LEN + str_get_cap(s) + l + 1);
 
     if (!s2) {
