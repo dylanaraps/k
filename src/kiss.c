@@ -48,6 +48,10 @@ static int run_search(int argc, char *argv[], struct repo *r) {
     for (int i = 2; i < argc; i++) {
         glob_t res;
 
+        if (!argv[i][0]) {
+            continue;
+        }
+
         if (repo_glob(&res, argv[i], r) != 0 ) {
             goto error;
         }
@@ -150,27 +154,27 @@ static int run_action(int argc, char *argv[]) {
         err("failed to allocate memory");
         return -1;
     }
+    
+    int err = 0;
 
-    if (repo_init(&repos, getenv("KISS_PATH")) != 0) {
+    if (repo_init(&repos, getenv("KISS_PATH")) < 0) {
         err("repository init failed");
-        return -1;
+        err = -1;
+        goto free_repo;
     }
 
     struct cache *cache_dir = cache_create();
 
     if (!cache_dir) {
         err("failed to allocate memory");
-        return -1;
+        err = -1;
+        goto free_cache;
     }
 
     if (cache_init(&cache_dir) < 0) {
         err("cache init failed"); 
-        return -1;
-    }
-
-    if (cache_mkdir(cache_dir) < 0) {
-        err("cache creation failed"); 
-        return -1; 
+        err = -1;
+        goto free_cache;
     }
 
     struct pkg **pkgs = 0;
@@ -180,27 +184,34 @@ static int run_action(int argc, char *argv[]) {
 
         if (!new) {
             err("failed to allocate memory"); 
-            return -1;
+            err = -1;
+            goto free_pkg;
         }
 
         new->repo = repo_find(argv[i], repos);
 
         if (!new->repo) {
             err("repository search error");
-            return -1;
+            err = -1;
+            goto free_pkg;
         }
 
         vec_push(pkgs, new);     
     }
 
-    repo_free(&repos);
-    cache_free(&cache_dir);
+free_pkg:
     for (size_t i = 0; i < vec_size(pkgs); i++) {
         pkg_free(&pkgs[i]);
     }
     vec_free(pkgs);
 
-    return 0;
+free_cache:
+    cache_free(&cache_dir);
+
+free_repo:
+    repo_free(&repos);
+
+    return err;
 }
 
 int main (int argc, char *argv[]) {

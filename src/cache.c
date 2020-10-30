@@ -13,36 +13,25 @@ struct cache *cache_create(void) {
     struct cache *c = malloc(sizeof *c);
 
     if (c) {
-        c->path = 0;
-        c->fd = 0;
+        c->fd   = 0;
+        c->path = str_init(256);
+
+        if (c->path) {
+            return c;
+        }
+
+        free(c);
     }
 
-    return c;
+    return NULL;
 }
 
 int cache_init(struct cache **cac) {
-    (*cac)->path = str_init(128);
-
-    if (!(*cac)->path) {
+    if (cache_get_base(&(*cac)->path) < 0) {
         return -1;
     }
 
-    if (str_push_s(&(*cac)->path, getenv("XDG_CACHE_HOME")) < 0) {
-        if (str_push_s(&(*cac)->path, getenv("HOME")) < 0) {
-            err("HOME and XDG_CACHE_HOME are unset");
-            return -1;
-        }
-
-        if (str_push_l(&(*cac)->path, "/.cache", 7) < 0) {
-            return -1;
-        }
-    }
-
-    if (str_printf(&(*cac)->path, "/kiss/proc/%ld/", (long) getpid()) < 0) {
-        return -1;
-    }
-
-    if (mkdir_p((*cac)->path) != 0) {
+    if (mkdir_p((*cac)->path) < 0) {
         err("failed to create directory '%s': %s", 
             (*cac)->path, strerror(errno));
         return -1;
@@ -50,13 +39,13 @@ int cache_init(struct cache **cac) {
 
     (*cac)->fd = open((*cac)->path, O_RDONLY);
 
-    if ((*cac)->fd == -1) {
+    if ((*cac)->fd < 0) {
         err("failed to open cache directory '%s': %s", 
             (*cac)->path, strerror(errno));
         return -1;
     }
 
-    return 0;
+    return cache_mkdir(*cac);
 }
 
 int cache_mkdir(struct cache *cac) {
@@ -74,6 +63,27 @@ int cache_mkdir(struct cache *cac) {
                 caches[i], strerror(errno));
             return -1;
         }
+    }
+
+    return 0;
+}
+
+int cache_get_base(str **s) {
+    if (str_push_s(s, getenv("XDG_CACHE_HOME")) < 0) {
+        if (str_push_s(s, getenv("HOME")) < 0) {
+            err("HOME and XDG_CACHE_HOME are unset");
+            return -1;
+        }
+
+        if (str_push_l(s, "/.cache", 7) < 0) {
+            err("string error");
+            return -1;
+        }
+    }
+
+    if (str_printf(s, "/kiss/proc/%ld/", (long) getpid()) < 0) {
+        err("string error");
+        return -1;
     }
 
     return 0;

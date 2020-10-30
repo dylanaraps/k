@@ -11,6 +11,7 @@ struct cache {
 struct cache *cache_create(void);
 int cache_init(struct cache **cac);
 int cache_mkdir(struct cache *cac);
+int cache_get_base(str **s);
 void cache_free(struct cache **cac);
 
 #endif

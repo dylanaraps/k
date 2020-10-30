@@ -4,11 +4,9 @@
 #include "str.h"
 
 struct repo {
+    str *mem;
     char **list;
     int *fds;
-
-    // don't touch
-    str *mem;
 };
 
 struct repo *repo_create(void);
