@@ -52,7 +52,7 @@ int pkg_list(int repo_fd, char *pkg) {
             return -1;
         }
 
-        err("failed to open pkg '%s': %s", pkg, strerror(errno));
+        err_no("failed to open pkg '%s'", pkg);
         return -1;
     }
 

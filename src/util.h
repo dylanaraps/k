@@ -25,4 +25,13 @@ int is_dir(const char *path);
     fputc('\n', stderr);                        \
 } while (0)
 
+#define err_no(...) do {                        \
+    fprintf(stderr, "error: ");                 \
+    fprintf(stderr, __VA_ARGS__);               \
+    fprintf(stderr, ": %s", strerror(errno));   \
+    fprintf(stderr, " (%s in %s() at line %d)", \
+        __FILE__, __func__, __LINE__);          \
+    fputc('\n', stderr);                        \
+} while (0)
+
 #endif

@@ -9,7 +9,7 @@ int source_download(const char *url, const char *dest) {
     FILE *file = fopen(dest, "w");
 
     if (!file) {
-        err("failed to open file '%s': %s", dest, strerror(errno));
+        err_no("failed to open file '%s'", dest);
         return -1;
     }
 

@@ -53,8 +53,7 @@ static int run_download(struct pkg **p) {
         FILE *src_file = pkg_fopen(p[i]->repo, p[i]->name, "sources");
 
         if (!src_file) {
-            err("failed to open sources file '%s': %s", 
-                p[i]->name, strerror(errno));
+            err_no("failed to open sources file '%s'", p[i]->name);
             return -1;
         }
 
@@ -118,7 +117,7 @@ static int run_list(int argc, char *argv[], char *db, int fd) {
         int len = scandir(db, &list, 0, alphasort);
 
         if (len == -1) {
-            err("failed to open repository '%s': %s", db, strerror(errno));
+            err_no("failed to open repository '%s'", db);
             return -1;
         }
 

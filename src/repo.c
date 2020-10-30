@@ -58,7 +58,7 @@ int repo_add(struct repo **r, char *path) {
     int repo_fd = open(path, O_RDONLY);
 
     if (repo_fd == -1) {
-        err("failed to access path '%s': %s", path, strerror(errno));
+        err_no("failed to access path '%s'", path);
         return -1;
     }
 
@@ -74,8 +74,7 @@ int repo_find(const char *name, struct repo *r) {
             return r->fds[i];
 
         } else if (errno != ENOENT) {
-            err("failed to open pkg '%s/%s': %s", 
-                r->list[i], name, strerror(errno));
+            err_no("failed to open pkg '%s/%s'", r->list[i], name);
             return -1;
         }
     }

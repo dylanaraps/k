@@ -16,7 +16,7 @@ int mkdir_p(const char* d) {
         *p = '/';
 
         if (ret == -1 && errno != EEXIST) {
-            err("failed to create directory '%s': %s", d, strerror(errno));
+            err("failed to create directory '%s'", d);
             return -1;
         }
     }
@@ -52,7 +52,7 @@ int is_dir(const char *path) {
    struct stat statbuf;
 
    if (stat(path, &statbuf) != 0) {
-       err("failed to stat path '%s': %s", path, strerror(errno));
+       err_no("failed to stat path '%s'", path);
        return 0;
    }
 

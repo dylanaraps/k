@@ -32,16 +32,14 @@ int cache_init(struct cache **cac) {
     }
 
     if (mkdir_p((*cac)->path) < 0) {
-        err("failed to create directory '%s': %s", 
-            (*cac)->path, strerror(errno));
+        err_no("failed to create directory '%s'", (*cac)->path);
         return -1;
     }
 
     (*cac)->fd = open((*cac)->path, O_RDONLY);
 
     if ((*cac)->fd < 0) {
-        err("failed to open cache directory '%s': %s", 
-            (*cac)->path, strerror(errno));
+        err_no("failed to open cache directory '%s'", (*cac)->path);
         return -1;
     }
 
@@ -59,8 +57,7 @@ int cache_mkdir(struct cache *cac) {
 
     for (size_t i = 0; i < (sizeof caches / sizeof caches[0]); i++) {
         if (mkdirat(cac->fd, caches[i], 0755) == -1 && errno != EEXIST) {
-            err("failed to create cache directory '%s': %s", 
-                caches[i], strerror(errno));
+            err_no("failed to create cache directory '%s'", caches[i]);
             return -1;
         }
     }
