@@ -7,6 +7,12 @@
 
 typedef char str;
 
+size_t str_get_cap(str **s);
+size_t str_get_len(str **s);
+void str_set_cap(str **s, size_t l);
+void str_set_len(str **s, size_t l);
+
+str *str_init(size_t l);
 str *str_alloc(str **s, size_t l);
 int str_maybe_alloc(str **s, size_t l);
 int str_push_l(str **s, const char *d, size_t l);
@@ -16,18 +22,5 @@ int str_undo_s(str **s, const char *d);
 int str_vprintf(str **s, const char *f, va_list ap);
 int str_printf(str **s, const char *f, ...);
 void str_free(str **s);
-
-#define str_init(l) str_alloc(NULL, l)
-#define str_get_cap(s) ((s) ? ((size_t *)(s))[-2] : (size_t) 0)
-#define str_get_len(s) ((s) ? ((size_t *)(s))[-1] : (size_t) 0)
-
-#define str_set_cap(s, l) do {  \
-    ((size_t *)(*s))[-2] = (l); \
-} while(0) 
-
-#define str_set_len(s, l) do {     \
-    ((size_t *)(*s))[-1] = (l);    \
-    *((*s) + str_get_len(*s)) = 0; \
-} while(0) 
 
 #endif

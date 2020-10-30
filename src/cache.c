@@ -21,6 +21,12 @@ struct cache *cache_create(void) {
 }
 
 int cache_init(struct cache **cac) {
+    (*cac)->path = str_init(128);
+
+    if (!(*cac)->path) {
+        return -1;
+    }
+
     if (str_push_s(&(*cac)->path, getenv("XDG_CACHE_HOME")) < 0) {
         if (str_push_s(&(*cac)->path, getenv("HOME")) < 0) {
             err("HOME and XDG_CACHE_HOME are unset");

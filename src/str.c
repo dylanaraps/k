@@ -5,22 +5,37 @@
 
 #include "str.h"
 
+#define HDR_LEN (sizeof (size_t) * 2)
+#define CAP_OFF 2
+#define LEN_OFF 1
+
+str *str_init(size_t l) {
+    size_t *s = malloc(HDR_LEN + l + 1);
+
+    if (!s) {
+        return NULL;
+    }
+
+    s[0] = s[1] = s[2] = 0;     
+
+    return (char *) &s[CAP_OFF];
+}
+
 str *str_alloc(str **s, size_t l) {
-    size_t *s2 = realloc(*s ? (size_t *) *s - 2 : (size_t *) *s,
-        (sizeof (size_t) * 2) + str_get_cap(*s) + l + 1);
+    size_t *s2 = realloc((size_t *) *s + -CAP_OFF, 
+        HDR_LEN + str_get_cap(s) + l + 1);
 
     if (!s2) {
         return NULL;
     }
 
-    s2[0] = (*s ? s2[0] : (size_t) 0) + l + 1; // cap
-    s2[1] = (*s ? s2[1] : (size_t) 0);         // len
+    s2[0] += l + 1;
 
-    return (char *) &s2[2];
+    return (char *) &s2[CAP_OFF];
 }
 
 int str_maybe_alloc(str **s, size_t l) {
-    if (str_get_len(*s) + l >= str_get_cap(*s)) {
+    if (str_get_len(s) + l >= str_get_cap(s)) {
         str *n = str_alloc(s, (l + (l >> 1)));
 
         if (!n) {
@@ -42,8 +57,8 @@ int str_push_l(str **s, const char *d, size_t l) {
         return -1;
     }
 
-    memcpy(*s + str_get_len(*s), d, l + 1);
-    str_set_len(s, str_get_len(*s) + l);
+    memcpy(*s + str_get_len(s), d, l + 1);
+    str_set_len(s, str_get_len(s) + l);
 
     return 0;
 }
@@ -57,11 +72,11 @@ int str_push_s(str **s, const char *d) {
 }
 
 int str_undo_l(str **s, size_t l) {
-    if (l > str_get_len(*s)) {
+    if (l > str_get_len(s)) {
         return -1;
     }
 
-    str_set_len(s, str_get_len(*s) - l);
+    str_set_len(s, str_get_len(s) - l);
     return 0;
 }
 
@@ -87,13 +102,11 @@ int str_vprintf(str **s, const char *f, va_list ap) {
         return -1;
     }
 
-    int l2 = vsnprintf(*s + str_get_len(*s), (size_t) l1 + 1, f, ap);
-
-    if (l1 != l2) {
+    if (vsnprintf(*s + str_get_len(s), (size_t) l1 + 1, f, ap) != l1) {
         return -1;
     }
 
-    str_set_len(s, str_get_len(*s) + (size_t) l1);
+    str_set_len(s, str_get_len(s) + (size_t) l1);
     return 0;
 }
 
@@ -105,12 +118,26 @@ int str_printf(str **s, const char *f, ...) {
     return ret;
 }
 
-void str_free(str **s) {
-    if (!*s) {
-        return;
-    }
+inline size_t str_get_cap(str **s) {
+    return *s ? ((size_t *) *s)[-CAP_OFF] : 0;
+}
 
-    free((size_t *) *s - 2);
-    *s = NULL;
+inline size_t str_get_len(str **s) {
+    return *s ? ((size_t *) *s)[-LEN_OFF] : 0;
+}
+
+inline void str_set_cap(str **s, size_t l) {
+    ((size_t *) *s)[-CAP_OFF] = l;
+}
+
+inline void str_set_len(str **s, size_t l) {
+    ((size_t *) *s)[-LEN_OFF] = l;
+}
+
+void str_free(str **s) {
+    if (*s) {
+        free((size_t *) *s - CAP_OFF);
+        *s = NULL;
+    }
 }
 
