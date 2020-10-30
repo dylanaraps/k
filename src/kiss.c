@@ -44,16 +44,35 @@ static int run_extension(char *argv[]) {
     return -1;
 }
 
-static int run_download(struct pkg *p) {
-    FILE *src_file = pkg_fopen(p->repo, p->name, "sources");
+static int run_download(struct pkg **p) {
+    for (size_t i = 0; i < vec_size(p); i++) {
+        FILE *src_file = pkg_fopen(p[i]->repo, p[i]->name, "sources");
 
-    if (!src_file) {
-        err("failed to open sources file '%s': %s", 
-            p->name, strerror(errno));
-        return -1;
+        if (!src_file) {
+            err("failed to open sources file '%s': %s", 
+                p[i]->name, strerror(errno));
+            return -1;
+        }
+
+        char *line  = 0;
+        ssize_t len = 0;
+
+        while ((len = getline(&line, &(size_t){0}, src_file)) > 0) {
+            if (line[0] == '\n' || line[0] == '#') {
+                continue; 
+            }
+
+            if (line[len - 1] == '\n') {
+                line[len - 1] = 0;
+            }
+
+            printf("%s\n", line);
+        }
+
+        free(line);
+        fclose(src_file);
     }
 
-    fclose(src_file);
     return 0;
 }
 
@@ -220,9 +239,7 @@ static int run_action(int argc, char *argv[]) {
             break;
 
         case 'd':
-            for (size_t i = 0; i < vec_size(pkgs); i++) {
-                run_download(pkgs[i]);
-            }
+            run_download(pkgs);
             break;
     }
 
