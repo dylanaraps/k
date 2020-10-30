@@ -26,9 +26,4 @@ int globat(const char *pwd, const char *query, int opt, glob_t *res);
     fputc('\n', stderr);                        \
 } while (0)
 
-#define die(...) do {   \
-    err(__VA_ARGS__);   \
-    exit(EXIT_FAILURE); \
-} while (0)
-
 #endif

@@ -34,13 +34,14 @@ static void usage(char *arg0) {
     puts("version      Package manager version");
 }
 
-static void run_extension(char *argv[]) {
+static int run_extension(char *argv[]) {
     char ext[64] = "kiss-";
 
     strncat(ext, *argv, 63);
     execvp(ext, argv);
 
-    die("failed to execute extension %s", ext);
+    err("failed to execute extension %s", ext);
+    return -1;
 }
 
 static int run_search(int argc, char *argv[], char **repos) {
@@ -226,7 +227,7 @@ int main (int argc, char *argv[]) {
         //
 
     } else {
-        run_extension(argv + 1);
+        err = run_extension(argv + 1);
     }
 
     return err;

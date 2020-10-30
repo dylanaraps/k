@@ -30,7 +30,22 @@ struct repo *repo_create(void) {
 }
 
 int repo_init(struct repo **r, char *path) {
-    if (str_printf(&(*r)->KISS_PATH, "%s:/var/db/kiss/installed", path) < 0) {
+    if (str_printf(&(*r)->KISS_PATH, "%s:", path) < 0) {
+        err("failed to push KISS_PATH");
+        return -1;
+    }
+
+    // ignore -2 (EINVAL) when KISS_ROOT unset.
+    if (str_push_s(&(*r)->KISS_PATH, getenv("KISS_ROOT")) == -1) {
+        err("failed to allocate memory");
+        return -1;
+    }
+
+    // drop all trailing slashes from KISS_ROOT.
+    str_undo_c(&(*r)->KISS_PATH, '/');
+
+    if (str_push_l(&(*r)->KISS_PATH, "/var/db/kiss/installed", 22) < 0) {
+        err("failed to push database directory");
         return -1;
     }
 

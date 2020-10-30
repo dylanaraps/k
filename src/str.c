@@ -50,7 +50,7 @@ int str_maybe_alloc(str **s, size_t l) {
 
 int str_push_l(str **s, const char *d, size_t l) {
     if (!d || l == 0) {
-        return -1;
+        return -2;
     }
 
     if (str_maybe_alloc(s, l) < 0) {
@@ -65,15 +65,26 @@ int str_push_l(str **s, const char *d, size_t l) {
 
 int str_push_s(str **s, const char *d) {
     if (!d) {
-        return -1;
+        return -2;
     }
 
     return str_push_l(s, d, strlen(d));
 }
 
+int str_push_c(str **s, int d, size_t n) {
+    if (str_maybe_alloc(s, n) < 0) {
+        return -1;
+    }
+
+    memset(*s + str_get_len(s), d, n);
+    str_set_len(s, str_get_len(s) + n);
+
+    return 0;
+}
+
 int str_undo_l(str **s, size_t l) {
     if (l > str_get_len(s)) {
-        return -1;
+        return -2;
     }
 
     str_set_len(s, str_get_len(s) - l);
@@ -82,10 +93,18 @@ int str_undo_l(str **s, size_t l) {
 
 int str_undo_s(str **s, const char *d) {
     if (!d) {
-        return -1;
+        return -2;
     }
 
     return str_undo_l(s, strlen(d));
+}
+
+void str_undo_c(str **s, int d) {
+    size_t l = str_get_len(s);
+
+    for (; (*s)[l - 1] == d ; l--);
+
+    str_set_len(s, l);
 }
 
 int str_vprintf(str **s, const char *f, va_list ap) {
