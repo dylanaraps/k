@@ -17,10 +17,9 @@ struct repo *repo_create(void) {
     if (r) {
         r->list = 0;
         r->fds  = 0;
-        r->buf  = 0;
-        r->KISS_PATH = str_init(256);
+        r->mem = str_init(512);
 
-        if (r->KISS_PATH) {
+        if (r->mem) {
             return r;
         }
 
@@ -31,26 +30,17 @@ struct repo *repo_create(void) {
 }
 
 int repo_init(struct repo **r, char *path) {
-    if (str_printf(&(*r)->KISS_PATH, "%s:", path) < 0) {
+    if (str_printf(&(*r)->mem, "%s:", path) < 0) {
         err("failed to push KISS_PATH");
         return -1;
     }
 
-    // ignore -2 (EINVAL) when KISS_ROOT unset.
-    if (str_push_s(&(*r)->KISS_PATH, getenv("KISS_ROOT")) == -1) {
-        err("failed to allocate memory");
+    if (repo_get_db(&(*r)->mem) < 0) {
+        err("string error");
         return -1;
     }
 
-    // drop all trailing slashes from KISS_ROOT.
-    str_undo_c(&(*r)->KISS_PATH, '/');
-
-    if (str_push_l(&(*r)->KISS_PATH, "/var/db/kiss/installed", 22) < 0) {
-        err("failed to push database directory");
-        return -1;
-    }
-
-    for (char *t = strtok((*r)->KISS_PATH, ":"); t; t = strtok(0, ":")) {
+    for (char *t = strtok((*r)->mem, ":"); t; t = strtok(0, ":")) {
         if (repo_add(r, t) < 0) {
             return -1;
         }
@@ -61,7 +51,7 @@ int repo_init(struct repo **r, char *path) {
 
 int repo_add(struct repo **r, char *path) {
     if (path[0] != '/') {
-        err("relative path '%s' found in KISS_PATH", path);
+        err("path '%s' is not absolute", path);
         return -1;
     }
 
@@ -96,19 +86,21 @@ char *repo_find(const char *name, struct repo *r) {
 
 int repo_glob(glob_t *res, const char *query, struct repo *r) {
     for (size_t i = 0; i < vec_size(r->list); i++) {
-        if (str_printf(&r->buf, "%s/%s/", r->list[i], query) < 0) {
+        size_t sl = str_get_len(&r->mem);
+
+        if (str_printf(&r->mem, "%s/%s/", r->list[i], query) < 0) {
             err("failed to construct search query");
             return -1;
         }
 
-        switch (glob(r->buf, i ? GLOB_APPEND : 0, NULL, res)) {
+        switch (glob(r->mem + sl, i ? GLOB_APPEND : 0, NULL, res)) {
             case GLOB_NOSPACE:
             case GLOB_ABORTED:
                 err("glob error");
                 return -1;
         }
 
-        if (str_undo_l(&r->buf, str_get_len(&r->buf)) < 0) {
+        if (str_undo_l(&r->mem, str_get_len(&r->mem) - sl) < 0) {
             err("string error");
             return -1;
         }
@@ -117,9 +109,26 @@ int repo_glob(glob_t *res, const char *query, struct repo *r) {
     return 0;
 }
 
+int repo_get_db(str **buf) {
+    // ignore -2 (EINVAL) when KISS_ROOT unset.
+    if (str_push_s(buf, getenv("KISS_ROOT")) == -1) {
+        err("failed to allocate memory");
+        return -1;
+    }
+
+    // drop all trailing slashes from KISS_ROOT.
+    str_undo_c(buf, '/');
+
+    if (str_push_l(buf, "/var/db/kiss/installed", 22) < 0) {
+        err("failed to push database directory");
+        return -1;
+    }
+
+    return 0;
+}
+
 void repo_free(struct repo **r) {
-    str_free(&(*r)->KISS_PATH);
-    str_free(&(*r)->buf);
+    str_free(&(*r)->mem);
 
     for (size_t i = 0; i < vec_size((*r)->fds); i++) {
         close((*r)->fds[i]);

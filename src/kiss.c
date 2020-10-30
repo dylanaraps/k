@@ -45,13 +45,6 @@ static int run_extension(char *argv[]) {
 }
 
 static int run_search(int argc, char *argv[], struct repo *r) {
-    r->buf = str_init(256);
-
-    if (!r->buf) {
-        err("failed to allocate memory");
-        return -1;
-    }
-
     for (int i = 2; i < argc; i++) {
         glob_t res;
 
@@ -119,26 +112,33 @@ static int run_query(int argc, char *argv[]) {
         return -1;
     }
 
-    if (repo_init(&r, getenv("KISS_PATH")) != 0) {
-        err("repository init failed");
-        repo_free(&r);
-        return -1;
-    }
-
     int err = 0;
 
     switch (argv[1][0]) {
         case 'l':
-            err = run_list(argc, argv, 
-                r->list[vec_size(r->list) - 1], 
-                r->fds[vec_size(r->fds) - 1]);
+            if ((err = repo_get_db(&r->mem)) < 0) {
+                err("database init failed");
+                goto error;
+            }
+
+            if ((err = repo_add(&r, r->mem)) < 0) {
+                goto error;
+            }
+
+            err = run_list(argc, argv, r->list[0], r->fds[0]);
             break;
 
         case 's':
+            if ((err = repo_init(&r, getenv("KISS_PATH"))) < 0) {
+                err("repository init failed");
+                goto error;
+            }
+
             err = run_search(argc, argv, r);
             break;
     }
 
+error:
     repo_free(&r);
     return err;
 }
