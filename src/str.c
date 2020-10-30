@@ -153,6 +153,7 @@ inline void str_set_cap(str **s, size_t l) {
 
 inline void str_set_len(str **s, size_t l) {
     ((size_t *) *s)[-LEN_OFF] = l;
+    memset(*s + l, 0, 1);
 }
 
 void str_free(str **s) {
