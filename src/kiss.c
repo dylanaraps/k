@@ -56,8 +56,9 @@ static int run_download(struct pkg **p) {
 
         char *line  = 0;
         ssize_t len = 0;
+        size_t size = 0;
 
-        while ((len = getline(&line, &(size_t){0}, src_file)) > 0) {
+        while ((len = getline(&line, &size, src_file)) > 0) {
             if (line[0] == '\n' || line[0] == '#') {
                 continue; 
             }
