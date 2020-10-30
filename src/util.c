@@ -9,16 +9,6 @@
 
 #include "util.h"
 
-char *path_normalize(char *d) {
-    if (d) {
-        for (size_t i = 1, l = strlen(d);
-             d[l - i] == '/';
-             d[l - i] = 0, i++);
-    }
-
-    return d;
-}
-
 int mkdir_p(const char* d) {
     for (char* p = strchr(d + 1, '/'); p; p = strchr(p + 1, '/')) {
         *p = 0;

@@ -7,7 +7,6 @@
 #include <errno.h>
 #include <string.h>
 
-char *path_normalize(char *d);
 int mkdir_p(const char* d);
 int run_cmd(const char *cmd);
 int file_print_line(FILE *f);
