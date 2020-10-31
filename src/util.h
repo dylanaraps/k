@@ -13,7 +13,7 @@ int is_dir(const char *path);
 int file_print_line(FILE *f);
 int mkopenat(int fd, const char *path);
 FILE *fopenat(int fd, const char *path, int o, const char *m);
-ssize_t getline_kiss(char **line, char **f1, char **f2, FILE *f);
+ssize_t getline_kiss(char **line, char **f1, char **f2, size_t *size, FILE *f);
 
 #define msg(...) do {             \
     fprintf(stderr, __VA_ARGS__); \

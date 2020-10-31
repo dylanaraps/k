@@ -86,10 +86,8 @@ FILE *fopenat(int fd, const char *path, int o, const char *m) {
     return fdopen(fd2, m);
 }
 
-ssize_t getline_kiss(char **line, char **f1, char **f2, FILE *f) {
-    // See: https://sourceware.org/bugzilla/show_bug.cgi?id=19464
-    size_t size = 0; 
-    ssize_t len = getline(line, &size, f);
+ssize_t getline_kiss(char **line, char **f1, char **f2, size_t *size, FILE *f) {
+    ssize_t len = getline(line, size, f);
 
     if (len < 1) {
         return len;
@@ -109,6 +107,6 @@ ssize_t getline_kiss(char **line, char **f1, char **f2, FILE *f) {
 
     return len;
 next:
-    return getline_kiss(line, f1, f2, f);
+    return getline_kiss(line, f1, f2, size, f);
 }
 

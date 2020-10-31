@@ -53,11 +53,12 @@ static int run_download(char **line, struct pkg *p) {
         return -1;
     }
 
+    size_t size = 0;
     ssize_t len = 0;
     char *f1 = 0;
     char *f2 = 0;
 
-    while ((len = getline_kiss(line, &f1, &f2, src_file)) > 0) {
+    while ((len = getline_kiss(line, &f1, &f2, &size, src_file)) > 0) {
         int dfd = p->src_fd;
 
         // create and open an fd to the second field in the sources file.
