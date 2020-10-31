@@ -268,7 +268,10 @@ static int run_action(int argc, char *argv[]) {
             char *line = 0;
 
             for (size_t i = 0; i < vec_size(pkgs); i++) {
-                run_download(&line, pkgs[i]);
+                if (run_download(&line, pkgs[i]) < 0) {
+                    err("[%s] failed to check sources", pkgs[i]->name);
+                    break;
+                }
             }
 
             free(line);

@@ -87,7 +87,10 @@ FILE *fopenat(int fd, const char *path, int o, const char *m) {
 }
 
 ssize_t getline_kiss(char **line, char **f1, char **f2, FILE *f) {
-    size_t size = 0; 
+    // Do not initialize size to 0 or glibc getdelim will leak memory.
+    // See: https://sourceware.org/bugzilla/show_bug.cgi?id=19464
+    size_t size; 
+
     ssize_t len = getline(line, &size, f);
 
     if (len < 1) {
