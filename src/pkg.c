@@ -6,14 +6,15 @@
 #include <fcntl.h>
 
 #include "vec.h"
+#include "cache.h"
 #include "util.h"
+#include "repo.h"
 #include "pkg.h"
 
 struct pkg *pkg_create(const char *name) {
     struct pkg *p = malloc(sizeof *p);    
 
     if (p) {
-        p->src_fd = 0;
         p->repo = 0;
         p->name = strdup(name);
 
@@ -56,14 +57,7 @@ int pkg_list(int repo_fd, char *pkg) {
 }
 
 void pkg_free(struct pkg **p) {
-    if ((*p)->repo > 0) {
-        close((*p)->repo);
-    }
-
-    if ((*p)->src_fd > 0) {
-        close((*p)->src_fd);
-    }
-
+    close((*p)->repo);
     free((*p)->name); 
     free(*p);
     *p = NULL;

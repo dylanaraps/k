@@ -45,7 +45,7 @@ static int run_extension(char *argv[]) {
     return -1;
 }
 
-static int run_download(char **line, struct pkg *p) {
+static int run_download(str *buf, char **line, struct pkg *p) {
     FILE *src_file = fopenat(p->repo, "sources", O_RDONLY, "r");
 
     if (!src_file) {
@@ -59,22 +59,11 @@ static int run_download(char **line, struct pkg *p) {
     char *f2 = 0;
 
     while ((len = getline_kiss(line, &f1, &f2, &size, src_file)) > 0) {
-        int dfd = p->src_fd;
+        char *base = bname(f1);
 
-        // create and open an fd to the second field in the sources file.
-        // ie, the destination directory of downloaded sources.
-        if (f2 && (dfd = mkopenat(p->src_fd, f2)) == -1) {
-            err_no("[%s] failed to make/open cache directory", p->name);
-            goto error;
-        }
-
-        switch (source_type(f1, dfd, p->repo)) {
+        switch (source_type(f1)) {
             case SRC_URL:
                 msg("[%s] downloading '%s'", p->name, f1);
-
-                if (source_download(f1, dfd) < 0) {
-                    goto error;
-                }
                 break;
 
             case SRC_ENOENT:
@@ -228,6 +217,14 @@ static int run_action(int argc, char *argv[]) {
         goto free_cache;
     }
 
+    str *buf = str_init(1024);
+
+    if (!buf) {
+        err("failed to allocate memory");
+        err = -1;
+        goto free_buf;
+    }
+
     struct pkg **pkgs = 0;
 
     for (int i = 2; i < argc; i++) {
@@ -247,14 +244,6 @@ static int run_action(int argc, char *argv[]) {
             goto free_pkg;
         }
 
-        new->src_fd = mkopenat(cac->fd[CAC_SRC], new->name);
-
-        if (new->src_fd < 0) {
-            err_no("[%s] failed to open source directory", new->name);
-            err = -1;
-            goto free_pkg;
-        }
-
         vec_push(pkgs, new);     
     }
 
@@ -269,8 +258,7 @@ static int run_action(int argc, char *argv[]) {
             char *line = 0;
 
             for (size_t i = 0; i < vec_size(pkgs); i++) {
-                if (run_download(&line, pkgs[i]) < 0) {
-                    err("[%s] failed to check sources", pkgs[i]->name);
+                if (run_download(buf, &line, pkgs[i]) < 0) {
                     break;
                 }
             }
@@ -285,6 +273,9 @@ free_pkg:
         pkg_free(&pkgs[i]);
     }
     vec_free(pkgs);
+
+free_buf:
+    str_free(&buf);
 
 free_cache:
     cache_free(&cac);

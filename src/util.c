@@ -110,3 +110,19 @@ next:
     return getline_kiss(line, f1, f2, size, f);
 }
 
+char *bname(char *s) {
+    if (!s || !*s) {
+        return NULL;
+    }
+
+    size_t l = strlen(s) - 1;
+
+    for (; l && s[l] == '/'; l--) {
+        s[l] = 0;
+    }
+
+    for (; l && s[l - 1] != '/'; l--);
+
+    return s + l;
+}
+

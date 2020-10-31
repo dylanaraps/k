@@ -4,7 +4,6 @@
 struct pkg {
     char *name;
     int repo;
-    int src_fd;
 };
 
 struct pkg *pkg_create(const char *name);

@@ -98,41 +98,18 @@ file_err:
     return -1;
 }
 
-int source_type(const char *url, int dest_fd, int repo_fd) {
-    if (strncmp(url, "git+", 4) == 0) {
-        return SRC_GIT; 
-    }
-
-    if (strstr(url, "://")) {
-        char *basename = strrchr(url, '/');
-
-        if (faccessat(dest_fd, basename + 1, F_OK, 0) != -1) {
-            return SRC_CAC;
-
-        } else if (errno != ENOENT) {
-            return -1;
-        }
-
-        return SRC_URL;
-    }
-
+int source_type(const char *url) {
     if (url[0] == '/') {
-        if (access(url, F_OK) != -1) {
-            return SRC_ABS; 
+        return SRC_ABS; 
 
-        } else if (errno != ENOENT) {
-            return -1;
-        }
+    } else if (strncmp(url, "git+", 4) == 0) {
+        return SRC_GIT; 
+
+    } else if (strstr(url, "://")) {
+        return SRC_URL;
 
     } else {
-        if (faccessat(repo_fd, url, F_OK, 0) != -1) {
-            return SRC_REL;
-
-        } else if (errno != ENOENT) {
-            return -1;
-        }
+        return SRC_REL;
     }
-
-    return SRC_ENOENT;
 }
 

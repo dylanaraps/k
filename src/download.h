@@ -2,7 +2,7 @@
 #define KISS_DOWNLOAD_H
 
 int source_download(const char *url, int dest_fd);
-int source_type(const char *url, int dest_fd, int repo_fd);
+int source_type(const char *url);
 
 enum src_type {
     SRC_URL,
