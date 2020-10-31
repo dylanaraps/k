@@ -117,6 +117,7 @@ void cache_free(struct cache **cac) {
     for (int i = 0; i < CAC_DIR; i++) {
         close((*cac)->fd[i]);
     }
+    close((*cac)->fd[CAC_DIR]);
 
     free(*cac);
     *cac = NULL;
