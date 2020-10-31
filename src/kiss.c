@@ -45,7 +45,9 @@ static int run_extension(char *argv[]) {
     return -1;
 }
 
-static int run_download(str *buf, char **line, struct pkg *p) {
+static int run_download(str *buf, char **l, struct pkg *p, struct cache *c) {
+    str_set_len(&buf, 0);
+
     if (str_printf(&buf, "%s/%s/sources", p->repo, p->name) < 0) {
         err("string error");
         return -1;
@@ -65,21 +67,89 @@ static int run_download(str *buf, char **line, struct pkg *p) {
     char *f1 = 0;
     char *f2 = 0;
 
-    while ((len = getline_kiss(line, &f1, &f2, &size, src_file)) > 0) {
+    while ((len = getline_kiss(l, &f1, &f2, &size, src_file)) > 0) {
         char *base = bname(f1);
-        
-        switch (source_type(f1)) {
-            case SRC_URL:
-                msg("[%s] downloading '%s'", p->name, f1);
-                break;
 
-            case SRC_ENOENT:
-                err("[%s] failed to find source '%s'", p->name, f1);
+        if (!base) {
+            err("[%s] failed to parse sources file", p->name);
+            goto error;
+        }
+
+        str_set_len(&buf, 0);
+
+        if (str_printf(&buf, "%ssources/%s/", c->path, p->name) < 0) {
+            err("string error"); 
+            goto error;
+        }
+
+        if (f2 && *f2 && str_printf(&buf, "%s/", f2) < 0) {
+            err("string error"); 
+            goto error;
+        }
+
+        if (str_push_s(&buf, base) < 0) {
+            err("string error"); 
+            goto error;
+        }
+
+        if (f1[0] == '/') {
+            if (access(f1, F_OK) == 0) {
+                msg("[%s] found absolute source '%s'", p->name, f1);
+                continue;
+
+            } else if (errno != ENOENT) {
+                err_no("[%s] failed to access source '%s'", p->name, f1);
+                goto error;
+            }
+        }
+
+        if (strncmp(f1, "git+", 4) == 0) {
+            msg("[%s] found git source '%s'", p->name, f1 + 4); 
+            continue;
+        }
+
+        if (strstr(f1, "://")) {
+            if (access(buf, F_OK) == 0) {
+                msg("[%s] found cached source '%s'", p->name, f1); 
+                continue;
+
+            } else if (errno != ENOENT) {
+                err_no("[%s] failed to access source '%s'", p->name, f1);
                 goto error;
 
-            case -1:
-                err("[%s] failed to parse sources file", p->name);
-                goto error;
+            } else {
+                msg("[%s] downloading source '%s'", p->name, f1);
+
+                if (mkdir_p(buf) < 0) {
+                    goto error;
+                }
+
+                if (source_download(f1, buf) < 0) {
+
+                    goto error;
+                }
+                continue;
+            }
+        }
+
+        str_set_len(&buf, 0);
+            
+        if (str_printf(&buf, "%s/%s", p->name, f1) < 0) {
+            err("string error"); 
+            goto error;
+        }
+
+        if (faccessat(p->repo_fd, buf, F_OK, 0) == 0) {
+            msg("[%s] found relative source '%s'", p->name, f1); 
+            continue;
+
+        } else if (errno != ENOENT) {
+            err_no("[%s] failed to access source '%s'", p->name, f1);
+            goto error;
+
+        } else {
+            err_no("[%s] '%s'", p->name, buf);
+            goto error;
         }
     }
 
@@ -243,7 +313,7 @@ static int run_action(int argc, char *argv[]) {
             goto free_pkg;
         }
 
-        new->repo = repo_find(argv[i], repos);
+        new->repo = repo_find(argv[i], repos, &new->repo_fd);
 
         if (!new->repo) {
             err("[%s] repository search error", new->name);
@@ -265,7 +335,7 @@ static int run_action(int argc, char *argv[]) {
             char *line = 0;
 
             for (size_t i = 0; i < vec_size(pkgs); i++) {
-                if (run_download(buf, &line, pkgs[i]) < 0) {
+                if (run_download(buf, &line, pkgs[i], cac) < 0) {
                     break;
                 }
             }

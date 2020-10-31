@@ -13,10 +13,6 @@ enum cache_dir {
     CAC_SRC,
     CAC_LOG,
 
-    CAC_MAK,
-    CAC_EXT,
-    CAC_PKG,
-
     CAC_DIR,
 };
 

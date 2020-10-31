@@ -9,10 +9,19 @@
 
 #include "util.h"
 
-int mkdir_p(const char* d) {
+char *path_fix(char *p) {
+    for (size_t l = strlen(p) - 1; 
+        *(p + l) == '/'; 
+        *(p + l--) = 0);
+    for (; *p == '/'; p++);
+
+    return p;
+}
+
+int mkdirat_p(int fd, const char* d) {
     for (char* p = strchr(d + 1, '/'); p; p = strchr(p + 1, '/')) {
         *p = 0;
-        int ret = mkdir(d, 0755);
+        int ret = mkdirat(fd, d, 0755);
         *p = '/';
 
         if (ret == -1 && errno != EEXIST) {
@@ -22,6 +31,10 @@ int mkdir_p(const char* d) {
     }
 
     return 0;
+}
+
+int mkdir_p(const char* d) {
+    return mkdirat_p(AT_FDCWD, d);
 }
 
 int run_cmd(const char *cmd) {
@@ -76,8 +89,8 @@ int mkopenat(int fd, const char *path) {
     return openat(fd, path, O_RDONLY);
 }
 
-FILE *fopenat(int fd, const char *path, int o, const char *m) {
-    int fd2 = openat(fd, path, o); 
+FILE *fopenat(int fd, const char *path, int o, const char *m, int p) {
+    int fd2 = openat(fd, path, o, p); 
 
     if (fd2 == -1) {
         return NULL;
@@ -104,6 +117,10 @@ ssize_t getline_kiss(char **line, char **f1, char **f2, size_t *size, FILE *f) {
     }
 
     *f2 = strtok(NULL, " 	\r\n");
+
+    if (*f2) {
+        path_fix(*f2);
+    }
 
     return len;
 next:

@@ -11,13 +11,9 @@
 #include "cache.h"
 
 static const char *caches[]  = {
-    "../../bin",
-    "../../sources", 
-    "../../logs",
-
-    "build", 
-    "extract", 
-    "pkg", 
+    "bin",
+    "sources", 
+    "logs",
 };
 
 struct cache *cache_create(void) {
@@ -103,7 +99,7 @@ int cache_get_base(str **s) {
         }
     }
 
-    if (str_printf(s, "/kiss/proc/%ld/", (long) getpid()) < 0) {
+    if (str_printf(s, "/kiss/", (long) getpid()) < 0) {
         err("string error");
         return -1;
     }

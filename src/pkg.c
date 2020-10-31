@@ -15,6 +15,7 @@ struct pkg *pkg_create(const char *name) {
     struct pkg *p = malloc(sizeof *p);    
 
     if (p) {
+        p->repo_fd = 0;
         p->repo = 0;
         p->name = strdup(name);
 
@@ -41,7 +42,7 @@ int pkg_list(int repo_fd, char *pkg) {
         return -1;
     }
 
-    FILE *ver = fopenat(fd, "version", O_RDONLY, "r");
+    FILE *ver = fopenat(fd, "version", O_RDONLY, "r", 644);
     close(fd);
 
     if (!ver) {

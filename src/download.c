@@ -8,17 +8,11 @@
 #include "util.h"
 #include "download.h"
 
-int source_download(const char *url, int dest_fd) {
-    char *basename = strrchr(url, '/');
-
-    if (!basename || basename[0] != '/') {
-        return -1;
-    }
-
-    FILE *file = fopenat(dest_fd, basename + 1, O_RDWR | O_CREAT, "w");
+int source_download(const char *url, const char *dest) {
+    FILE *file = fopen(dest, "w");
 
     if (!file) {
-        err_no("failed to open file '%s'", basename + 1);
+        err_no("failed to open file '%s'", dest);
         return -1;
     }
 
@@ -81,6 +75,11 @@ int source_download(const char *url, int dest_fd) {
     if (ret != 0) {
         err("failed to download file '%s': %s", url,
             curl_easy_strerror(ret));
+
+        if (remove(dest) < 0) {
+            err_no("failed to remove incomplete file '%s'", dest);
+        }
+
         goto curl_err;
     }
 
@@ -97,19 +96,3 @@ file_err:
 
     return -1;
 }
-
-int source_type(const char *url) {
-    if (url[0] == '/') {
-        return SRC_ABS; 
-
-    } else if (strncmp(url, "git+", 4) == 0) {
-        return SRC_GIT; 
-
-    } else if (strstr(url, "://")) {
-        return SRC_URL;
-
-    } else {
-        return SRC_REL;
-    }
-}
-

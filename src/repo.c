@@ -68,9 +68,10 @@ int repo_add(struct repo **r, char *path) {
     return 0;
 }
 
-char *repo_find(const char *name, struct repo *r) {
+char *repo_find(const char *name, struct repo *r, int *fd) {
     for (size_t i = 0; i < vec_size(r->fds); i++) {
         if (faccessat(r->fds[i], name, F_OK, 0) != -1) {
+            *fd = r->fds[i];
             return r->list[i];
 
         } else if (errno != ENOENT) {
