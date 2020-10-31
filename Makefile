@@ -25,12 +25,7 @@ VALGRIND = \
 OBJ = \
 	src/kiss.o \
 	src/str.o \
-	src/cache.o \
-	src/file.o \
-	src/pkg.o \
-	src/repo.o \
-	src/download.o \
-	src/util.o
+	src/download.o 
 
 kiss: $(OBJ)
 	$(CC) -o $@ $(OBJ) $(BUILD_LDFLAGS)
@@ -40,8 +35,6 @@ kiss: $(OBJ)
 
 check:
 	valgrind $(VALGRIND) ./kiss
-	valgrind $(VALGRIND) ./kiss s zlib
-	valgrind $(VALGRIND) ./kiss d zlib
 
 compdb:
 	ninja -t compdb cc > compile_commands.json

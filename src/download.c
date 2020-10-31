@@ -1,11 +1,8 @@
 #include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
 
 #include <curl/curl.h>
 
-#include "cache.h"
-#include "util.h"
+#include "error.h"
 #include "download.h"
 
 int source_download(const char *url, const char *dest) {
@@ -96,3 +93,4 @@ file_err:
 
     return -1;
 }
+
