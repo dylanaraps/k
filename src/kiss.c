@@ -46,12 +46,19 @@ static int run_extension(char *argv[]) {
 }
 
 static int run_download(str *buf, char **line, struct pkg *p) {
-    FILE *src_file = fopenat(p->repo, "sources", O_RDONLY, "r");
+    if (str_printf(&buf, "%s/%s/sources", p->repo, p->name) < 0) {
+        err("string error");
+        return -1;
+    }
+
+    FILE *src_file = fopen(buf, "r");
 
     if (!src_file) {
         err_no("failed to open sources file '%s'", p->name);
         return -1;
     }
+
+    str_set_len(&buf, 0);
 
     size_t size = 0;
     ssize_t len = 0;
@@ -60,7 +67,7 @@ static int run_download(str *buf, char **line, struct pkg *p) {
 
     while ((len = getline_kiss(line, &f1, &f2, &size, src_file)) > 0) {
         char *base = bname(f1);
-
+        
         switch (source_type(f1)) {
             case SRC_URL:
                 msg("[%s] downloading '%s'", p->name, f1);
@@ -71,7 +78,7 @@ static int run_download(str *buf, char **line, struct pkg *p) {
                 goto error;
 
             case -1:
-                err("[%s] error parsing sources file", p->name);
+                err("[%s] failed to parse sources file", p->name);
                 goto error;
         }
     }
@@ -238,7 +245,7 @@ static int run_action(int argc, char *argv[]) {
 
         new->repo = repo_find(argv[i], repos);
 
-        if (new->repo < 0) {
+        if (!new->repo) {
             err("[%s] repository search error", new->name);
             err = -1;
             goto free_pkg;

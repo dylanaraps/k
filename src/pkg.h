@@ -3,7 +3,7 @@
 
 struct pkg {
     char *name;
-    int repo;
+    char *repo;
 };
 
 struct pkg *pkg_create(const char *name);

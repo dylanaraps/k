@@ -57,7 +57,6 @@ int pkg_list(int repo_fd, char *pkg) {
 }
 
 void pkg_free(struct pkg **p) {
-    close((*p)->repo);
     free((*p)->name); 
     free(*p);
     *p = NULL;

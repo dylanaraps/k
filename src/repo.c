@@ -68,21 +68,19 @@ int repo_add(struct repo **r, char *path) {
     return 0;
 }
 
-int repo_find(const char *name, struct repo *r) {
+char *repo_find(const char *name, struct repo *r) {
     for (size_t i = 0; i < vec_size(r->fds); i++) {
-        int pfd = openat(r->fds[i], name, F_OK, 0);
-
-        if (pfd != -1) {
-            return pfd;
+        if (faccessat(r->fds[i], name, F_OK, 0) != -1) {
+            return r->list[i];
 
         } else if (errno != ENOENT) {
             err_no("failed to open pkg '%s/%s'", r->list[i], name);
-            return -1;
+            return NULL;
         }
     }
 
     err("package '%s' not in any repository", name);
-    return -1;
+    return NULL;
 }
 
 int repo_glob(glob_t *res, const char *query, struct repo *r) {
@@ -101,10 +99,7 @@ int repo_glob(glob_t *res, const char *query, struct repo *r) {
                 return -1;
         }
 
-        if (str_undo_l(&r->mem, str_get_len(&r->mem) - sl) < 0) {
-            err("string error");
-            return -1;
-        }
+        str_set_len(&r->mem, sl);
     }
 
     return 0;

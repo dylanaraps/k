@@ -84,29 +84,16 @@ int str_push_c(str **s, int d, size_t n) {
     return 0;
 }
 
-int str_undo_l(str **s, size_t l) {
-    if (l > str_get_len(s)) {
-        return -2;
-    }
-
-    str_set_len(s, str_get_len(s) - l);
-    return 0;
-}
-
-int str_undo_s(str **s, const char *d) {
-    if (!d) {
-        return -2;
-    }
-
-    return str_undo_l(s, strlen(d));
-}
-
 void str_undo_c(str **s, int d) {
     size_t l = str_get_len(s);
 
     for (; (*s)[l - 1] == d ; l--);
 
     str_set_len(s, l);
+}
+
+void str_empty(str **s) {
+    str_set_len(s, 0);
 }
 
 int str_vprintf(str **s, const char *f, va_list ap) {
