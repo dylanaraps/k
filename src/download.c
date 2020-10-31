@@ -1,15 +1,24 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include <curl/curl.h>
 
+#include "cache.h"
 #include "util.h"
 #include "download.h"
 
-int source_download(const char *url, const char *dest) {
-    FILE *file = fopen(dest, "w");
+int source_download(const char *url, int dest_fd) {
+    char *basename = strrchr(url, '/');
+
+    if (!basename || basename[0] != '/') {
+        return -1;
+    }
+
+    FILE *file = fopenat(dest_fd, basename + 1, O_RDWR | O_CREAT, "w");
 
     if (!file) {
-        err_no("failed to open file '%s'", dest);
+        err_no("failed to open file '%s'", basename + 1);
         return -1;
     }
 
@@ -82,9 +91,48 @@ int source_download(const char *url, const char *dest) {
 
 curl_err:
     curl_easy_cleanup(curl);
+
 file_err:
     fclose(file);
 
     return -1;
+}
+
+int source_type(const char *url, int dest_fd, int repo_fd) {
+    if (strncmp(url, "git+", 4) == 0) {
+        return SRC_GIT; 
+    }
+
+    if (strstr(url, "://")) {
+        char *basename = strrchr(url, '/');
+
+        if (faccessat(dest_fd, basename + 1, F_OK, 0) != -1) {
+            return SRC_CAC;
+
+        } else if (errno != ENOENT) {
+            return -1;
+        }
+
+        return SRC_URL;
+    }
+
+    if (url[0] == '/') {
+        if (access(url, F_OK) != -1) {
+            return SRC_ABS; 
+
+        } else if (errno != ENOENT) {
+            return -1;
+        }
+
+    } else {
+        if (faccessat(repo_fd, url, F_OK, 0) != -1) {
+            return SRC_REL;
+
+        } else if (errno != ENOENT) {
+            return -1;
+        }
+    }
+
+    return SRC_ENOENT;
 }
 

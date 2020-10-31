@@ -6,14 +6,24 @@
 #include <sys/stat.h>
 
 #include "str.h"
+#include "vec.h"
 #include "util.h"
 #include "cache.h"
+
+static const char *caches[]  = {
+    "../../bin",
+    "../../sources", 
+    "../../logs",
+
+    "build", 
+    "extract", 
+    "pkg", 
+};
 
 struct cache *cache_create(void) {
     struct cache *c = malloc(sizeof *c);
 
     if (c) {
-        c->fd   = 0;
         c->path = str_init(256);
 
         if (c->path) {
@@ -36,27 +46,42 @@ int cache_init(struct cache **cac) {
         return -1;
     }
 
-    (*cac)->fd = open((*cac)->path, O_RDONLY);
+    (*cac)->fd[CAC_DIR] = open((*cac)->path, O_RDONLY);
 
-    if ((*cac)->fd < 0) {
+    if ((*cac)->fd[CAC_DIR] < 0) {
         err_no("failed to open cache directory '%s'", (*cac)->path);
         return -1;
     }
 
-    return cache_mkdir(*cac);
+    if (cache_mkdir(*cac) < 0) {
+        return -1;
+    }
+
+    if (cache_open_fds(cac) < 0) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int cache_open_fds(struct cache **cac) {
+    for (int i = 0; i < CAC_DIR; i++) {
+        (*cac)->fd[i] = openat((*cac)->fd[CAC_DIR], caches[i], O_RDONLY);
+
+        if ((*cac)->fd[i] == -1) {
+            err_no("failed to open cache directory '%s'", caches[i]);
+            return -1;
+        }
+    }
+
+    return 0;
 }
 
 int cache_mkdir(struct cache *cac) {
-    static const char *caches[]  = {
-        "build", 
-        "extract", 
-        "pkg", 
-        "../../sources", 
-        "../../bin"
-    };
+    for (size_t i = 0; i < CAC_DIR; i++) {
+        int ret = mkdirat(cac->fd[CAC_DIR], caches[i], 0755);
 
-    for (size_t i = 0; i < (sizeof caches / sizeof caches[0]); i++) {
-        if (mkdirat(cac->fd, caches[i], 0755) == -1 && errno != EEXIST) {
+        if (ret == -1 && errno != EEXIST) {
             err_no("failed to create cache directory '%s'", caches[i]);
             return -1;
         }
@@ -88,7 +113,11 @@ int cache_get_base(str **s) {
 
 void cache_free(struct cache **cac) {
     str_free(&(*cac)->path);
-    close((*cac)->fd);
+
+    for (int i = 0; i < CAC_DIR; i++) {
+        close((*cac)->fd[i]);
+    }
+
     free(*cac);
     *cac = NULL;
 }

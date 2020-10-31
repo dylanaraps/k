@@ -13,6 +13,7 @@ struct pkg *pkg_create(const char *name) {
     struct pkg *p = malloc(sizeof *p);    
 
     if (p) {
+        p->src_fd = 0;
         p->repo = 0;
         p->name = strdup(name);
 
@@ -26,32 +27,23 @@ struct pkg *pkg_create(const char *name) {
     return NULL;
 }
 
-FILE *pkg_fopen(int repo_fd, char *pkg, const char *file) {
-    int pkg_fd = openat(repo_fd, pkg, O_RDONLY);
-
-    if (pkg_fd == -1) {
-        return NULL;
-    }
-
-    int fd = openat(pkg_fd, file, O_RDONLY);
-    close(pkg_fd);
+int pkg_list(int repo_fd, char *pkg) {
+    int fd = openat(repo_fd, pkg, O_RDONLY);
 
     if (fd == -1) {
-        return NULL;
-    }
-
-    return fdopen(fd, "r");
-}
-
-int pkg_list(int repo_fd, char *pkg) {
-    FILE *ver = pkg_fopen(repo_fd, pkg, "version");
-
-    if (!ver) {
         if (errno == ENOENT) {
             err("package '%s' not installed", pkg);
             return -1;
         }
 
+        err_no("failed to open pkg '%s'", pkg);
+        return -1;
+    }
+
+    FILE *ver = fopenat(fd, "version", O_RDONLY, "r");
+    close(fd);
+
+    if (!ver) {
         err_no("failed to open pkg '%s'", pkg);
         return -1;
     }
@@ -64,6 +56,14 @@ int pkg_list(int repo_fd, char *pkg) {
 }
 
 void pkg_free(struct pkg **p) {
+    if ((*p)->repo > 0) {
+        close((*p)->repo);
+    }
+
+    if ((*p)->src_fd > 0) {
+        close((*p)->src_fd);
+    }
+
     free((*p)->name); 
     free(*p);
     *p = NULL;

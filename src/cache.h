@@ -5,12 +5,25 @@
 
 struct cache {
     str *path;
-    int fd;
+    int fd[7];
+};
+
+enum cache_dir {
+    CAC_BIN,
+    CAC_SRC,
+    CAC_LOG,
+
+    CAC_MAK,
+    CAC_EXT,
+    CAC_PKG,
+
+    CAC_DIR,
 };
 
 struct cache *cache_create(void);
 int cache_init(struct cache **cac);
 int cache_mkdir(struct cache *cac);
+int cache_open_fds(struct cache **cac);
 int cache_get_base(str **s);
 void cache_free(struct cache **cac);
 

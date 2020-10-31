@@ -70,8 +70,10 @@ int repo_add(struct repo **r, char *path) {
 
 int repo_find(const char *name, struct repo *r) {
     for (size_t i = 0; i < vec_size(r->fds); i++) {
-        if (faccessat(r->fds[i], name, F_OK, 0) != -1) {
-            return r->fds[i];
+        int pfd = openat(r->fds[i], name, F_OK, 0);
+
+        if (pfd != -1) {
+            return pfd;
 
         } else if (errno != ENOENT) {
             err_no("failed to open pkg '%s/%s'", r->list[i], name);

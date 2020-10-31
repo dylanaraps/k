@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <fnmatch.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 #include "cache.h"
 #include "download.h"
@@ -44,48 +45,62 @@ static int run_extension(char *argv[]) {
     return -1;
 }
 
-static int run_download(struct pkg **p) {
-    char *line  = 0;
-    ssize_t len = 0;
-    size_t size = 0;
+static int run_download(char **line, struct pkg *p) {
+    FILE *src_file = fopenat(p->repo, "sources", O_RDONLY, "r");
 
-    for (size_t i = 0; i < vec_size(p); i++) {
-        FILE *src_file = pkg_fopen(p[i]->repo, p[i]->name, "sources");
-
-        if (!src_file) {
-            err_no("failed to open sources file '%s'", p[i]->name);
-            return -1;
-        }
-
-        while ((len = getline(&line, &size, src_file)) > 0) {
-            if (line[0] == '\n' || line[0] == '#') {
-                continue;
-            }
-
-            if (line[len - 1] == '\n') {
-                line[len - 1] = 0;
-            }
-
-            char *src = strtok(line, " 	");
-            char *des = strtok(NULL, " 	");
-
-            printf("%s -> %s\n", src, des ? des : "");
-        }
-
-        fclose(src_file);
+    if (!src_file) {
+        err_no("failed to open sources file '%s'", p->name);
+        return -1;
     }
 
-    free(line);
+    ssize_t len = 0;
+    char *f1 = 0;
+    char *f2 = 0;
+
+    while ((len = getline_kiss(line, &f1, &f2, src_file)) > 0) {
+        int dfd = p->src_fd;
+
+        // create and open an fd to the second field in the sources file.
+        // ie, the destination directory of downloaded sources.
+        if (f2 && (dfd = mkopenat(p->src_fd, f2)) == -1) {
+            err_no("[%s] failed to make/open cache directory", p->name);
+            goto error;
+        }
+
+        switch (source_type(f1, dfd, p->repo)) {
+            case SRC_URL:
+                msg("[%s] downloading '%s'", p->name, f1);
+
+                if (source_download(f1, dfd) < 0) {
+                    goto error;
+                }
+                break;
+
+            case SRC_ENOENT:
+                err("[%s] failed to find source '%s'", p->name, f1);
+                goto error;
+
+            case -1:
+                err("[%s] error parsing sources file", p->name);
+                goto error;
+        }
+    }
+
+    fclose(src_file);
     return 0;
+
+error:
+    fclose(src_file);
+    return -1;
 }
 
 static int run_search(int argc, char *argv[], struct repo *r) {
     for (int i = 2; i < argc; i++) {
-        glob_t res;
-
         if (!argv[i][0]) {
             continue;
         }
+
+        glob_t res;
 
         if (repo_glob(&res, argv[i], r) != 0 ) {
             goto error;
@@ -198,15 +213,15 @@ static int run_action(int argc, char *argv[]) {
         goto free_repo;
     }
 
-    struct cache *cache_dir = cache_create();
+    struct cache *cac = cache_create();
 
-    if (!cache_dir) {
+    if (!cac) {
         err("failed to allocate memory");
         err = -1;
         goto free_cache;
     }
 
-    if (cache_init(&cache_dir) < 0) {
+    if (cache_init(&cac) < 0) {
         err("cache init failed"); 
         err = -1;
         goto free_cache;
@@ -226,7 +241,15 @@ static int run_action(int argc, char *argv[]) {
         new->repo = repo_find(argv[i], repos);
 
         if (new->repo < 0) {
-            err("repository search error");
+            err("[%s] repository search error", new->name);
+            err = -1;
+            goto free_pkg;
+        }
+
+        new->src_fd = mkopenat(cac->fd[CAC_SRC], new->name);
+
+        if (new->src_fd < 0) {
+            err_no("[%s] failed to open source directory", new->name);
             err = -1;
             goto free_pkg;
         }
@@ -241,9 +264,16 @@ static int run_action(int argc, char *argv[]) {
         case 'c':
             break;
 
-        case 'd':
-            run_download(pkgs);
+        case 'd': {
+            char *line = 0;
+
+            for (size_t i = 0; i < vec_size(pkgs); i++) {
+                run_download(&line, pkgs[i]);
+            }
+
+            free(line);
             break;
+       }
     }
 
 free_pkg:
@@ -253,7 +283,7 @@ free_pkg:
     vec_free(pkgs);
 
 free_cache:
-    cache_free(&cache_dir);
+    cache_free(&cac);
 
 free_repo:
     repo_free(&repos);

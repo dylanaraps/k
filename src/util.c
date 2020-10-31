@@ -67,3 +67,47 @@ int file_print_line(FILE *f) {
 
     return ferror(f);
 }
+
+int mkopenat(int fd, const char *path) {
+    if (mkdirat(fd, path, 0755) == -1 && errno != EEXIST) {
+        return -1;
+    }
+
+    return openat(fd, path, O_RDONLY);
+}
+
+FILE *fopenat(int fd, const char *path, int o, const char *m) {
+    int fd2 = openat(fd, path, o); 
+
+    if (fd2 == -1) {
+        return NULL;
+    }
+
+    return fdopen(fd2, m);
+}
+
+ssize_t getline_kiss(char **line, char **f1, char **f2, FILE *f) {
+    size_t size = 0; 
+    ssize_t len = getline(line, &size, f);
+
+    if (len < 1) {
+        return len;
+    }
+
+    if (*line[0] == '\n' || *line[0] == '#') {
+        goto next;
+    }
+
+    *f1 = strtok(*line, " 	\r\n");
+
+    if (!*f1) {
+        goto next;
+    }
+
+    *f2 = strtok(NULL, " 	\r\n");
+
+    return len;
+next:
+    return getline_kiss(line, f1, f2, f);
+}
+

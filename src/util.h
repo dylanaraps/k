@@ -9,8 +9,11 @@
 
 int mkdir_p(const char* d);
 int run_cmd(const char *cmd);
-int file_print_line(FILE *f);
 int is_dir(const char *path);
+int file_print_line(FILE *f);
+int mkopenat(int fd, const char *path);
+FILE *fopenat(int fd, const char *path, int o, const char *m);
+ssize_t getline_kiss(char **line, char **f1, char **f2, FILE *f);
 
 #define msg(...) do {             \
     fprintf(stderr, __VA_ARGS__); \
