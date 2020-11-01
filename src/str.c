@@ -28,7 +28,7 @@ str *str_alloc(str **s, size_t l) {
     return (char *) &n[CAP_OFF];
 }
 
-int str_maybe_alloc(str **s, size_t l) {
+static int str_maybe_alloc(str **s, size_t l) {
     if (str_get_len(s) + l < str_get_cap(s)) {
         return 0;
     }
@@ -49,7 +49,7 @@ int str_push_l(str **s, const char *d, size_t l) {
     }
 
     memcpy(*s + str_get_len(s), d, l + 1);
-    str_set_len(s, str_get_len(s) + l);
+    str_add_len(s, l);
 
     return 0;
 }
@@ -76,7 +76,7 @@ int str_vprintf(str **s, const char *f, va_list ap) {
         return -1;
     }
 
-    str_set_len(s, str_get_len(s) + (size_t) l1);
+    str_add_len(s, (size_t) l1);
     return 0;
 }
 
@@ -89,8 +89,8 @@ int str_printf(str **s, const char *f, ...) {
 }
 
 void str_undo_c(str **s, int d) {
-    size_t l = str_get_len(s) - 1;
-    for (; l && *(*s + l--) == d ;);
+    size_t l = str_get_len(s);
+    for (; l && *s[l - 1] == d ;);
     str_set_len(s, l);
 }
 
@@ -102,17 +102,13 @@ size_t str_get_len(str **s) {
     return s ? *s ? ((size_t *) *s)[-LEN_OFF] : 0 : 0;
 }
 
-void str_set_cap(str **s, size_t l) {
-    ((size_t *) *s)[-CAP_OFF] = l;
-}
-
 void str_set_len(str **s, size_t l) {
     ((size_t *) *s)[-LEN_OFF] = l;
-    str_set_pos(s, l, 0);
+    memset(*s + l, 0, 1);
 }
 
-void str_set_pos(str **s, size_t l, int c) {
-    *(*s + l) = c;
+void str_add_len(str **s, size_t l) {
+    ((size_t *) *s)[-LEN_OFF] += l;
 }
 
 void str_free(str **s) {

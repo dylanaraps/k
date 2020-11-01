@@ -52,9 +52,6 @@ static int run_search(int argc, char *argv[]) {
         return -1;
     }
 
-    printf("%s\n", db->path);
-    printf("%d\n", db->fd);
-
     repo_free(&db);
 
     return 0;
