@@ -31,6 +31,13 @@ static int run_extension(char *argv[]) {
     return -1;
 }
 
+static int run_search(int argc, char *argv[]) {
+    (void) argc;
+    (void) argv;
+
+    return 0;    
+}
+
 int main (int argc, char *argv[]) {
     int err = 0;
 
@@ -44,22 +51,8 @@ int main (int argc, char *argv[]) {
     } else if (ARG(argv[1], "version")) {
         puts("0.0.1");
 
-    } else if (ARG(argv[1], "alt")) {
-        //
-
-    } else if (ARG(argv[1], "build") ||
-               ARG(argv[1], "checksum") ||
-               ARG(argv[1], "download")) {
-
-    } else if (ARG(argv[1], "install") ||
-               ARG(argv[1], "remove")) {
-        //
-
-    } else if (ARG(argv[1], "list") || 
-               ARG(argv[1], "search")) {
-
-    } else if (ARG(argv[1], "update")) {
-        //
+    } else if (ARG(argv[1], "search")) {
+        err = run_search(argc, argv);
 
     } else {
         err = run_extension(argv + 1);
