@@ -24,17 +24,26 @@ VALGRIND = \
 	--trace-children=yes
 
 OBJ = \
-	src/kiss.o \
+	src/download.o \
+	src/repo.o \
 	src/str.o \
-	src/download.o 
+	src/kiss.o
 
-kiss: $(OBJ)
-	$(CC) -o $@ $(OBJ) $(BUILD_LDFLAGS)
+HDR = \
+	src/download.h \
+	src/error.h \
+	src/repo.h \
+	src/str.h
 
 .c.o:
 	$(CC) $(BUILD_CFLAGS) -g -O0 -c -o $@ $<
 
-install:
+kiss: $(OBJ)
+	$(CC) -o $@ $(OBJ) $(BUILD_LDFLAGS)
+
+$(OBJ): $(HDR)
+
+install: kiss
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp -f kiss $(DESTDIR)$(PREFIX)/bin
 

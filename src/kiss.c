@@ -1,7 +1,9 @@
+#include <errno.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "download.h"
+#include "repo.h"
 #include "error.h"
 #include "str.h"
 
@@ -35,7 +37,27 @@ static int run_search(int argc, char *argv[]) {
     (void) argc;
     (void) argv;
 
-    return 0;    
+    struct repo *db = repo_create();
+
+    if (!db) {
+        err("failed to allocate memory");
+        return -1;
+    }
+
+    str_push_s(&db->path, getenv("KISS_ROOT"));
+    str_undo_c(&db->path, '/');
+
+    if (repo_init(&db, "/var/db/kiss/installed") < 0) {
+        err_no("failed to initialize repository");
+        return -1;
+    }
+
+    printf("%s\n", db->path);
+    printf("%d\n", db->fd);
+
+    repo_free(&db);
+
+    return 0;
 }
 
 int main (int argc, char *argv[]) {
@@ -46,7 +68,7 @@ int main (int argc, char *argv[]) {
 
 // Check if argument matches an action. True for b==build and build==build
 // strcmp is only reached when both first characters match.
-#define ARG(a, b) ((a[0]) == (b[0]) && ((!a[1]) || strcmp(a, b) == 0)) 
+#define ARG(a, b) ((a[0]) == (b[0]) && ((!a[1]) || strcmp(a, b) == 0))
 
     } else if (ARG(argv[1], "version")) {
         puts("0.0.1");

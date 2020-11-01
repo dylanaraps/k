@@ -26,7 +26,7 @@ static int source_curl_init(void) {
 }
 
 static CURLcode source_curl_setopts(void) {
-    CURLcode ret = 0;    
+    CURLcode ret = 0;
 
     if ((ret = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L)) != 0) {
         err("CURLOPT_NOPROGRESS: %s", curl_easy_strerror(ret));
@@ -84,7 +84,7 @@ int source_download(const char *url, FILE *dest) {
         return -1;
     }
 
-    return 0;     
+    return 0;
 }
 
 void source_curl_cleanup(void) {

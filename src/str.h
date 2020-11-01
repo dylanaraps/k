@@ -11,9 +11,9 @@ str *str_alloc(str **s, size_t l);
 int str_maybe_alloc(str **s, size_t l);
 int str_push_l(str **s, const char *d, size_t l);
 int str_push_s(str **s, const char *d);
-int str_push_c(str **s, int d);
 int str_vprintf(str **s, const char *f, va_list ap);
 int str_printf(str **s, const char *f, ...);
+void str_undo_c(str **s, int d);
 void str_free(str **s);
 
 size_t str_get_cap(str **s);
