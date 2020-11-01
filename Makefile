@@ -21,7 +21,6 @@ VALGRIND = \
 	--track-origins=yes \
 	--error-exitcode=1 \
 	--track-fds=yes \
-	--trace-children=yes
 
 OBJ = \
 	src/download.o \
