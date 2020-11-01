@@ -7,7 +7,7 @@ Next KISS Package Manager
 ________________________________________________________________________________
 
 The at-some-point-in-the-future replacement for the current POSIX shell
-package manager written in C99.
+package manager written in C99. 
 
 
 Dependencies
@@ -15,12 +15,28 @@ ________________________________________________________________________________
 
 Required:
 
-- C99 compiler.
-- Various POSIX.1-2008 interfaces.
+- C99 compiler
+- Various POSIX.1-2008 interfaces
+- libcurl
 
-Optional:
 
-- libcurl (if absent, download support is not compiled)
+Compilation
+________________________________________________________________________________
+
+POSIX Make:
+
+$ make
+$ make DESTDIR="..." PREFIX="..." install
+
+Samurai / Ninja:
+
+$ ninja
+$ cp kiss ...
+
+Manual:
+
+$ cc -std=c99 -D_POSIX_C_SOURCE=200809L $CFLAGS src/*.c -o kiss -lcurl
+$ cp kiss ...
 
 
 Changes from the shell version (present and future)

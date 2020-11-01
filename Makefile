@@ -34,6 +34,10 @@ kiss: $(OBJ)
 .c.o:
 	$(CC) $(BUILD_CFLAGS) -g -O0 -c -o $@ $<
 
+install:
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	cp -f kiss $(DESTDIR)$(PREFIX)/bin
+
 check:
 	valgrind $(VALGRIND) ./kiss
 
