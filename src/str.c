@@ -9,52 +9,40 @@
 #define CAP_OFF 2
 #define LEN_OFF 1
 
-str *str_init(size_t l) {
-    size_t *s = malloc(HDR_LEN + l + 1);
-
-    if (!s) {
-        return NULL;
-    }
-
-    s[0] = l + 1;
-    s[1] = 0;
-    s[2] = 0;     
-
-    return (char *) &s[CAP_OFF];
+inline str *str_init(size_t l) {
+    return str_alloc(NULL, l);
 }
 
 str *str_alloc(str **s, size_t l) {
-    size_t *s2 = realloc((size_t *) *s - CAP_OFF, 
+    size_t *n = realloc(s ? *s ? (size_t *) *s - CAP_OFF : 0 : 0, 
         HDR_LEN + str_get_cap(s) + l + 1);
 
-    if (!s2) {
+    if (!n) {
         return NULL;
     }
 
-    s2[0] += l + 1;
+    n[0] = (s ? *s ? n[0] : 0 : 0) + l + 1;
+    n[1] = (s ? *s ? n[1] : 0 : 0);
 
-    return (char *) &s2[CAP_OFF];
+    return (char *) &n[CAP_OFF];
 }
 
 int str_maybe_alloc(str **s, size_t l) {
-    if (str_get_len(s) + l >= str_get_cap(s)) {
-        str *n = str_alloc(s, (l + (l >> 1)));
-
-        if (!n) {
-            return -1; 
-        }
-
-        *s = n;
+    if (str_get_len(s) + l < str_get_cap(s)) {
+        return 0;
     }
 
+    str *n = str_alloc(s, (l + (l >> 1)));
+
+    if (!n) {
+        return -1; 
+    }
+
+    *s = n;
     return 0;
 }
 
 int str_push_l(str **s, const char *d, size_t l) {
-    if (!d || l == 0) {
-        return -2;
-    }
-
     if (str_maybe_alloc(s, l) < 0) {
         return -1;
     }
@@ -65,35 +53,19 @@ int str_push_l(str **s, const char *d, size_t l) {
     return 0;
 }
 
-int str_push_s(str **s, const char *d) {
-    if (!d) {
-        return -2;
-    }
-
-    return str_push_l(s, d, strlen(d));
-}
-
-int str_push_c(str **s, int d, size_t n) {
-    if (str_maybe_alloc(s, n) < 0) {
+int str_push_c(str **s, int d) {
+    if (str_maybe_alloc(s, 1) < 0) {
         return -1;
     }
 
-    memset(*s + str_get_len(s), d, n);
-    str_set_len(s, str_get_len(s) + n);
+    str_set_len(s, str_get_len(s) + 1);
+    str_set_pos(s, str_get_len(s), d);
 
     return 0;
 }
 
-void str_undo_c(str **s, int d) {
-    size_t l = str_get_len(s);
-
-    for (; (*s)[l - 1] == d ; l--);
-
-    str_set_len(s, l);
-}
-
-void str_empty(str **s) {
-    str_set_len(s, 0);
+int str_push_s(str **s, const char *d) {
+    return str_push_l(s, d, strlen(d));
 }
 
 int str_vprintf(str **s, const char *f, va_list ap) {
@@ -127,11 +99,11 @@ int str_printf(str **s, const char *f, ...) {
 }
 
 inline size_t str_get_cap(str **s) {
-    return *s ? ((size_t *) *s)[-CAP_OFF] : 0;
+    return s ? *s ? ((size_t *) *s)[-CAP_OFF] : 0 : 0;
 }
 
 inline size_t str_get_len(str **s) {
-    return *s ? ((size_t *) *s)[-LEN_OFF] : 0;
+    return s ? *s ? ((size_t *) *s)[-LEN_OFF] : 0 : 0;
 }
 
 inline void str_set_cap(str **s, size_t l) {
@@ -140,7 +112,11 @@ inline void str_set_cap(str **s, size_t l) {
 
 inline void str_set_len(str **s, size_t l) {
     ((size_t *) *s)[-LEN_OFF] = l;
-    memset(*s + l, 0, 1);
+    str_set_pos(s, l, 0);
+}
+
+inline void str_set_pos(str **s, size_t l, int c) {
+    *(*s + l) = c;
 }
 
 void str_free(str **s) {
