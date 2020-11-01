@@ -10,7 +10,7 @@
 #define LEN_OFF 1
 
 inline str *str_init(size_t l) {
-    return str_alloc(NULL, l);
+    return str_alloc(0, l);
 }
 
 str *str_alloc(str **s, size_t l) {
@@ -18,7 +18,7 @@ str *str_alloc(str **s, size_t l) {
         HDR_LEN + str_get_cap(s) + l + 1);
 
     if (!n) {
-        return NULL;
+        return 0;
     }
 
     n[0] = (s ? *s ? n[0] : 0 : 0) + l + 1;
@@ -71,7 +71,7 @@ int str_push_s(str **s, const char *d) {
 int str_vprintf(str **s, const char *f, va_list ap) {
     va_list ap2;
     va_copy(ap2, ap);
-    int l1 = vsnprintf(NULL, 0, f, ap2);
+    int l1 = vsnprintf(0, 0, f, ap2);
     va_end(ap2);
 
     if (l1 <= 0) {
@@ -122,7 +122,7 @@ inline void str_set_pos(str **s, size_t l, int c) {
 void str_free(str **s) {
     if (*s) {
         free((size_t *) *s - CAP_OFF);
-        *s = NULL;
+        *s = 0;
     }
 }
 
