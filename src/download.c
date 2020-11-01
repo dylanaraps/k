@@ -28,23 +28,17 @@ static int source_curl_init(void) {
 static CURLcode source_curl_setopts(void) {
     CURLcode ret = 0;    
 
-    ret = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-
-    if (ret != 0) {
+    if ((ret = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L)) != 0) {
         err("CURLOPT_NOPROGRESS: %s", curl_easy_strerror(ret));
         return ret;
     }
 
-    ret = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
-    if (ret != 0) {
+    if ((ret = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L)) != 0) {
         err("CURLOPT_FOLLOWLOCATION: %s", curl_easy_strerror(ret));
         return ret;
     }
 
-    ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
-
-    if (ret != 0) {
+    if ((ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL)) != 0) {
         err("CURLOPT_WRITEFUNCTION: %s", curl_easy_strerror(ret));
         return ret;
     }
@@ -55,16 +49,12 @@ static CURLcode source_curl_setopts(void) {
 static CURLcode source_curl_stage(const char *url, FILE *dest) {
     CURLcode ret = 0;
 
-    ret = curl_easy_setopt(curl, CURLOPT_URL, url);
-
-    if (ret != 0) {
+    if ((ret = curl_easy_setopt(curl, CURLOPT_URL, url)) != 0) {
         err("CURLOPT_URL: %s", curl_easy_strerror(ret));
         return ret;
     }
 
-    ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, dest);
-
-    if (ret != 0) {
+    if ((ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, dest)) != 0) {
         err("CURLOPT_WRITEDATA: %s", curl_easy_strerror(ret));
         return ret;
     }
