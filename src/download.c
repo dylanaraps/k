@@ -1,96 +1,104 @@
-#include <stdio.h>
-
 #include <curl/curl.h>
 
 #include "error.h"
 #include "download.h"
 
-int source_download(const char *url, const char *dest) {
-    FILE *file = fopen(dest, "w");
+// same handle is used for all requests
+static CURL *curl = 0;
 
-    if (!file) {
-        err_no("failed to open file '%s'", dest);
-        return -1;
-    }
-
+static int source_curl_init(void) {
     CURLcode ret = curl_global_init(CURL_GLOBAL_ALL);
 
     if (ret != 0) {
         err("failed to initialize curl: %s", curl_easy_strerror(ret));
-        goto file_err;
+        return -1;
     }
 
-    CURL *curl = curl_easy_init();
+    curl = curl_easy_init();
 
     if (!curl) {
+        curl_global_cleanup();
         err("failed to initialize curl");
-        goto file_err;
+        return -1;
     }
 
-    ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+    return 0;
+}
 
-    if (ret != 0) {
-        err("failed to set CURLOPT_WRITEDATA: %s", 
-            curl_easy_strerror(ret));
-        goto curl_err;
-    }
-
-    ret = curl_easy_setopt(curl, CURLOPT_URL, url);
-
-    if (ret != 0) {
-        err("failed to set CURLOPT_URL to '%s': %s", url,
-            curl_easy_strerror(ret));
-        goto curl_err;
-    }
+static CURLcode source_curl_setopts(void) {
+    CURLcode ret = 0;    
 
     ret = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
     if (ret != 0) {
-        err("failed to set CURLOPT_NOPROGRESS: %s", 
-            curl_easy_strerror(ret));
-        goto curl_err;
+        err("CURLOPT_NOPROGRESS: %s", curl_easy_strerror(ret));
+        return ret;
     }
 
     ret = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
     if (ret != 0) {
-        err("failed to set CURLOPT_FOLLOWLOCATION: %s", 
-            curl_easy_strerror(ret));
-        goto curl_err;
+        err("CURLOPT_FOLLOWLOCATION: %s", curl_easy_strerror(ret));
+        return ret;
     }
 
-    ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
+    ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
 
     if (ret != 0) {
-        err("failed to set CURLOPT_WRITEFUNCTION: %s", 
-            curl_easy_strerror(ret));
-        goto curl_err;
+        err("CURLOPT_WRITEFUNCTION: %s", curl_easy_strerror(ret));
+        return ret;
     }
 
-    ret = curl_easy_perform(curl);
+    return ret;
+}
+
+static CURLcode source_curl_stage(const char *url, FILE *dest) {
+    CURLcode ret = 0;
+
+    ret = curl_easy_setopt(curl, CURLOPT_URL, url);
 
     if (ret != 0) {
-        err("failed to download file '%s': %s", url,
-            curl_easy_strerror(ret));
+        err("CURLOPT_URL: %s", curl_easy_strerror(ret));
+        return ret;
+    }
 
-        if (remove(dest) < 0) {
-            err_no("failed to remove incomplete file '%s'", dest);
+    ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, dest);
+
+    if (ret != 0) {
+        err("CURLOPT_WRITEDATA: %s", curl_easy_strerror(ret));
+        return ret;
+    }
+
+    return ret;
+}
+
+int source_download(const char *url, FILE *dest) {
+    if (!curl) {
+        if (source_curl_init() != 0) {
+            return -1;
         }
 
-        goto curl_err;
+        if (source_curl_setopts() != 0) {
+            return -1;
+        }
     }
 
-    curl_easy_cleanup(curl);
-    fclose(file);
+    if (source_curl_stage(url, dest) != 0) {
+        return -1;
+    }
+
+    CURLcode ret = curl_easy_perform(curl);
+
+    if (ret != 0) {
+        err("failed to download file '%s': %s", url, curl_easy_strerror(ret));
+        return -1;
+    }
 
     return 0;     
+}
 
-curl_err:
+void source_curl_cleanup(void) {
     curl_easy_cleanup(curl);
-
-file_err:
-    fclose(file);
-
-    return -1;
+    curl_global_cleanup();
 }
 
