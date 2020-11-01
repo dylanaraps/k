@@ -2,13 +2,14 @@
 
 PREFIX = /usr/local
 
-BUILD_FLAGS = \
+BUILD_CFLAGS = \
 	-std=c99 \
 	-D_POSIX_C_SOURCE=200809L \
 	-Wall \
 	-Wextra \
 	-pedantic \
-	$(CFLAGS)
+	$(CFLAGS) \
+	$(CPPFLAGS)
 
 BUILD_LDFLAGS = \
 	-lcurl \
@@ -31,7 +32,7 @@ kiss: $(OBJ)
 	$(CC) -o $@ $(OBJ) $(BUILD_LDFLAGS)
 
 .c.o:
-	$(CC) $(BUILD_FLAGS) -g -O0 -c -o $@ $<
+	$(CC) $(BUILD_CFLAGS) -g -O0 -c -o $@ $<
 
 check:
 	valgrind $(VALGRIND) ./kiss

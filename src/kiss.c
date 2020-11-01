@@ -1,8 +1,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "error.h"
 #include "download.h"
+#include "error.h"
 #include "str.h"
 
 static void usage(char *arg0) {
