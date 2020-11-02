@@ -7,7 +7,7 @@ Next KISS Package Manager
 ________________________________________________________________________________
 
 The at-some-point-in-the-future replacement for the current POSIX shell
-package manager written in C99. 
+package manager written in C99.
 
 
 Dependencies
@@ -42,11 +42,14 @@ $ cp kiss ...
 Changes from the shell version (present and future)
 ________________________________________________________________________________
 
-- The 'alternatives' action will be renamed to 'alt' to make the long form 
+- The 'alternatives' action will be renamed to 'alt' to make the long form
   action name easier to use ('a' will still work as it did).
 
 - The 'nostrip' file will be replaced with a more thought out alternative. This
-  current method breaks when user hooks are used at runtime to modify cache 
+  current method breaks when user hooks are used at runtime to modify cache
   directories.
+
+- KISS_HOOK will not be implemented. A new means of configuration will be
+  added to fill this gap.
 
 - ...

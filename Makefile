@@ -19,8 +19,7 @@ VALGRIND = \
 	--leak-check=full \
 	--show-leak-kinds=all \
 	--track-origins=yes \
-	--error-exitcode=1 \
-	--track-fds=yes \
+	--error-exitcode=1
 
 OBJ = \
 	src/download.o \
@@ -32,7 +31,7 @@ HDR = \
 	src/download.h \
 	src/error.h \
 	src/repo.h \
-	src/str.h
+	src/str.h \
 
 .c.o:
 	$(CC) $(BUILD_CFLAGS) -g -O0 -c -o $@ $<

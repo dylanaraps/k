@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#include "error.h"
 #include "str.h"
 #include "repo.h"
 
@@ -29,7 +30,7 @@ int repo_init(struct repo **r, const char *path) {
         return -1;
     }
 
-    if (((*r)->fd = open((*r)->path, O_RDONLY)) < 0) {
+    if (((*r)->fd = open((*r)->path->buf, O_RDONLY)) < 0) {
         return -1;
     }
 
