@@ -49,7 +49,6 @@ int str_push_l(str **s, const char *d, size_t l) {
 
     memcpy((*s)->buf + (*s)->len, d, l + 1);
     str_set_len((*s), (*s)->len + l);
-
     return 0;
 }
 
@@ -59,6 +58,16 @@ int str_push_s(str **s, const char *d) {
     }
 
     return str_push_l(s, d, strlen(d));
+}
+
+int str_push_c(str **s, int d) {
+    if (str_alloc_maybe(s, 1) < 0) {
+        return -ENOMEM;
+    }
+
+    (*s)->buf[(*s)->len++] = d;
+    (*s)->buf[(*s)->len]   = 0;
+    return 0;
 }
 
 void str_undo_c(str **s, int d) {

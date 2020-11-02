@@ -3,7 +3,6 @@
 #include <unistd.h>
 
 #include "download.h"
-#include "repo.h"
 #include "error.h"
 #include "str.h"
 
@@ -34,25 +33,9 @@ static int run_extension(char *argv[]) {
 }
 
 static int run_search(int argc, char *argv[]) {
+    // temporary
     (void) argc;
     (void) argv;
-
-    struct repo *db = repo_create();
-
-    if (!db) {
-        err("failed to allocate memory");
-        return -1;
-    }
-
-    str_push_s(&db->path, getenv("KISS_ROOT"));
-    str_undo_c(&db->path, '/');
-
-    if (repo_init(&db, "/var/db/kiss/installed") < 0) {
-        err_no("failed to initialize repository");
-        return -1;
-    }
-
-    repo_free(&db);
 
     return 0;
 }

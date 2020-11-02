@@ -23,18 +23,16 @@ VALGRIND = \
 
 OBJ = \
 	src/download.o \
-	src/repo.o \
 	src/str.o \
 	src/kiss.o
 
 HDR = \
 	src/download.h \
 	src/error.h \
-	src/repo.h \
-	src/str.h \
+	src/str.h
 
 .c.o:
-	$(CC) $(BUILD_CFLAGS) -g -O0 -c -o $@ $<
+	$(CC) $(BUILD_CFLAGS) -c -o $@ $<
 
 kiss: $(OBJ)
 	$(CC) -o $@ $(OBJ) $(BUILD_LDFLAGS)
