@@ -1,4 +1,4 @@
-cflags  = -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic
+cflags  = -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic -Iinclude
 ldflags = -lcurl
 
 cc = cc

@@ -8,6 +8,7 @@ BUILD_CFLAGS = \
 	-Wall \
 	-Wextra \
 	-pedantic \
+	-Iinclude \
 	$(CFLAGS) \
 	$(CPPFLAGS)
 
@@ -27,9 +28,9 @@ OBJ = \
 	src/kiss.o
 
 HDR = \
-	src/download.h \
-	src/error.h \
-	src/str.h
+	include/download.h \
+	include/error.h \
+	include/str.h
 
 .c.o:
 	$(CC) $(BUILD_CFLAGS) -c -o $@ $<
