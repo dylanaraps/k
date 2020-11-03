@@ -24,12 +24,14 @@ VALGRIND = \
 
 OBJ = \
 	src/download.o \
+	src/list.o \
 	src/str.o \
 	src/kiss.o
 
 HDR = \
 	include/download.h \
 	include/error.h \
+	include/list.h \
 	include/str.h
 
 .c.o:
