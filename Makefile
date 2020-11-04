@@ -2,7 +2,7 @@
 
 PREFIX = /usr/local
 
-BUILD_CFLAGS = \
+XCFLAGS = \
 	-std=c99 \
 	-D_POSIX_C_SOURCE=200809L \
 	-Wall \
@@ -12,7 +12,7 @@ BUILD_CFLAGS = \
 	$(CFLAGS) \
 	$(CPPFLAGS)
 
-BUILD_LDFLAGS = \
+XLDFLAGS = \
 	-lcurl \
 	$(LDFLAGS)
 
@@ -37,10 +37,10 @@ HDR = \
 	include/str.h
 
 .c.o:
-	$(CC) $(BUILD_CFLAGS) -c -o $@ $<
+	$(CC) $(XCFLAGS) -c -o $@ $<
 
 kiss: $(OBJ)
-	$(CC) -o $@ $(OBJ) $(BUILD_LDFLAGS)
+	$(CC) -o $@ $(OBJ) $(XLDFLAGS)
 
 $(OBJ): $(HDR)
 

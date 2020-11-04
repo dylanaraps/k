@@ -1,6 +1,6 @@
 kiss
-kiss-install
 */*.o
+*/*/*.o
 .ccls-cache
 compile_commands.json
 .ninja*
