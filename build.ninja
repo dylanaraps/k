@@ -11,10 +11,12 @@ rule cc
 rule link
     command = $cc $ldflags -o $out $in
 
-build src/download.o: cc src/download.c
-build src/str.o:      cc src/str.c
-build src/kiss.o:     cc src/kiss.c
+build src/download.o:    cc src/download.c
+build src/list.o:        cc src/list.c
+build src/str.o:         cc src/str.c
+build src/action/list.o: cc src/action/list.c
+build src/kiss.o:        cc src/kiss.c
 
-build kiss: link src/download.o src/str.o src/kiss.o
+build kiss: link src/download.o src/list.o src/str.o src/action/list.o src/kiss.o
 
 default kiss
