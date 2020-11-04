@@ -49,6 +49,8 @@ install: kiss
 check:
 	valgrind $(VALGRIND) ./kiss
 	valgrind $(VALGRIND) ./kiss s zlib
+	valgrind $(VALGRIND) ./kiss l zlib
+	valgrind $(VALGRIND) ./kiss l zlib xz musl gzip
 
 compdb:
 	ninja -t compdb cc > compile_commands.json
