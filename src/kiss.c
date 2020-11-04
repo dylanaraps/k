@@ -1,14 +1,9 @@
-#include <dirent.h>
-#include <errno.h>
 #include <string.h>
+#include <stdio.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 
 #include "action.h"
-#include "download.h"
 #include "error.h"
-#include "list.h"
 #include "str.h"
 
 static void usage(char *arg0) {
@@ -37,13 +32,6 @@ static int run_extension(char *argv[]) {
     return -1;
 }
 
-static int run_search(int argc, char *argv[]) {
-    (void) argc;
-    (void) argv;
-
-    return 0;
-}
-
 int main (int argc, char *argv[]) {
     int err = 0;
 
@@ -59,9 +47,6 @@ int main (int argc, char *argv[]) {
 
     } else if (ARG(argv[1], "list")) {
         err = action_list(argc, argv);
-
-    } else if (ARG(argv[1], "search")) {
-        err = run_search(argc, argv);
 
     } else {
         err = run_extension(argv + 1);
