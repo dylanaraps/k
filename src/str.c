@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "str.h"
@@ -84,6 +85,25 @@ int str_rstrip(str **s, int d) {
     }
 
     return n;
+}
+
+int str_getline(str **s, FILE *f) {
+    str_set_len(*s, 0);
+
+    char *buf = (*s)->buf;
+    ssize_t ret = getline(&buf, &(*s)->cap, f);
+
+    if (ret < 1) {
+        return -1;
+    }
+
+    if ((*s)->buf[ret - 1] == '\n') {
+        (*s)->buf[ret - 1] = 0;
+    }
+
+    (*s)->len = (size_t) ret;
+
+    return 0;
 }
 
 void str_free(str **s) {

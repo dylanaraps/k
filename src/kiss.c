@@ -1,6 +1,8 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include "download.h"
 #include "error.h"
@@ -24,9 +26,9 @@ static void usage(char *arg0) {
 }
 
 static int run_extension(char *argv[]) {
-    char ext[64] = "kiss-";
+    char ext[256] = "kiss-";
 
-    strncat(ext, *argv, 63);
+    strncat(ext, *argv, 255);
     execvp(ext, argv);
 
     err("failed to execute extension %s", ext);
@@ -34,11 +36,41 @@ static int run_extension(char *argv[]) {
 }
 
 static int run_search(int argc, char *argv[]) {
-    // temporary
     (void) argc;
     (void) argv;
 
     return 0;
+}
+
+static int run_list(str *buf, char *pkg) {
+    str_push_l(&buf, "/var/db/kiss/installed/", 23);
+    str_push_s(&buf, pkg);
+    str_push_l(&buf, "/version", 8);
+
+    FILE *ver = fopen(buf->buf, "r");
+
+    if (!ver) {
+        if (errno == ENOENT) {
+            err("package '%s' not installed", pkg);
+
+        } else {
+            err_no("failed to open file '%s'", buf->buf);
+        }
+
+        return -1;
+    }
+
+    int ret = 0;
+
+    if ((ret = str_getline(&buf, ver)) == 0) {
+        printf("%s %s\n", pkg, buf->buf);
+
+    } else {
+        err_no("file read '%s/%s/version' failed", buf->buf, pkg);
+    }
+
+    fclose(ver);
+    return ret;
 }
 
 int main (int argc, char *argv[]) {
@@ -53,6 +85,25 @@ int main (int argc, char *argv[]) {
 
     } else if (ARG(argv[1], "version")) {
         puts("0.0.1");
+
+    } else if (ARG(argv[1], "list")) {
+        str *buf = str_init(256);
+
+        if (!buf) {
+            err("failed to allocate memory");
+            return -ENOMEM;
+        }
+
+        for (int i = 2; i < argc; i++) {
+            if ((err = run_list(buf, argv[i])) < 0) {
+                break;
+            }
+
+            // soft reset buffer
+            str_set_len(buf, 0);
+        }
+
+        str_free(&buf);
 
     } else if (ARG(argv[1], "search")) {
         err = run_search(argc, argv);
