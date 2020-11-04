@@ -4,7 +4,7 @@
 #include "list.h"
 
 int list_init(list *l, size_t s) {
-    l->cap = s;
+    l->cap = s ? s : 16;
     l->len = 0;
 
     if (l->cap > (size_t)-1 / (sizeof(void *))) {
@@ -16,7 +16,7 @@ int list_init(list *l, size_t s) {
     return l->arr ? 0 : -1;
 }
 
-int list_grow(list *l) {
+static int list_grow(list *l) {
     size_t gr = l->cap + (l->cap >> 1);
 
     if (gr > (size_t)-1 / (sizeof(void *))) {
@@ -37,7 +37,7 @@ int list_grow(list *l) {
 
 int list_push_b(list *l, void *d) {
     if (l->len == l->cap && list_grow(l) < 0) {
-        return -1;
+        return -ENOMEM;
     }
 
     l->arr[l->len++] = d;
