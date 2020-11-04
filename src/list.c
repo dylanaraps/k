@@ -15,6 +15,10 @@ int list_init(list *l) {
 }
 
 int list_grow(list *l) {
+    if ((l->cap + PAD) > (size_t)-1 / (sizeof(void *))) {
+        return -ENOMEM;
+    }
+
     void *n = realloc(l->arr, sizeof(void *) * (l->cap + PAD));
 
     if (!n) {
