@@ -3,29 +3,33 @@
 
 #include "list.h"
 
-// overallocation amount
-#define PAD 16
-
-int list_init(list *l) {
-    l->cap = PAD;
+int list_init(list *l, size_t s) {
+    l->cap = s;
     l->len = 0;
+
+    if (l->cap > (size_t)-1 / (sizeof(void *))) {
+        return -ENOMEM;
+    }
+
     l->arr = malloc(sizeof(void *) * l->cap);
 
     return l->arr ? 0 : -1;
 }
 
 int list_grow(list *l) {
-    if ((l->cap + PAD) > (size_t)-1 / (sizeof(void *))) {
+    size_t gr = l->cap + (l->cap >> 1);
+
+    if (gr > (size_t)-1 / (sizeof(void *))) {
         return -ENOMEM;
     }
 
-    void *n = realloc(l->arr, sizeof(void *) * (l->cap + PAD));
+    void *n = realloc(l->arr, sizeof(void *) * gr);
 
     if (!n) {
         return -ENOMEM;
     }
 
-    l->cap += PAD;
+    l->cap = gr;
     l->arr = n;
 
     return 0;

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "error.h"
 #include "str.h"
 
 str *str_init(size_t l) {
@@ -88,21 +89,25 @@ int str_rstrip(str **s, int d) {
 }
 
 int str_getline(str **s, FILE *f) {
-    str_set_len(*s, 0);
+#define CHUNK 256
+    do {
+        if (ferror(f) || feof(f)) {
+            return -1;
+        }
 
-    char *buf = (*s)->buf;
-    ssize_t ret = getline(&buf, &(*s)->cap, f);
+        if (str_alloc_maybe(s, CHUNK) < 0) {
+            return -ENOMEM;
+        }
 
-    if (ret < 1) {
-        return -1;
-    }
+        if (!fgets((*s)->buf + (*s)->len, CHUNK, f)) {
+            return -1;
+        }
 
-    if ((*s)->buf[ret - 1] == '\n') {
-        (*s)->buf[ret - 1] = 0;
-    }
+        (*s)->len += strnlen((*s)->buf + (*s)->len, CHUNK);
 
-    (*s)->len = (size_t) ret;
+    } while ((*s)->buf[(*s)->len - 1] != '\n');
 
+    str_set_len(*s, (*s)->len - 1);
     return 0;
 }
 
