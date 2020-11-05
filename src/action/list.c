@@ -55,11 +55,13 @@ static int pkg_list_all(str **buf, str **dir_buf) {
         return -1;
     }
 
+    int err = 0;
+
     list pkgs;
 
-    if (list_init(&pkgs, 256) < 0) {
+    if ((err = list_init(&pkgs, 256)) < 0) {
         err("failed to allocate memory");
-        return -ENOMEM;
+        goto error;
     }
 
     struct dirent *dp = 0;
@@ -74,8 +76,6 @@ static int pkg_list_all(str **buf, str **dir_buf) {
     }
 
     list_sort(&pkgs, compare);
-
-    int err = 0;
 
     for (size_t i = 2; i < pkgs.len; i++) {
         char *pkg = pkgs.arr[i];
