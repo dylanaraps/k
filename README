@@ -52,4 +52,68 @@ ________________________________________________________________________________
 - KISS_HOOK will not be implemented. A new means of configuration will be
   added to fill this gap.
 
+- KISS_DEBUG may be changed to display verbose messages among other things.
+
 - ...
+
+
+TODO
+________________________________________________________________________________
+
+- [ ] actions
+    - [ ] alternatives
+    - [ ] build
+    - [ ] checksum
+        - [ ] find self-contained / permissively licensed sha256 implementation
+    - [ ] download
+        - [x] libcurl stuff
+        - [ ] catch Ctrl+C during download
+    - [ ] install
+    - [ ] list
+        - [x] Individual
+        - [ ] All
+    - [ ] remove
+    - [ ] search
+    - [ ] update
+        - [ ] avoid libgit2 (requires cmake, no support for shallow clones, etc)
+        - [ ] possibly fork/exec command-line git initially
+    - [ ] help-ext
+- [ ] environment variables
+    - [ ] KISS_ROOT
+    - [ ] KISS_PROMPT
+    - [ ] KISS_PATH
+    - [ ] KISS_STRIP
+    - [ ] KISS_COMPRESS
+    - [ ] KISS_FORCE
+    - [ ] KISS_CHOICE
+    - [ ] KISS_DEBUG
+    - [ ] KISS_TMPDIR
+- [ ] components
+    - [ ] source extraction / tarball creation
+        - [ ] avoid libarchive
+        - [ ] possibly fork/exec command-line tar initially
+        - [ ] support zip
+    - [ ] repositories
+    - [ ] caches
+    - [ ] dependency resolution
+        - [ ] lets not make it recursive this time
+    - [ ] dependency fixer
+        - [ ] elf parser
+    - [ ] binary stripping
+        - [ ] elf parser
+    - [ ] package conflict detection
+    - [ ] repository hooks
+    - [ ] manifest generation
+        - [ ] requires recursive file tree walk
+        - [ ] avoid nftw() (XSI, not POSIX)
+    - [ ] 3-way handshake for files in /etc/
+- [ ] misc
+    - [ ] crux-like usage
+    - [ ] logging
+    - [ ] pretty output
+    - [x] string library
+        - [ ] str_push_int() (or snprintf wrapper)
+    - [x] list library
+    - [ ] privileges
+        - Run as root + drop permissions? (shell method not feasible)
+    - [ ] support paths and packages containing special characters.
