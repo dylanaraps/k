@@ -1,3 +1,7 @@
+/**
+ * SPDX-License-Identifier: MIT
+ * Copyright (C) 2020 Dylan Araps
+ */
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>

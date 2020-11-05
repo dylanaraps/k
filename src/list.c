@@ -1,3 +1,7 @@
+/**
+ * SPDX-License-Identifier: MIT
+ * Copyright (C) 2020 Dylan Araps
+ */
 #include <errno.h>
 #include <stdlib.h>
 
