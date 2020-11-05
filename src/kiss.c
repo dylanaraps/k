@@ -10,6 +10,10 @@
 #include "error.h"
 #include "str.h"
 
+static void version(char *arg0) {
+    printf("%s 0.0.1 (compiled %s)\n", arg0, __DATE__);
+}
+
 static void usage(char *arg0) {
     fputs(arg0, stdout);
     fputs(" [a|b|c|d|i|l|r|s|u|v] [pkg]...\n", stdout);
@@ -47,7 +51,7 @@ int main (int argc, char *argv[]) {
 #define ARG(a, b) ((a[0]) == (b[0]) && ((!a[1]) || strcmp(a, b) == 0))
 
     } else if (ARG(argv[1], "version")) {
-        puts("0.0.1");
+        version(argv[0]);
 
     } else if (ARG(argv[1], "list")) {
         err = action_list(argc, argv);
