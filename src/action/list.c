@@ -73,9 +73,7 @@ static int pkg_list_all(str **buf, list *pkgs, int repo_fd) {
         return -1;
     }
 
-    struct dirent *dp = 0;
-
-    while ((dp = readdir(db))) {
+    for (struct dirent *dp; (dp = readdir(db)); ) {
         size_t len_pre = (*buf)->len;
 
         str_push_s(buf, dp->d_name);
