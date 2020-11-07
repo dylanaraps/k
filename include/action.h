@@ -10,10 +10,10 @@
 /**
  * kiss list
  */
-int action_list(str **buf, int argc, char *argv[]);
+int action_list(int argc, char *argv[]);
 
 /**
- * kiss build
+ * kiss search
  */
 int action_search(int argc, char *argv[]);
 

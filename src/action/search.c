@@ -4,9 +4,15 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "str.h"
+
 int action_search(int argc, char *argv[]) {
     (void) argc;
     (void) argv;
+
+    for (char *t = strtok(0, ":"); t; t = strtok(NULL, ":")) {
+
+    }
 
     return 0;
 }

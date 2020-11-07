@@ -26,6 +26,7 @@
 #define KISS_STR_H
 
 #include <stdlib.h>
+#include <stdio.h>
 
 typedef struct {
     size_t cap;
