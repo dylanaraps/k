@@ -92,22 +92,21 @@ int str_rstrip(str **s, int d) {
     return n;
 }
 
-int str_getline(str **s, FILE *f) {
-#define CHUNK 256
+int str_getline(str **s, FILE *f, size_t l) {
     do {
         if (ferror(f) || feof(f)) {
             return -1;
         }
 
-        if (str_alloc_maybe(s, CHUNK) < 0) {
+        if (str_alloc_maybe(s, l) < 0) {
             return -ENOMEM;
         }
 
-        if (!fgets((*s)->buf + (*s)->len, CHUNK, f)) {
+        if (!fgets((*s)->buf + (*s)->len, l, f)) {
             return -1;
         }
 
-        (*s)->len += strnlen((*s)->buf + (*s)->len, CHUNK);
+        (*s)->len += strnlen((*s)->buf + (*s)->len, l);
 
     } while ((*s)->buf[(*s)->len - 1] != '\n');
 

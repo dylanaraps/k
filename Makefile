@@ -26,7 +26,9 @@ OBJ = \
 	src/download.o \
 	src/list.o \
 	src/str.o \
+	src/repo.o \
 	src/action/list.o \
+	src/action/search.o \
 	src/kiss.o
 
 HDR = \
@@ -34,6 +36,7 @@ HDR = \
 	include/download.h \
 	include/error.h \
 	include/list.h \
+	include/repo.h \
 	include/str.h
 
 .c.o:

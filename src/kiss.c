@@ -54,7 +54,19 @@ int main (int argc, char *argv[]) {
         version(argv[0]);
 
     } else if (ARG(argv[1], "list")) {
-        err = action_list(argc, argv);
+        str *buf = str_init(1024);
+
+        if (!buf) {
+            err("failed to allocate memory");
+            return -ENOMEM;
+        }
+
+        err = action_list(&buf, argc, argv);
+
+        str_free(&buf);
+
+    } else if (ARG(argv[1], "search")) {
+        err = action_search(argc, argv);
 
     } else {
         err = run_extension(argv + 1);

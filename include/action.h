@@ -5,9 +5,16 @@
 #ifndef KISS_ACTION_H
 #define KISS_ACTION_H
 
+#include "str.h"
+
 /**
- * kiss l
+ * kiss list
  */
-int action_list(int argc, char *argv[]);
+int action_list(str **buf, int argc, char *argv[]);
+
+/**
+ * kiss build
+ */
+int action_search(int argc, char *argv[]);
 
 #endif

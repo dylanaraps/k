@@ -77,12 +77,12 @@ int str_undo_c(str **s, int d);
 int str_rstrip(str **s, int d);
 
 /**
- * Push the next line in f to the string. This ignores the length value of
- * the string and will overwrite its contents. No additional memory is allocated
- * for each line read (unless the buffer must be grown). The trailing newline is
- * removed if present. Returns 0 for success and -1 for failure.
+ * Push the next line in f to the string in chunks of l. No additional memory
+ * is allocated for each line read (unless the buffer must be grown). The
+ * trailing newline is removed if present. Returns 0 for success and -1 for
+ * failure.
  */
-int str_getline(str **s, FILE *f);
+int str_getline(str **s, FILE *f, size_t l);
 
 /**
  * Change the string's length to l and set the corresponding position in the

@@ -5,6 +5,9 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 #include "error.h"
 #include "list.h"
@@ -15,119 +18,118 @@ static int compare(void const *a, void const *b) {
     return strcmp(*(const char **) a, *(const char **) b);
 }
 
-static int pkg_list(str **buf, const char *pkg) {
-    str_push_l(buf, "/var/db/kiss/installed/", 23);
-    str_push_s(buf, pkg);
-    str_push_l(buf, "/version", 8);
+static FILE *pkg_fopen(int repo_fd, const char *pkg, const char *file) {
+    int pfd = openat(repo_fd, pkg, O_RDONLY);
 
-    FILE *ver = fopen((*buf)->buf, "r");
+    if (pfd == -1) {
+        return NULL;
+    }
+
+    int ffd = openat(pfd, file, O_RDONLY);
+    close(pfd);
+
+    if (ffd == -1) {
+        return NULL;
+    }
+
+    return fdopen(ffd, "r");
+}
+
+static int pkg_list(str **buf, int repo_fd, const char *pkg) {
+    FILE *ver = pkg_fopen(repo_fd, pkg, "version");
 
     if (!ver) {
         if (errno == ENOENT) {
             err("package '%s' not installed", pkg);
 
         } else {
-            err_no("failed to open file '%s'", (*buf)->buf);
+            err_no("[%s] failed to open version file", pkg);
         }
 
         return -1;
     }
 
-    str_set_len(*buf, 0);
-    int ret = 0;
+    size_t len_pre = (*buf)->len;
 
-    if ((ret = str_getline(buf, ver)) == 0) {
-        printf("%s %s\n", pkg, (*buf)->buf);
+    switch (str_getline(buf, ver, 32)) {
+        case 0:
+            printf("%s %s\n", pkg, (*buf)->buf + len_pre);
+            str_set_len(*buf, len_pre);
+            fclose(ver);
+            return 0;
 
-    } else {
-        err_no("file read '...%s/version' failed", pkg);
+        default:
+            err_no("[%s] failed to read version file", pkg);
+            fclose(ver);
+            return -1;
     }
-
-    fclose(ver);
-    return ret;
 }
 
-static int pkg_list_all(str **buf, str **dir_buf) {
-    DIR *db = opendir("/var/db/kiss/installed");
+static int pkg_list_all(str **buf, list *pkgs, int repo_fd) {
+    DIR *db = fdopendir(repo_fd);
 
     if (!db) {
         err_no("failed to open database");
         return -1;
     }
 
-    int err = 0;
-
-    list pkgs;
-
-    if ((err = list_init(&pkgs, 256)) < 0) {
-        err("failed to allocate memory");
-        goto error;
-    }
-
     struct dirent *dp = 0;
 
     while ((dp = readdir(db))) {
-        size_t len_pre = (*dir_buf)->len;
+        size_t len_pre = (*buf)->len;
 
-        str_push_s(dir_buf, dp->d_name);
-        str_push_c(dir_buf, 0);
+        str_push_s(buf, dp->d_name);
+        str_push_c(buf, 0);
 
-        list_push_b(&pkgs, (*dir_buf)->buf + len_pre);
+        list_push_b(pkgs, (*buf)->buf + len_pre);
     }
 
-    list_sort(&pkgs, compare);
+    list_sort(pkgs, compare);
 
-    for (size_t i = 2; i < pkgs.len; i++) {
-        char *pkg = pkgs.arr[i];
-
-        if ((err = pkg_list(buf, pkg)) < 0) {
-            goto error;
+    // i = 2 skips '.' and '..'
+    for (size_t i = 2; i < pkgs->len; i++) {
+        if (pkg_list(buf, repo_fd, pkgs->arr[i]) < 0) {
+            closedir(db);
+            return -1;
         }
-
-        // soft reset buffer
-        str_set_len(*buf, 0);
     }
 
-error:
-    list_free(&pkgs);
     closedir(db);
-    return err;
+    return 0;
 }
 
-int action_list(int argc, char *argv[]) {
-    str *buf = str_init(1024);
+int action_list(str **buf, int argc, char *argv[]) {
+    int repo_fd = open("/var/db/kiss/installed", O_RDONLY);
 
-    if (!buf) {
-        err("failed to allocate memory");
-        return -ENOMEM;
+    if (repo_fd == -1) {
+        err_no("failed to open database");
+        return -1;
     }
-
-    int err = 0;
 
     for (int i = 2; i < argc; i++) {
-        if ((err = pkg_list(&buf, argv[i])) < 0) {
-            goto error;
+        if (pkg_list(buf, repo_fd, argv[i]) < 0) {
+            close(repo_fd);
+            return -1;
         }
-
-        // soft reset buffer
-        str_set_len(buf, 0);
     }
+
+    int ret = 0;
 
     if (argc == 2) {
-        str *dir_buf = str_init(1024);
+        list pkgs;
 
-        if (!dir_buf) {
+        if ((ret = list_init(&pkgs, 256)) == 0) {
+            ret = pkg_list_all(buf, &pkgs, repo_fd);
+
+        } else {
             err("failed to allocate memory");
-            err = -ENOMEM;
-            goto error;
         }
 
-        err = pkg_list_all(&buf, &dir_buf);
-        str_free(&dir_buf);
+        list_free(&pkgs);
     }
 
-error:
-    str_free(&buf);
-    return err;
+    // handled implicitly in pkg_list_all() via closedir();
+    close(repo_fd);
+    return 0;
 }
 
