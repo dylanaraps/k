@@ -6,9 +6,9 @@
 #define KISS_LIST_H
 
 typedef struct {
-	void **arr;
-	size_t cap;
-	size_t len;
+    void **arr;
+    size_t cap;
+    size_t len;
 } list;
 
 /**
