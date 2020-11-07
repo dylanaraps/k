@@ -57,7 +57,7 @@ int main (int argc, char *argv[]) {
 
 // Check if argument matches an action. True for b==build and build==build
 // strcmp is only reached when both first characters match.
-#define ARG(a, b) ((a[0]) == (b[0]) && ((!a[1]) || strcmp(a, b) == 0))
+#define ARG(a, b) ((*a) == (*b) && ((!a[1]) || strcmp(a, b) == 0))
 
     if (argc < 2 || !argv[1] || !argv[1][0] || argv[1][0] == '-') {
         usage(argv[0]);
