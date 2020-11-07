@@ -9,11 +9,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define msg(...) do {             \
-    fprintf(stderr, __VA_ARGS__); \
-    fputc('\n', stderr);          \
-} while (0)
-
 #define err(...) do {                           \
     fprintf(stderr, "error: ");                 \
     fprintf(stderr, __VA_ARGS__);               \
