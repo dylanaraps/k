@@ -1,0 +1,5 @@
+image: nixos/latest
+sources:
+- https://git.sr.ht/~_dylan/kiss
+tasks:
+- build: make check
