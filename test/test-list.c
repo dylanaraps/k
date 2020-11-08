@@ -23,9 +23,9 @@ int main(int argc, char *argv[]) {
     int ret = test_begin(__FILE__);
 
     list l;
-    ret = list_init(&l, 0); {
+    ret = list_init(&l, 4); {
         test(ret == 0);
-        test(l.cap == 16);
+        test(l.cap == 4);
         test(l.len == 0);
     }
 
@@ -34,14 +34,13 @@ int main(int argc, char *argv[]) {
 
         ret = list_push_b(&l, s); {
             test(ret == 0);
-            test(l.cap == 16);
             test(l.len == i + 1);
             test(strcmp(l.arr[0], "apple") == 0);
         }
     }
 
     list_sort(&l, compare); {
-        test(l.cap == 16);
+        test(l.cap == 6);
         test(l.len == 6);
         test(strcmp(l.arr[0], "apple") == 0);
         test(strcmp(l.arr[1], "banana") == 0);
@@ -53,7 +52,7 @@ int main(int argc, char *argv[]) {
 
     free(l.arr[l.len - 1]);
     list_drop_b(&l); {
-        test(l.cap == 16);
+        test(l.cap == 6);
         test(l.len == 5);
         test(strcmp(l.arr[0], "apple") == 0);
         test(strcmp(l.arr[1], "banana") == 0);
@@ -64,7 +63,7 @@ int main(int argc, char *argv[]) {
 
     free(l.arr[l.len - 1]);
     list_drop_b(&l); {
-        test(l.cap == 16);
+        test(l.cap == 6);
         test(l.len == 4);
         test(strcmp(l.arr[0], "apple") == 0);
         test(strcmp(l.arr[1], "banana") == 0);
