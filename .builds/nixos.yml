@@ -1,9 +1,8 @@
 image: nixos/latest
-packages:
-    - nixpkgs.tools.networking.curl
-    - nixpkgs.valgrind
 sources:
     - https://git.sr.ht/~_dylan/kiss
+environment:
+    VALGRIND: true
 tasks:
     - build: |
         cd kiss
