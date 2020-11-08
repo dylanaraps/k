@@ -10,6 +10,14 @@ _cc() {
     "$CC" "$@"
 }
 
+_valgrind() {
+    if command -v valgrind >/dev/null 2>&1; then
+        valgrind --leak-check=full --track-origins=yes --error-exitcode=1 "$@"
+    else
+        "$@"
+    fi
+}
+
 configure() {
     CFLAGS="-std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic $CFLAGS"
     CPPFLAGS="-Iinclude $CPPFLAGS"
@@ -29,15 +37,6 @@ configure() {
     esac
 }
 
-check() {
-    for file in test/*.c; do
-        "${file%%.c}"
-    done
-
-    ./kiss v
-    ./kiss
-}
-
 build() {
     configure
 
@@ -50,6 +49,15 @@ build() {
     done
 
     _cc $CPPFLAGS -o kiss src/*.c src/*/*.c $LDFLAGS
+}
+
+check() {
+    for file in test/*.c; do
+        _valgrind "${file%%.c}"
+    done
+
+    _valgrind ./kiss v
+    _valgrind ./kiss
 }
 
 "${1:-build}"

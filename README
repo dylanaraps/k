@@ -30,7 +30,7 @@ $ make DESTDIR="..." PREFIX="..." install
 
 Manual:
 
-$ ./make
+$ CFLAGS="" LDFLAGS="" ./make
 
 
 Changes from the shell version (present and future)
