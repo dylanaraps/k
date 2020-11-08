@@ -1,12 +1,16 @@
 #!/bin/sh
 
+_pkgconf() {
+    pkgconf --libs --cflags "$1" 2>/dev/null || printf '%s' "$2"
+}
+
 _cc() {
     printf '%s %s\n' "${CC:=cc}" "$1"
 
     _file=$1
     shift
 
-    set -- src/[!k]*.o src/action/*.o "$@"
+    set -- src/[!k]*.o src/action/*.o $(_pkgconf libcurl -lcurl) "$@"
     set -f
 
     "$CC" -Iinclude $CFLAGS -lcurl $LDFLAGS "$@" -o "${_file%%.c}" "$_file"
