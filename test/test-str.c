@@ -64,6 +64,17 @@ int main(int argc, char *argv[]) {
         test(strcmp(s->buf, "12345") == 0);
     }
 
+    FILE *f = fopen(__FILE__, "r");
+
+    ret = str_getline(&s, f, 30); {
+        test(ret == 0);
+        test(s->len == 24);
+        test(s->cap == 66);
+        test(strcmp(s->buf, "12345#include <string.h>") == 0);
+    }
+
+    fclose(f);
+
     str_free(&s); {
         test(!s);
     }
