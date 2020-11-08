@@ -1,9 +1,5 @@
 #!/bin/sh
 
-_pkgconf() {
-    pkgconf --libs --cflags "$1" 2>/dev/null || printf '%s' "$2"
-}
-
 _cc() {
     printf '%s %s\n' "${CC:=cc}" "$1"
 
@@ -19,7 +15,7 @@ _cc() {
 }
 
 _valgrind() {
-    valgrind \
+    "${VALGRIND:=valgrind}" \
         --leak-check=full \
         --show-leak-kinds=all \
         --track-origins=yes \
