@@ -43,6 +43,27 @@ int main(int argc, char *argv[]) {
         test(strcmp(s->buf, "123456!") == 0);
     }
 
+    ret = str_rstrip(&s, '!'); {
+        test(ret == 1);
+        test(s->len == 6);
+        test(s->cap == 20);
+        test(strcmp(s->buf, "123456") == 0);
+    }
+
+    ret = str_undo_c(&s, '6'); {
+        test(ret == 0);
+        test(s->len == 5);
+        test(s->cap == 20);
+        test(strcmp(s->buf, "12345") == 0);
+    }
+
+    ret = str_undo_c(&s, '6'); {
+        test(ret == -1);
+        test(s->len == 5);
+        test(s->cap == 20);
+        test(strcmp(s->buf, "12345") == 0);
+    }
+
     str_free(&s); {
         test(!s);
     }
