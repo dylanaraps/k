@@ -7,7 +7,7 @@ jobs:
             - uses: actions/checkout@v1
             - name: Run CI.
               run: |
-                  sudo apt install valgrind libcurl4-openssl-dev
+                  sudo apt install tcc valgrind libcurl4-openssl-dev
                   CFLAGS=-Werror CC=tcc   make -B
                   CFLAGS=-Werror CC=tcc   make check
                   CFLAGS=-Werror CC=clang make -B
