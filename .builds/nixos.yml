@@ -1,6 +1,5 @@
 image: nixos/latest
 packages:
-    - curl
     - valgrind
 sources:
     - https://git.sr.ht/~_dylan/kiss
