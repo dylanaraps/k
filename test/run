@@ -13,7 +13,7 @@ _cc() {
     set -- src/[!k]*.o src/action/*.o $(_pkgconf libcurl -lcurl) "$@"
     set -f
 
-    "$CC" -Iinclude $CFLAGS -lcurl $LDFLAGS "$@" -o "${_file%%.c}" "$_file"
+    "$CC" -Iinclude -O0 -g -lcurl $LDFLAGS "$@" -o "${_file%%.c}" "$_file"
 
     set +f
 }
@@ -26,5 +26,12 @@ for file do
 done
 
 for file do
-    "${file%%.c}"
+    valgrind \
+        --leak-check=full \
+        --show-leak-kinds=all \
+        --track-origins=yes \
+        --error-exitcode=1 \
+        "${file%%.c}"
+
+    rm -f "${file%%.c}"
 done

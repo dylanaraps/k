@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
         test(strcmp(l.arr[5], "pear") == 0);
     }
 
+    free(l.arr[l.len - 1]);
     list_drop_b(&l); {
         test(l.cap == 16);
         test(l.len == 5);
@@ -59,9 +60,9 @@ int main(int argc, char *argv[]) {
         test(strcmp(l.arr[2], "lime") == 0);
         test(strcmp(l.arr[3], "orange") == 0);
         test(strcmp(l.arr[4], "peach") == 0);
-        test(strcmp(l.arr[5], "pear") == 0);
     }
 
+    free(l.arr[l.len - 1]);
     list_drop_b(&l); {
         test(l.cap == 16);
         test(l.len == 4);
@@ -69,8 +70,6 @@ int main(int argc, char *argv[]) {
         test(strcmp(l.arr[1], "banana") == 0);
         test(strcmp(l.arr[2], "lime") == 0);
         test(strcmp(l.arr[3], "orange") == 0);
-        test(strcmp(l.arr[4], "peach") == 0);
-        test(strcmp(l.arr[5], "pear") == 0);
     }
 
     for (size_t i = 0; i < l.len; i++) {
