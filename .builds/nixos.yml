@@ -1,10 +1,10 @@
 image: nixos/latest
 packages:
-    - pkgs.gnumake
+    - nixos.pkgs.gnumake
+    - nixos.pkgs.curl
+    - nixos.pkgs.valgrind
 sources:
     - https://git.sr.ht/~_dylan/kiss
-environment:
-    VALGRIND: 0
 tasks:
     - build: |
         cd kiss
