@@ -11,24 +11,20 @@ jobs:
 
                   export CFLAGS=-Werror
 
-                  make clean
-                  CC=tcc   make
-                  CC=tcc   make check
+                  CC=tcc   ./make
+                  CC=tcc   ./make check
 
-                  make clean
-                  CC=clang make
-                  CC=clang make check
+                  CC=clang ./make
+                  CC=clang ./make check
 
-                  make clean
-                  CC=gcc   make
-                  CC=gcc   make check
+                  CC=gcc   ./make
+                  CC=gcc   ./make check
 
                   export CFLAGS='-fprofile-arcs -ftest-coverage'
                   export LDFLAGS='-lgcov --coverage'
 
-                  make clean
-                  CC=gcc   make
-                  CC=gcc   make check
+                  CC=gcc ./make
+                  CC=gcc ./make check
 
             - uses: codecov/codecov-action@v1
               with:

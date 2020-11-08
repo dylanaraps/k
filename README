@@ -23,14 +23,7 @@ Required:
 Compilation
 ________________________________________________________________________________
 
-POSIX Make:
-
-$ make
-$ make DESTDIR="..." PREFIX="..." install
-
-Manual:
-
-$ CFLAGS="" LDFLAGS="" ./make
+$ CFLAGS="" LDFLAGS="" CPPFLAGS="" ./make
 
 
 Changes from the shell version (present and future)
