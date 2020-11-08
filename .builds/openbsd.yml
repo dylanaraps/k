@@ -5,6 +5,7 @@ sources:
     - https://git.sr.ht/~_dylan/kiss
 environment:
     VALGRIND: true
+    CPPFLAGS: -I/usr/local/include -L/usr/local/lib
 tasks:
     - build: |
         cd kiss

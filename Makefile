@@ -30,7 +30,7 @@ HDR = \
 	include/test.h
 
 .c.o:
-	$(CC) -Iinclude -lcurl $(XCFLAGS) $(CPPFLAGS) -c -o $@ $<
+	$(CC) -Iinclude $(XCFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 kiss: $(OBJ)
 	$(CC) -o $@ $(OBJ) -lcurl $(LDFLAGS)
