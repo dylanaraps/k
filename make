@@ -44,7 +44,7 @@ build() {
         _cc $CFLAGS $CPPFLAGS -c -o "${obj%%.c}.o" "$obj"
     done
 
-    for obj in test/test-*.c; do
+    for obj in test/*.c; do
         _cc $CPPFLAGS -o "${obj%%.c}" "$obj" src/[!k]*.o src/*/*.o $LDFLAGS
     done
 
