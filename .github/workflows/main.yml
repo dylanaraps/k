@@ -8,8 +8,9 @@ jobs:
             - name: Run CI.
               run: |
                   sudo apt install valgrind libcurl4-openssl-dev
-                  CFLAGS=-Werror CC=gcc   make -B
+                  CFLAGS=-Werror CC=tcc   make -B
+                  CFLAGS=-Werror CC=tcc   make check
                   CFLAGS=-Werror CC=clang make -B
-                  git clone --depth=1 https://github.com/kisslinux/repo
-                  mkdir -p "$PWD/var/db/kiss/installed"
-                  KISS_PATH=$PWD/repo/core:$PWD/repo/extra KISS_ROOT=$PWD make check
+                  CFLAGS=-Werror CC=clang make check
+                  CFLAGS=-Werror CC=gcc   make -B
+                  CFLAGS=-Werror CC=gcc   make check
