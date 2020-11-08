@@ -1,12 +1,9 @@
 image: freebsd/latest
 packages:
     - ftp/curl
+    - valgrind
 sources:
     - https://git.sr.ht/~_dylan/kiss
-environment:
-    VALGRIND: 0
-    CPPFLAGS: -I/usr/local/include
-    LDFLAGS:  -L/usr/local/lib
 tasks:
     - build: |
         cd kiss
