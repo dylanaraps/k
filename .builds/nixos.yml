@@ -1,8 +1,9 @@
 image: nixos/latest
 packages:
-    - curl
+    - libcurl
 sources:
     - https://git.sr.ht/~_dylan/kiss
 tasks:
 - build: |
+    cd kiss
     make check
