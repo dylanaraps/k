@@ -1,4 +1,6 @@
 image: nixos/latest
+packages:
+    - nixpkgs.gnumake
 sources:
     - https://git.sr.ht/~_dylan/kiss
 environment:
