@@ -27,6 +27,7 @@ OBJ = \
 	src/list.o \
 	src/str.o \
 	src/repo.o \
+	src/test.o \
 	src/action/list.o \
 	src/action/search.o \
 	src/kiss.o
@@ -37,7 +38,8 @@ HDR = \
 	include/error.h \
 	include/list.h \
 	include/repo.h \
-	include/str.h
+	include/str.h \
+	include/test.h
 
 .c.o:
 	$(CC) $(XCFLAGS) -c -o $@ $<
@@ -51,11 +53,11 @@ install: kiss
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp -f kiss $(DESTDIR)$(PREFIX)/bin
 
-check:
-	valgrind $(VALGRIND) ./kiss
-
 compdb:
 	ninja -t compdb cc > compile_commands.json
+
+check: kiss
+	./test/run
 
 clean:
 	rm -f kiss $(OBJ)

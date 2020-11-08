@@ -1,0 +1,26 @@
+#!/bin/sh
+
+_cc() {
+    printf '%s %s\n' "${CC:=cc}" "$1"
+
+    _file=$1
+    shift
+
+    set -- src/[!k]*.o src/action/*.o "$@"
+    set -f
+
+    "$CC" -Iinclude $CFLAGS -lcurl $LDFLAGS "$@" -o "${_file%%.c}" "$_file"
+
+    set +f
+}
+
+set -e
+set -- test/*.c
+
+for file do
+    _cc "$file"
+done
+
+for file do
+    "${file%%.c}"
+done
