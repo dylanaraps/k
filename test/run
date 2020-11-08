@@ -15,12 +15,20 @@ _cc() {
 }
 
 _valgrind() {
-    "${VALGRIND:=valgrind}" \
-        --leak-check=full \
-        --show-leak-kinds=all \
-        --track-origins=yes \
-        --error-exitcode=1 \
-        "$@"
+    case ${VALGRIND:=valgrind} in
+        0)
+            "$@"
+        ;;
+
+        *)
+            "$VALGRIND" \
+                --leak-check=full \
+                --show-leak-kinds=all \
+                --track-origins=yes \
+                --error-exitcode=1 \
+                "$@"
+        ;;
+    esac
 }
 
 set -e
