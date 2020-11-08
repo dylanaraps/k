@@ -3,13 +3,13 @@
 PREFIX = /usr/local
 
 kiss:
-	./build
+	./make
 
 install: kiss
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp -f kiss $(DESTDIR)$(PREFIX)/bin
 
 check: kiss
-	./test/run
+	./make check
 
 .PHONY: kiss install check

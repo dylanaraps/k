@@ -7,7 +7,7 @@ dep() {
 
 _cc() {
     printf '%s %s\n' "${CC:=cc}" "$*"
-    "${CC:=cc}" "$@"
+    "$CC" "$@"
 }
 
 configure() {
@@ -29,6 +29,15 @@ configure() {
     esac
 }
 
+check() {
+    for file in test/*.c; do
+        "${file%%.c}"
+    done
+
+    ./kiss v
+    ./kiss
+}
+
 build() {
     configure
 
@@ -43,4 +52,4 @@ build() {
     _cc $CPPFLAGS -o kiss src/*.c src/*/*.c $LDFLAGS
 }
 
-build "$1"
+"${1:-build}"
