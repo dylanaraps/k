@@ -1,10 +1,11 @@
 image: openbsd/latest
 packages:
-    - libcurl
-    - valgrind
+    - curl
 sources:
     - https://git.sr.ht/~_dylan/kiss
+environment:
+    VALGRIND: true
 tasks:
-- build: |
-    cd kiss
-    make check
+    - build: |
+        cd kiss
+        make check
