@@ -1,0 +1,48 @@
+#!/bin/sh
+
+dep() {
+    pkg-config --libs --cflags "${static:+--static}" "$1" ||
+    printf '%s\n' "$2"
+}
+
+run() {
+    printf '%s\n' "$*"
+    "$@"
+}
+
+_c99() {
+    run "${CC:=cc}" "$@"
+}
+
+build() {
+    for obj do
+        _c99 $CFLAGS $CPPFLAGS -c -o "${obj%%.c}.o" "$obj"
+    done
+
+    _c99 $CPPFLAGS -o kiss "$@" $LDFLAGS
+}
+
+main() {
+    CFLAGS="-std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic $CFLAGS"
+    CPPFLAGS="-Iinclude $CPPFLAGS"
+
+    case " $CFLAGS $LDFLAGS " in (*" -static "*)
+        CFLAGS="-static $CFLAGS"
+        LDFLAGS="-static $LDFLAGS"
+        static=1
+    esac
+
+    case ${CURL:=1} in (1)
+        LDFLAGS="$(dep libcurl -lcurl) $LDFLAGS"
+        CFLAGS="-DUSE_CURL $CFLAGS"
+    esac
+
+    case ${OPENSSL:=1} in (1)
+        LDFLAGS="$(dep openssl '-lssl -lcrypto') $LDFLAGS"
+        CFLAGS="-DUSE_OPENSSL $CFLAGS"
+    esac
+
+    build src/*.c src/*/*.c
+}
+
+main

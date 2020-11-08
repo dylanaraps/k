@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# Intended behavior.
+# shellcheck disable=2086
 
 _cc() {
     printf '%s %s\n' "${CC:=cc}" "$1"
