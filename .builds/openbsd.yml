@@ -1,5 +1,8 @@
 image: openbsd/latest
+packages:
+    - curl
 sources:
-- https://git.sr.ht/~_dylan/kiss
+    - https://git.sr.ht/~_dylan/kiss
 tasks:
-- build: make check
+- build: |
+    make check
