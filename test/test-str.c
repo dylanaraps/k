@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
     (void) argc;
     (void) argv;
 
-    int ret = test_begin();
+    int ret = test_begin(__FILE__);
 
     str *s = str_init(0); {
         test(s);

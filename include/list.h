@@ -5,6 +5,8 @@
 #ifndef KISS_LIST_H
 #define KISS_LIST_H
 
+#include <stdlib.h>
+
 typedef struct {
     void **arr;
     size_t cap;

@@ -6,8 +6,8 @@
 static int test_count;
 static int test_error_count;
 
-int test_begin(void) {
-    printf("Running tests for %s:\n", __FILE__);
+int test_begin(const char *file) {
+    printf("Running tests for %s:\n", file);
 
     test_count = 0;
     test_error_count = 0;
