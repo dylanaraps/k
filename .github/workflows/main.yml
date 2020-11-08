@@ -8,12 +8,21 @@ jobs:
             - name: Run CI.
               run: |
                   sudo apt install tcc valgrind libcurl4-openssl-dev
+
+                  export CFLAGS="-Werror -coverage"
+
                   make clean
-                  CFLAGS=-Werror CC=tcc   make
-                  CFLAGS=-Werror CC=tcc   make check
+                  CC=tcc   make
+                  CC=tcc   make check
+
                   make clean
-                  CFLAGS=-Werror CC=clang make
-                  CFLAGS=-Werror CC=clang make check
+                  CC=clang make
+                  CC=clang make check
+
                   make clean
-                  CFLAGS=-Werror CC=gcc   make
-                  CFLAGS=-Werror CC=gcc   make check
+                  CC=gcc   make
+                  CC=gcc   make check
+
+            - uses: codecov/codecov-action@v1
+              with:
+                  fail_ci_if_error: true
