@@ -1,7 +1,7 @@
 image: nixos/latest
 packages:
-    - pkgs.curl
-    - pkgs.valgrind
+    - nixpkgs.tools.networking.curl
+    - nixpkgs.valgrind
 sources:
     - https://git.sr.ht/~_dylan/kiss
 tasks:
