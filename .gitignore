@@ -7,5 +7,4 @@ compile_commands.json
 .cache
 *.s
 */*.s
-test/test-list
-test/test-str
+test/test-*.t

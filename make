@@ -45,7 +45,7 @@ build() {
     done
 
     for obj in test/*.c; do
-        _cc $CPPFLAGS -o "${obj%%.c}" "$obj" src/[!k]*.o src/*/*.o $LDFLAGS
+        _cc $CPPFLAGS -o "${obj%%.c}.t" "$obj" src/[!k]*.o src/*/*.o $LDFLAGS
     done
 
     _cc $CPPFLAGS -o kiss src/*.c src/*/*.c $LDFLAGS
@@ -53,7 +53,7 @@ build() {
 
 check() {
     for file in test/*.c; do
-        _valgrind "${file%%.c}"
+        _valgrind "${file%%.c}.t"
     done
 
     _valgrind ./kiss v
