@@ -1,6 +1,6 @@
 image: freebsd/latest
 packages:
-    - curl
+    - ftp/curl
 sources:
     - https://git.sr.ht/~_dylan/kiss
 environment:
