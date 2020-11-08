@@ -1,6 +1,7 @@
 image: freebsd/latest
 packages:
-    - libcurlcurl
+    - libcurl
+    - valgrind
 sources:
     - https://git.sr.ht/~_dylan/kiss
 tasks:

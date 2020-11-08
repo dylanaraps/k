@@ -1,6 +1,7 @@
 image: nixos/latest
 packages:
     - libcurl
+    - valgrind
 sources:
     - https://git.sr.ht/~_dylan/kiss
 tasks:
