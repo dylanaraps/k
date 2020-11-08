@@ -1,51 +1,27 @@
 #!/bin/sh
-#
-# Intended behavior.
-# shellcheck disable=2086
-
-_cc() {
-    printf '%s %s\n' "${CC:=cc}" "$1"
-
-    _file=$1
-    shift
-
-    set -- src/[!k]*.o src/action/*.o "$@"
-    set -f
-
-    "$CC" -Iinclude -O0 -g "$@" -o "${_file%%.c}" "$_file" -lcurl $LDFLAGS
-
-    set +f
-}
 
 _valgrind() {
-    case ${VALGRIND:=valgrind} in
-        0)
+    if command -v valgrind >/dev/null 2>&1; then
+        valgrind \
+            --leak-check=full \
+            --show-leak-kinds=all \
+            --track-origins=yes \
+            --error-exitcode=1 \
             "$@"
-        ;;
-
-        *)
-            "$VALGRIND" \
-                --leak-check=full \
-                --show-leak-kinds=all \
-                --track-origins=yes \
-                --error-exitcode=1 \
-                "$@"
-        ;;
-    esac
+    else
+        "$@"
+    fi
 }
 
-set -e
-set -- test/*.c
+check() {
+    set -e
 
-for file do
-    _cc "$file"
-done
+    for file in test/*.c; do
+        _valgrind "${file%%.c}"
+    done
 
-for file do
-    _valgrind "${file%%.c}"
+    _valgrind ./kiss v
+    _valgrind ./kiss
+}
 
-    rm -f "${file%%.c}"
-done
-
-_valgrind ./kiss v
-_valgrind ./kiss
+check

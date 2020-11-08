@@ -5,20 +5,12 @@ dep() {
     printf '%s\n' "$2"
 }
 
-run() {
-    printf '%s\n' "$*"
-    "$@"
+_cc() {
+    printf '%s %s\n' "${CC:=cc}" "$*"
+    "${CC:=cc}" "$@"
 }
 
-build() {
-    for obj do
-        run "${CC:=cc}" $CFLAGS $CPPFLAGS -c -o "${obj%%.c}.o" "$obj"
-    done
-
-    run "${CC:=cc}" $CPPFLAGS -o kiss "$@" $LDFLAGS
-}
-
-main() {
+configure() {
     CFLAGS="-std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic $CFLAGS"
     CPPFLAGS="-Iinclude $CPPFLAGS"
 
@@ -35,8 +27,20 @@ main() {
         LDFLAGS="$(dep openssl '-lssl -lcrypto') $LDFLAGS"
         CFLAGS="-DUSE_OPENSSL $CFLAGS"
     esac
-
-    build src/*.c src/*/*.c
 }
 
-main
+build() {
+    configure
+
+    for obj in src/*.c src/*/*.c; do
+        _cc $CFLAGS $CPPFLAGS -c -o "${obj%%.c}.o" "$obj"
+    done
+
+    for obj in test/test-*.c; do
+        _cc $CPPFLAGS -o "${obj%%.c}" "$obj" src/[!k]*.o src/*/*.o $LDFLAGS
+    done
+
+    _cc $CPPFLAGS -o kiss src/*.c src/*/*.c $LDFLAGS
+}
+
+build "$1"

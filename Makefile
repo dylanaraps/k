@@ -12,7 +12,4 @@ install: kiss
 check: kiss
 	./test/run
 
-clean:
-	rm -f kiss
-
-.PHONY: kiss install check clean
+.PHONY: kiss install check
