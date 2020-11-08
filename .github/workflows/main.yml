@@ -23,7 +23,8 @@ jobs:
                   CC=gcc   make
                   CC=gcc   make check
 
-                  export CFLAGS=-coverage
+                  export CFLAGS='-fprofile-arcs -ftest-coverage'
+                  export LDFLAGS='-lgcov --coverage'
 
                   make clean
                   CC=gcc   make
