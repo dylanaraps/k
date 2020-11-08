@@ -10,10 +10,10 @@ _cc() {
     _file=$1
     shift
 
-    set -- src/[!k]*.o src/action/*.o $(_pkgconf libcurl -lcurl) "$@"
-    set -f
+    set -f -- src/[!k]*.o src/action/*.o "$@"
 
-    "$CC" -Iinclude -O0 -g -lcurl $LDFLAGS "$@" -o "${_file%%.c}" "$_file"
+    "$CC" -Iinclude -O0 -g $(_pkgconf libcurl -lcurl) $LDFLAGS "$@" \
+        -o "${_file%%.c}" "$_file"
 
     set +f
 }
