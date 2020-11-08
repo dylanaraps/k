@@ -8,28 +8,16 @@ XCFLAGS = \
 	-Wall \
 	-Wextra \
 	-pedantic \
-	-Iinclude \
-	$(CFLAGS) \
-	$(CPPFLAGS)
-
-XLDFLAGS = \
-	-lcurl \
-	$(LDFLAGS)
-
-VALGRIND = \
-	--leak-check=full \
-	--show-leak-kinds=all \
-	--track-origins=yes \
-	--error-exitcode=1
+	$(CFLAGS)
 
 OBJ = \
-	src/download.o \
-	src/list.o \
-	src/str.o \
-	src/repo.o \
-	src/test.o \
 	src/action/list.o \
 	src/action/search.o \
+	src/download.o \
+	src/list.o \
+	src/repo.o \
+	src/str.o \
+	src/test.o \
 	src/kiss.o
 
 HDR = \
@@ -42,10 +30,10 @@ HDR = \
 	include/test.h
 
 .c.o:
-	$(CC) $(XCFLAGS) -c -o $@ $<
+	$(CC) -Iinclude $(XCFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 kiss: $(OBJ)
-	$(CC) -o $@ $(OBJ) $(XLDFLAGS)
+	$(CC) -o $@ $(OBJ) -lcurl $(LDFLAGS)
 
 $(OBJ): $(HDR)
 
