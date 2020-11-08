@@ -18,6 +18,15 @@ _cc() {
     set +f
 }
 
+_valgrind() {
+    valgrind \
+        --leak-check=full \
+        --show-leak-kinds=all \
+        --track-origins=yes \
+        --error-exitcode=1 \
+        "$@"
+}
+
 set -e
 set -- test/*.c
 
@@ -26,12 +35,10 @@ for file do
 done
 
 for file do
-    valgrind \
-        --leak-check=full \
-        --show-leak-kinds=all \
-        --track-origins=yes \
-        --error-exitcode=1 \
-        "${file%%.c}"
+    _valgrind "${file%%.c}"
 
     rm -f "${file%%.c}"
 done
+
+_valgrind ./kiss v
+_valgrind ./kiss
