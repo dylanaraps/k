@@ -28,15 +28,9 @@ POSIX Make:
 $ make
 $ make DESTDIR="..." PREFIX="..." install
 
-Samurai / Ninja:
-
-$ ninja
-$ cp kiss ...
-
 Manual:
 
-$ cc -std=c99 -D_POSIX_C_SOURCE=200809L $CFLAGS src/*.c -o kiss -lcurl
-$ cp kiss ...
+$ ./make
 
 
 Changes from the shell version (present and future)
