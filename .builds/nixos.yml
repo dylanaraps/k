@@ -3,8 +3,11 @@ packages:
     - nixos.pkgs.gnumake
     - nixos.pkgs.curl
     - nixos.pkgs.valgrind
+    - nixos.pkgs.gcc
 sources:
     - https://git.sr.ht/~_dylan/kiss
+environment:
+    CC: cc
 tasks:
     - build: |
         cd kiss
