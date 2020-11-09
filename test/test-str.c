@@ -65,20 +65,27 @@ int main(int argc, char *argv[]) {
         test(strcmp(s->buf, "12345") == 0);
     }
 
+    ret = str_printf(&s, "%d", 2211); {
+        test(ret == 0);
+        test(s->len == 9);
+        test(s->cap == 20);
+        test(strcmp(s->buf, "123452211") == 0);
+    }
+
     FILE *f = fopen("test/files/single_line", "r");
 
     ret = str_getline(&s, f, 30); {
         test(ret == 0);
-        test(s->len == 16);
+        test(s->len == 20);
         test(s->cap == 66);
-        test(strcmp(s->buf, "12345single line") == 0);
+        test(strcmp(s->buf, "123452211single line") == 0);
     }
 
     ret = str_getline(&s, f, 30); {
         test(ret == -1);
-        test(s->len == 16);
+        test(s->len == 20);
         test(s->cap == 66);
-        test(strcmp(s->buf, "12345single line") == 0);
+        test(strcmp(s->buf, "123452211single line") == 0);
     }
 
     fclose(f);
@@ -86,9 +93,9 @@ int main(int argc, char *argv[]) {
     char *test_str = 0;
     ret = str_push_s(&s, test_str); {
         test(ret == -EINVAL);
-        test(s->len == 16);
+        test(s->len == 20);
         test(s->cap == 66);
-        test(strcmp(s->buf, "12345single line") == 0);
+        test(strcmp(s->buf, "123452211single line") == 0);
     }
 
     str_free(&s); {

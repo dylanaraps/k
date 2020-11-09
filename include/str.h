@@ -86,6 +86,12 @@ int str_rstrip(str **s, int d);
 int str_getline(str **s, FILE *f, size_t l);
 
 /**
+ * Wrapper around vsnprintf() which automatically grows buffer if needed.
+ * Returns 0 on success and -ENOMEM or -1 on failure.
+ */
+int str_printf(str **s, const char *f, ...);
+
+/**
  * Change the string's length to l and set the corresponding position in the
  * string to '\0'. This can be used to safely (and cheaply) truncate strings.
  */

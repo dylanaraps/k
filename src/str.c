@@ -4,6 +4,7 @@
  */
 #include <errno.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -112,6 +113,36 @@ int str_getline(str **s, FILE *f, size_t l) {
 
     str_set_len(*s, (*s)->len - 1);
     return 0;
+}
+
+static int str_vprintf(str **s, const char *f, va_list ap) {
+    va_list ap2;
+    va_copy(ap2, ap);
+    int l1 = vsnprintf(NULL, 0, f, ap2);
+    va_end(ap2);
+
+    if (l1 <= 0) {
+        return -1;
+    }
+
+    if (str_alloc_maybe(s, (size_t) l1) < 0) {
+        return -1;
+    }
+
+    if (vsnprintf((*s)->buf + (*s)->len, (size_t) l1 + 1, f, ap) != l1) {
+        return -1;
+    }
+
+    str_set_len(*s, (*s)->len + (size_t) l1);
+    return 0;
+}
+
+int str_printf(str **s, const char *f, ...) {
+    va_list ap;
+    va_start(ap, f);
+    int ret = str_vprintf(s, f, ap);
+    va_end(ap);
+    return ret;
 }
 
 void str_free(str **s) {
