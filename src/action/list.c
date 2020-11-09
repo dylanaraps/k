@@ -12,27 +12,11 @@
 #include "error.h"
 #include "list.h"
 #include "str.h"
+#include "pkg.h"
 #include "action.h"
 
 static int compare(void const *a, void const *b) {
     return strcmp(*(const char **) a, *(const char **) b);
-}
-
-static FILE *pkg_fopen(int repo_fd, const char *pkg, const char *file) {
-    int pfd = openat(repo_fd, pkg, O_RDONLY);
-
-    if (pfd == -1) {
-        return NULL;
-    }
-
-    int ffd = openat(pfd, file, O_RDONLY);
-    close(pfd);
-
-    if (ffd == -1) {
-        return NULL;
-    }
-
-    return fdopen(ffd, "r");
 }
 
 static int pkg_list(str **buf, int repo_fd, const char *pkg) {
