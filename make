@@ -11,7 +11,8 @@ _cc() {
 }
 
 configure() {
-    CFLAGS="-std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic $CFLAGS"
+    CFLAGS="-Wall -Wextra -pedantic $CFLAGS"
+    CFLAGS="-std=c99 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 $CFLAGS"
     CPPFLAGS="-Iinclude $CPPFLAGS"
 
     # Detect when '-static' is passed via LDFLAGS and handle things accordingly.
