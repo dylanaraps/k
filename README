@@ -51,12 +51,12 @@ ________________________________________________________________________________
     - [ ] alternatives
     - [ ] build
     - [ ] checksum
-        - [ ] find self-contained / permissively licensed sha256 implementation
+        - [x] find self-contained / permissively licensed sha256 implementation
     - [ ] download
         - [x] libcurl stuff
         - [ ] catch Ctrl+C during download
     - [ ] install
-    - [ ] list
+    - [x] list
         - [x] Individual
         - [x] All
     - [ ] remove
