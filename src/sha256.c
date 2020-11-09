@@ -100,7 +100,7 @@ static const uint32_t K[64] = {
     0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-static void Sha256_Transform(uint32_t *state, const uint32_t *data) {
+static void sha256_transform(uint32_t *state, const uint32_t *data) {
     uint32_t W[16];
 
     uint32_t a = state[0];
@@ -132,7 +132,7 @@ static void Sha256_Transform(uint32_t *state, const uint32_t *data) {
     state[7] += h;
 }
 
-static void Sha256_WriteByteBlock(SHA256_CTX *c) {
+static void sha256_write(SHA256_CTX *c) {
     uint32_t data[16];
 
     for (unsigned i = 0; i < 16; i++) {
@@ -143,7 +143,7 @@ static void Sha256_WriteByteBlock(SHA256_CTX *c) {
             ((uint32_t)(c->buf[i * 4 + 3]));
     }
 
-    Sha256_Transform(c->state, data);
+    sha256_transform(c->state, data);
 }
 
 void SHA256_Update(SHA256_CTX *c, const void *data, size_t size) {
@@ -157,7 +157,7 @@ void SHA256_Update(SHA256_CTX *c, const void *data, size_t size) {
 
         if (pos == 64) {
             pos = 0;
-            Sha256_WriteByteBlock(c);
+            sha256_write(c);
         }
     }
 }
@@ -172,7 +172,7 @@ void SHA256_Final(unsigned char *md, SHA256_CTX *c) {
         pos &= 0x3F;
 
         if (pos == 0) {
-            Sha256_WriteByteBlock(c);
+            sha256_write(c);
         }
 
         c->buf[pos++] = 0;
@@ -183,7 +183,7 @@ void SHA256_Final(unsigned char *md, SHA256_CTX *c) {
         len_bits <<= 8;
     }
 
-    Sha256_WriteByteBlock(c);
+    sha256_write(c);
 
     for (unsigned i = 0; i < 8; i++) {
         *md++ = (c->state[i] >> 24);
