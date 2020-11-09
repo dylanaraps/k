@@ -44,7 +44,7 @@ build() {
     done
 
     for obj in test/*.c; do
-        _cc $CFLAGS $CPPFLAGS -o "${obj%%.c}.t" "$obj" \
+        _cc $CFLAGS $CPPFLAGS -o "${obj%%.c}" "$obj" \
             src/[!k]*.o src/*/*.o $LDFLAGS
     done
 
@@ -56,7 +56,7 @@ check() {
         set -- valgrind --leak-check=full --track-origins=yes --error-exitcode=1
 
     for file in test/*.c; do
-        "$@" "${file%%.c}.t"
+        "$@" "${file%%.c}"
     done
 
     "$@" ./kiss v
