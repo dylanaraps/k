@@ -2,10 +2,19 @@
  * SPDX-License-Identifier: MIT
  * Copyright (C) 2020 Dylan Araps
  */
+#ifdef USE_CURL
 #include <curl/curl.h>
+#endif
 
 #include "error.h"
 #include "download.h"
+
+/**
+ * CURL is used to download remote sources. This dependency can be disabled
+ * by setting the environment variable CURL to 0 prior to the build. Disabling
+ * this dependency will also disable the download feature.
+ */
+#ifdef USE_CURL
 
 // same handle is used for all requests
 static CURL *curl = 0;
@@ -95,4 +104,24 @@ void source_curl_cleanup(void) {
     curl_easy_cleanup(curl);
     curl_global_cleanup();
 }
+
+/**
+ * Fallback stubs for public functions when CURL dependency has been disabled.
+ * In the future, the build system may simply exclude this file from compilation
+ * with ifdefs used around the caller.
+ */
+#else
+
+int source_download(const char *url, FILE *dest) {
+    (void) url;
+    (void) dest;
+
+    return -ENOSYS;
+}
+
+void source_curl_cleanup(void) {
+    //
+}
+
+#endif // USE_CURL
 
