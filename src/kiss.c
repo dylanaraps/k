@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "action.h"
+#include "cache.h"
 #include "error.h"
 #include "str.h"
 
