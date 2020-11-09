@@ -21,21 +21,6 @@ int main(int argc, char *argv[]) {
 
     test_begin(__FILE__);
 
-    SHA256_CTX ctx;
-    SHA256_Init(&ctx); {
-#ifndef USE_OPENSSL
-        test(ctx.count == 0);
-        test(ctx.state[0] == 0x6a09e667);
-        test(ctx.state[1] == 0xbb67ae85);
-        test(ctx.state[2] == 0x3c6ef372);
-        test(ctx.state[3] == 0xa54ff53a);
-        test(ctx.state[4] == 0x510e527f);
-        test(ctx.state[5] == 0x9b05688c);
-        test(ctx.state[6] == 0x1f83d9ab);
-        test(ctx.state[7] == 0x5be0cd19);
-#endif
-    }
-
     unsigned char hash[SHA256_DIGEST_LENGTH];
     FILE *f = fopen("test/files/multi_line", "r");
     sha256_file(hash, f);
