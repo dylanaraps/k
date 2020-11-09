@@ -9,7 +9,7 @@ jobs:
               run: |
                   sudo apt install tcc valgrind libcurl4-openssl-dev
 
-                  export CFLAGS=-Werror
+                  export CFLAGS=-Werror OPENSSL=0
 
                   CC=tcc   ./make
                   CC=tcc   ./make check
