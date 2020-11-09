@@ -14,15 +14,22 @@ configure() {
     CFLAGS="-std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic $CFLAGS"
     CPPFLAGS="-Iinclude $CPPFLAGS"
 
+    # Detect when '-static' is passed via LDFLAGS and handle things accordingly.
     case " $LDFLAGS " in *" -static "*)
         static=1
     esac
 
+    # Download functionality. Setting the environment variable CURL to '0' will
+    # disable the package manager's ability to download sources. Git sources
+    # will continue to work as normal (so long as git does).
     case ${CURL:=1} in 1)
         LDFLAGS="$(dep libcurl -lcurl) $LDFLAGS"
         CFLAGS="-DUSE_CURL $CFLAGS"
     esac
 
+    # SHA256 external implementation. Setting the environment variable OPENSSL
+    # to '0' will cause the package manager to use an internal sha256
+    # implementation rather than the optimized ASM from openssl.
     case ${OPENSSL:=1} in 1)
         LDFLAGS="$(dep openssl '-lssl -lcrypto') $LDFLAGS"
         CFLAGS="-DUSE_OPENSSL $CFLAGS"
