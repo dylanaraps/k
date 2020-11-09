@@ -49,7 +49,7 @@ build() {
             src/[!k]*.o src/*/*.o $LDFLAGS
     done
 
-    _cc $CPPFLAGS -o kiss src/*.c src/*/*.c $LDFLAGS
+    _cc $CFLAGS $CPPFLAGS -o kiss src/*.c src/*/*.c $LDFLAGS
 }
 
 check() {
