@@ -23,7 +23,7 @@
 typedef struct SHA256state_st {
     uint32_t state[8];
     uint64_t count;
-    uint8_t buf[SHA256_DIGEST_LENGTH * 2];
+    unsigned char buf[SHA256_DIGEST_LENGTH * 2];
 } SHA256_CTX;
 
 void SHA256_Init(SHA256_CTX *c);
