@@ -99,7 +99,7 @@ ________________________________________________________________________________
     - [ ] logging
     - [ ] pretty output
     - [x] string library
-        - [ ] str_push_int() (or snprintf wrapper)
+        - [x] str_push_int() (or snprintf wrapper)
     - [x] list library
     - [ ] privileges
         - Run as root + drop permissions? (shell method not feasible)
