@@ -28,18 +28,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef struct {
-    size_t cap;
-    size_t len;
-    char buf[];
-} str;
+typedef char str;
 
 /**
- * Allocate l bytes of memory for the string and initialize all struct fields
- * to their respective values. Returns NULL on failure. This function must be
- * called before any other str_ functions can be used.
+ * Allocate or grow a string by l bytes. If s is NULL, memory will be allocted
+ * for the string. If s is not NULL, the string will grow by l bytes. Returns
+ * NULL if memory allocation fails and string is unmodified.
+ *
+ * Functions will call this internally for you. This is only really needed
+ * during string creation.
+ *
+ * // create string, don't allocate any extra memory for char array.
+ * str *new = str_alloc(0, 0);
+ *
+ * // create string and preallocate 20 bytes of memory for char array.
+ * str *new = str_alloc(0, 20);
+ *
  */
-str *str_init(size_t l);
+str *str_alloc(str **s, size_t l);
 
 /**
  * Free all memory associated with the string. Checks for NULL before calling
@@ -72,10 +78,9 @@ int str_push_c(str **s, int d);
 int str_undo_c(str **s, int d);
 
 /**
- * Drop every character matching d from the end of the string. Returns how
- * many characters were dropped. 0 denotes failure.
+ * Drop every character matching d from the end of the string.
  */
-int str_rstrip(str **s, int d);
+void str_rstrip(str **s, int d);
 
 /**
  * Push the next line in f to the string in chunks of l. No additional memory
@@ -92,9 +97,19 @@ int str_getline(str **s, FILE *f, size_t l);
 int str_printf(str **s, const char *f, ...);
 
 /**
+ * Get the length of a string.
+ */
+#define str_len(s) (((size_t *) (s))[-1])
+
+/**
+ * Get the capacity (memory allocated) of a string.
+ */
+#define str_cap(s) (((size_t *) (s))[-2])
+
+/**
  * Change the string's length to l and set the corresponding position in the
  * string to '\0'. This can be used to safely (and cheaply) truncate strings.
  */
-#define str_set_len(s, l) (((s)->buf)[((s)->len) = (l)] = 0)
+#define str_set_len(s, l) (((s)[str_len(s) = (l)]) = 0)
 
 #endif

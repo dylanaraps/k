@@ -45,25 +45,25 @@ int cache_init(str **cache_dir) {
         return -1;
     }
 
-    if (mkdir_p((*cache_dir)->buf, 0755) < 0) {
+    if (mkdir_p(*cache_dir, 0755) < 0) {
         return -1;
     }
 
     for (size_t i = 0; i < sizeof(caches) / sizeof(caches[0]); i++) {
         str_push_l(cache_dir, caches[i], cache_len[i]);
 
-        if (mkdir((*cache_dir)->buf, 0755) == -1 && errno != EEXIST) {
-            err_no("failed to create directory '%s'", (*cache_dir)->buf);
+        if (mkdir(*cache_dir, 0755) == -1 && errno != EEXIST) {
+            err_no("failed to create directory '%s'", *cache_dir);
             return -1;
         }
 
-        str_set_len(*cache_dir, (*cache_dir)->len - cache_len[i]);
+        str_set_len(cache_dir, str_len(cache_dir) - cache_len[i]);
     }
 
     return 0;
 }
 
 int cache_clean(str *cache_dir) {
-    return rm_rf(cache_dir->buf);
+    return rm_rf(cache_dir);
 }
 

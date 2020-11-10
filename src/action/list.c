@@ -33,11 +33,11 @@ static int pkg_list(str **buf, int repo_fd, const char *pkg) {
         return -1;
     }
 
-    size_t len_pre = (*buf)->len;
+    size_t len_pre = str_len(*buf);
 
     switch (str_getline(buf, ver, 32)) {
         case 0:
-            printf("%s %s\n", pkg, (*buf)->buf + len_pre);
+            printf("%s %s\n", pkg, *buf + len_pre);
             str_set_len(*buf, len_pre);
             fclose(ver);
             return 0;
@@ -58,12 +58,12 @@ static int pkg_list_all(str **buf, list *pkgs, int repo_fd) {
     }
 
     for (struct dirent *dp; (dp = readdir(db)); ) {
-        size_t len_pre = (*buf)->len;
+        size_t len_pre = str_len(*buf);
 
         str_push_s(buf, dp->d_name);
         str_push_c(buf, 0);
 
-        list_push_b(pkgs, (*buf)->buf + len_pre);
+        list_push_b(pkgs, *buf + len_pre);
     }
 
     list_sort(pkgs, compare);
@@ -89,7 +89,7 @@ int action_list(int argc, char *argv[]) {
     }
 
     int ret = 0;
-    str *buf = str_init(1024);
+    str *buf = str_alloc(0, 1024);
 
     if (!buf) {
         ret = -1;
