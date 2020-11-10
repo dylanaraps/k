@@ -40,6 +40,7 @@ int action_search(buf **buf, int argc, char *argv[]) {
             buf_rstrip(buf, '/');
             buf_push_c(buf, '/');
             buf_push_s(buf, argv[i]);
+            buf_push_c(buf, '/');
 
             if (glob(*buf + len, g.gl_pathc ? GLOB_APPEND : 0, NULL, &g) < 0) {
                 goto error;
