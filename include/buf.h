@@ -1,34 +1,14 @@
 /**
  * SPDX-License-Identifier: MIT
  * Copyright (C) 2020 Dylan Araps
- *
- * Notes:
- *
- * - Memory is overallocated by a factor of 1.5 to prevent growing the
- *   buffer every time new data is pushed to it. Memory can also be
- *   preallocated during str_init(). The character array is a flexible
- *   struct member so (re)allocation only needs a single function call.
- *
- * - Functions which push data always append to the end of any existing data.
- *   This behavior can be controlled via str_set_len() as the value of the
- *   len struct member is where pushes start. This function will also NULL
- *   terminate the string at the new length.
- *
- * - All functions which cause buffer growth return -ENOMEM on allocation
- *   failure. str_init() returns with NULL on allocation failure. str_push_s()
- *   returns with -EINVAL if input is NULL.
- *
- * - The buffer is null terminated so it can be used with regular functions.
- *   Access is via the buf struct member.
- *
  */
-#ifndef KISS_STR_H
-#define KISS_STR_H
+#ifndef KISS_buf_H
+#define KISS_buf_H
 
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef char str;
+typedef char buf;
 
 /**
  * Allocate or grow a string by l bytes. If s is NULL, memory will be allocted
@@ -39,48 +19,48 @@ typedef char str;
  * during string creation.
  *
  * // create string, don't allocate any extra memory for char array.
- * str *new = str_alloc(0, 0);
+ * buf *new = buf_alloc(0, 0);
  *
  * // create string and preallocate 20 bytes of memory for char array.
- * str *new = str_alloc(0, 20);
+ * buf *new = buf_alloc(0, 20);
  *
  */
-str *str_alloc(str **s, size_t l);
+buf *buf_alloc(buf **s, size_t l);
 
 /**
  * Free all memory associated with the string. Checks for NULL before calling
  * free().
  */
-void str_free(str **s);
+void buf_free(buf **s);
 
 /**
  * Push a string of known length. Returns 0 for success and -ENOMEM if memory
  * allocation fails.
  */
-int str_push_l(str **s, const char *d, size_t l);
+int buf_push_l(buf **s, const char *d, size_t l);
 
 /**
  * Push a string of unknown length. Returns 0 for success, -EINVAL if d is
- * NULL and -ENOMEM if memory allocation fails. Wrapper around str_push_l()
- * using strlen(d) to determine length of input.
+ * NULL and -ENOMEM if memory allocation fails. Wrapper around buf_push_l()
+ * using buflen(d) to determine length of input.
  */
-int str_push_s(str **s, const char *d);
+int buf_push_s(buf **s, const char *d);
 
 /**
  * Push a character. Returns 0 for success, -ENOMEM if memory allocation fails.
  */
-int str_push_c(str **s, int d);
+int buf_push_c(buf **s, int d);
 
 /**
  * Drop a character from the end of the string if it matches d. Returns 0 for
  * success and -1 for failure.
  */
-int str_undo_c(str **s, int d);
+int buf_undo_c(buf **s, int d);
 
 /**
  * Drop every character matching d from the end of the string.
  */
-void str_rstrip(str **s, int d);
+void buf_rstrip(buf **s, int d);
 
 /**
  * Push the next line in f to the string in chunks of l. No additional memory
@@ -88,28 +68,38 @@ void str_rstrip(str **s, int d);
  * trailing newline is removed if present. Returns 0 for success and -1 for
  * failure.
  */
-int str_getline(str **s, FILE *f, size_t l);
+int buf_getline(buf **s, FILE *f, size_t l);
 
 /**
  * Wrapper around vsnprintf() which automatically grows buffer if needed.
  * Returns 0 on success and -ENOMEM or -1 on failure.
  */
-int str_printf(str **s, const char *f, ...);
+int buf_printf(buf **s, const char *f, ...);
+
+/**
+ * Get pointer to beginning of memory allocation.
+ */
+#define buf_raw(s) ((s) ? (*s) ? ((size_t *) (*s) - 2) : 0 : 0)
 
 /**
  * Get the length of a string.
  */
-#define str_len(s) (((size_t *) (s))[-1])
+#define buf_len(s) (((size_t *) (s))[-1])
 
 /**
  * Get the capacity (memory allocated) of a string.
  */
-#define str_cap(s) (((size_t *) (s))[-2])
+#define buf_cap(s) (((size_t *) (s))[-2])
+
+/**
+ * Last character in string.
+ */
+#define buf_end(s) ((s)[buf_len(s) - 1])
 
 /**
  * Change the string's length to l and set the corresponding position in the
  * string to '\0'. This can be used to safely (and cheaply) truncate strings.
  */
-#define str_set_len(s, l) (((s)[str_len(s) = (l)]) = 0)
+#define buf_set_len(s, l) (((s)[buf_len(s) = (l)]) = 0)
 
 #endif

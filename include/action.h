@@ -5,8 +5,6 @@
 #ifndef KISS_ACTION_H
 #define KISS_ACTION_H
 
-#include "str.h"
-
 /**
  * kiss list
  */

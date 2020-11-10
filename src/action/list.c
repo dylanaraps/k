@@ -11,7 +11,7 @@
 
 #include "error.h"
 #include "list.h"
-#include "str.h"
+#include "buf.h"
 #include "pkg.h"
 #include "action.h"
 
@@ -19,7 +19,7 @@ static int compare(void const *a, void const *b) {
     return strcmp(*(const char **) a, *(const char **) b);
 }
 
-static int pkg_list(str **buf, int repo_fd, const char *pkg) {
+static int pkg_list(buf **buf, int repo_fd, const char *pkg) {
     FILE *ver = pkg_fopen(repo_fd, pkg, "version");
 
     if (!ver) {
@@ -33,12 +33,12 @@ static int pkg_list(str **buf, int repo_fd, const char *pkg) {
         return -1;
     }
 
-    size_t len_pre = str_len(*buf);
+    size_t len_pre = buf_len(*buf);
 
-    switch (str_getline(buf, ver, 32)) {
+    switch (buf_getline(buf, ver, 32)) {
         case 0:
             printf("%s %s\n", pkg, *buf + len_pre);
-            str_set_len(*buf, len_pre);
+            buf_set_len(*buf, len_pre);
             fclose(ver);
             return 0;
 
@@ -49,7 +49,7 @@ static int pkg_list(str **buf, int repo_fd, const char *pkg) {
     }
 }
 
-static int pkg_list_all(str **buf, list *pkgs, int repo_fd) {
+static int pkg_list_all(buf **buf, list *pkgs, int repo_fd) {
     DIR *db = fdopendir(repo_fd);
 
     if (!db) {
@@ -58,10 +58,10 @@ static int pkg_list_all(str **buf, list *pkgs, int repo_fd) {
     }
 
     for (struct dirent *dp; (dp = readdir(db)); ) {
-        size_t len_pre = str_len(*buf);
+        size_t len_pre = buf_len(*buf);
 
-        str_push_s(buf, dp->d_name);
-        str_push_c(buf, 0);
+        buf_push_s(buf, dp->d_name);
+        buf_push_c(buf, 0);
 
         list_push_b(pkgs, *buf + len_pre);
     }
@@ -89,7 +89,7 @@ int action_list(int argc, char *argv[]) {
     }
 
     int ret = 0;
-    str *buf = str_alloc(0, 1024);
+    buf *buf = buf_alloc(0, 1024);
 
     if (!buf) {
         ret = -1;
@@ -117,7 +117,7 @@ int action_list(int argc, char *argv[]) {
 
 error:
     close(repo_fd);
-    str_free(&buf);
+    buf_free(&buf);
     return 0;
 }
 

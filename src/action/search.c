@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "str.h"
+#include "buf.h"
 
 int action_search(int argc, char *argv[]) {
     (void) argc;

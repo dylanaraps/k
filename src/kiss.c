@@ -9,7 +9,6 @@
 #include "action.h"
 #include "cache.h"
 #include "error.h"
-#include "str.h"
 
 static int (*actions[])(int, char *[]) = {
     ['a'] = NULL,

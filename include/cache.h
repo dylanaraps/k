@@ -5,9 +5,9 @@
 #ifndef KISS_CACHE_H
 #define KISS_CACHE_H
 
-#include "str.h"
+#include "buf.h"
 
-int cache_init(str **cache_dir);
-int cache_clean(str *cache_dir);
+int cache_init(buf **cache_dir);
+int cache_clean(buf *cache_dir);
 
 #endif
