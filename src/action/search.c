@@ -35,6 +35,8 @@ int action_search(buf **buf, int argc, char *argv[]) {
     size_t len = buf_len(*buf);
 
     for (int i = 2; i < argc; i++) {
+        size_t glob_pre = g.gl_pathc;
+
         for (size_t j = 0; j < repos.len; j++) {
             buf_push_s(buf, repos.arr[j]);
             buf_rstrip(buf, '/');
@@ -49,7 +51,7 @@ int action_search(buf **buf, int argc, char *argv[]) {
             buf_set_len(*buf, len);
         }
 
-        if (g.gl_pathc == 0) {
+        if (g.gl_pathc - glob_pre == 0) {
             err("no search results for '%s'", argv[i]);
             goto error;
         }
