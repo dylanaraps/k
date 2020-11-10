@@ -80,7 +80,7 @@ static int pkg_list_all(buf **buf, list *pkgs, int repo_fd) {
     return 0;
 }
 
-int action_list(int argc, char *argv[]) {
+int action_list(buf **buf, int argc, char *argv[]) {
     int repo_fd = open("/var/db/kiss/installed", O_RDONLY);
 
     if (repo_fd == -1) {
@@ -89,15 +89,9 @@ int action_list(int argc, char *argv[]) {
     }
 
     int ret = 0;
-    buf *buf = buf_alloc(0, 1024);
-
-    if (!buf) {
-        ret = -1;
-        goto error;
-    }
 
     for (int i = 2; i < argc; i++) {
-        if ((ret = pkg_list(&buf, repo_fd, argv[i])) < 0) {
+        if ((ret = pkg_list(buf, repo_fd, argv[i])) < 0) {
             goto error;
         }
     }
@@ -106,7 +100,7 @@ int action_list(int argc, char *argv[]) {
         list pkgs;
 
         if ((ret = list_init(&pkgs, 256)) == 0) {
-            ret = pkg_list_all(&buf, &pkgs, repo_fd);
+            ret = pkg_list_all(buf, &pkgs, repo_fd);
 
         } else {
             err("failed to allocate memory");
@@ -117,7 +111,6 @@ int action_list(int argc, char *argv[]) {
 
 error:
     close(repo_fd);
-    buf_free(&buf);
-    return 0;
+    return ret;
 }
 

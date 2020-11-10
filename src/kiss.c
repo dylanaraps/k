@@ -7,10 +7,11 @@
 #include <unistd.h>
 
 #include "action.h"
+#include "buf.h"
 #include "cache.h"
 #include "error.h"
 
-static int (*actions[])(int, char *[]) = {
+static int (*actions[])(buf **, int, char *[]) = {
     ['a'] = NULL,
     ['b'] = NULL,
     ['c'] = NULL,
@@ -74,7 +75,14 @@ int main (int argc, char *argv[]) {
                ARG(argv[1], "remove")   ||
                ARG(argv[1], "search")   ||
                ARG(argv[1], "update")) {
-        err = actions[(unsigned char) argv[1][0]](argc, argv);
+        buf *buf = buf_alloc(0, 1024);
+
+        if (!buf) {
+            return -ENOMEM;
+        }
+
+        err = actions[(unsigned char) argv[1][0]](&buf, argc, argv);
+        buf_free(&buf);
 
     } else {
         err = run_extension(argv + 1);

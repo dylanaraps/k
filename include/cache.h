@@ -8,6 +8,6 @@
 #include "buf.h"
 
 int cache_init(buf **cache_dir);
-int cache_clean(buf *cache_dir);
+int cache_clean(const char *cache_dir);
 
 #endif
