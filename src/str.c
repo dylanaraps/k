@@ -141,9 +141,6 @@ int str_printf(str **s, const char *f, ...) {
 }
 
 void str_free(str **s) {
-    if (*s) {
-        free((size_t *) *s - 2);
-        *s = NULL;
-    }
+    free(str_raw(s));
 }
 
