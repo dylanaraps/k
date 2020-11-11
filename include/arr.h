@@ -26,25 +26,6 @@
 void *arr_alloc(void *a, size_t l);
 
 /**
- * Grow the array if l additional items do not fit.
- */
-#define arr_alloc_maybe(a, l) do {               \
-    if ((arr_len(a) + l) > arr_cap(a)) {         \
-        void *_n = arr_alloc(a, arr_inc_cap(a)); \
-        assert(_n);                              \
-        (a) = _n;                                \
-    }                                            \
-} while(0)
-
-/**
- * Push an element to the list, growing it by a factor of 1.5 (if needed).
- */
-#define arr_push_b(a, d) do { \
-    arr_alloc_maybe(a, 1);    \
-    arr_set_end(a, d);        \
-} while(0)
-
-/**
  * Free the array (caller must free elements).
  */
 #define arr_free(a)       free(a ? arr_raw(a) : 0)
@@ -70,6 +51,25 @@ void *arr_alloc(void *a, size_t l);
 #define arr_add_len(a, l) (arr_len(a) += (l))
 #define arr_rem_len(a, l) (arr_len(a) -= (l))
 #define arr_inc_cap(a)    (arr_cap(a) + (arr_cap(a) >> 1))
+
+/**
+ * Grow the array if l additional items do not fit.
+ */
+#define arr_alloc_maybe(a, l) do {               \
+    if ((arr_len(a) + l) > arr_cap(a)) {         \
+        void *_n = arr_alloc(a, arr_inc_cap(a)); \
+        assert(_n);                              \
+        (a) = _n;                                \
+    }                                            \
+} while(0)
+
+/**
+ * Push an element to the list, growing it by a factor of 1.5 (if needed).
+ */
+#define arr_push_b(a, d) do { \
+    arr_alloc_maybe(a, 1);    \
+    arr_set_end(a, d);        \
+} while(0)
 
 #endif
 
