@@ -46,23 +46,23 @@ void *arr_alloc(void *a, size_t l);
 } while(0)
 
 /**
- * Drop an element from the end of the list.
+ * Free the array (caller must free elements).
  */
-void arr_drop_b(void *a);
+#define arr_free(a)       free(a ? arr_raw(a) : 0)
 
 /**
- * Sort a list using qsort().
+ * Sort array using qsort. cb equates to the function pointer
+ * given to qsort: int (*cb)(const void *, const void *)
  */
-void arr_sort(void *a, int (*cb)(const void *, const void *));
+#define arr_sort(a, cb)   qsort(a, arr_len(a), sizeof(void *), cb)
 
 /**
- * Free memory associated with the list. Checks for NULL before calling
- * free(). List elements themselves must be freed by the caller.
+ * Drop element from back of array.
  */
-void arr_free(void *a);
+#define arr_drop_b(a)     arr_rem_len(a, 1)
 
 /**
- * Various macros to ease data access.
+ * Various macros to ease data accesss.
  */
 #define arr_raw(a)        ((size_t *) (a) - 2)
 #define arr_len(a)        (arr_raw(a)[1])
