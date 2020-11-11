@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include "error.h"
-#include "list.h"
+#include "arr.h"
 #include "buf.h"
 #include "action.h"
 
@@ -31,19 +31,14 @@ static int get_repositories(buf **buf) {
     return 0;
 }
 
-static int get_repo_list(list *repos, char *buf) {
-    if (list_init(repos, 12) < 0) {
-        err("failed to allocate memory");
-        return -ENOMEM;
-    }
-
+static int get_repo_list(char **repos, char *buf) {
     for (char *t = strtok(buf, ":"); t; t = strtok(NULL, ":")) {
         if (t[0] != '/') {
             err("invalid path '%s' in KISS_PATH", t);
             return -1;
         }
 
-        list_push_b(repos, t);
+        arr_push_b(repos, t);
     }
 
     return 0;
@@ -57,11 +52,16 @@ int action_search(buf **buf, int argc, char *argv[]) {
         return -1;
     }
 
-    list repos;
+    char **repos = arr_alloc(0, 12);
 
-    if ((err = get_repo_list(&repos, *buf)) < 0) {
+    if (!repos) {
+        err("failed to allocate memory");
+        goto arr_error;
+    }
+
+    if ((err = get_repo_list(repos, *buf)) < 0) {
         err("failed to initialize repository list");
-        goto list_error;
+        goto arr_error;
     }
 
     glob_t g = { .gl_pathc = 0, };
@@ -69,8 +69,8 @@ int action_search(buf **buf, int argc, char *argv[]) {
     for (int i = 2; i < argc; i++) {
         size_t glob_pre = g.gl_pathc;
 
-        for (size_t j = 0, len = buf_len(*buf); j < repos.len; j++) {
-            buf_push_s(buf, repos.arr[j]);
+        for (size_t j = 0, len = buf_len(*buf); j < arr_len(repos); j++) {
+            buf_push_s(buf, repos[j]);
             buf_rstrip(buf, '/');
             buf_push_c(buf, '/');
             buf_push_s(buf, argv[i]);
@@ -104,8 +104,8 @@ int action_search(buf **buf, int argc, char *argv[]) {
 
 glob_error:
     globfree(&g);
-list_error:
-    list_free(&repos);
+arr_error:
+    arr_free(repos);
     return err;
 }
 

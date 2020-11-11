@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 
 #include "error.h"
-#include "list.h"
+#include "arr.h"
 #include "buf.h"
 #include "pkg.h"
 #include "action.h"
@@ -49,7 +49,7 @@ static int pkg_list(buf **buf, int repo_fd, const char *pkg) {
     }
 }
 
-static int pkg_list_all(buf **buf, list *pkgs, int repo_fd) {
+static int pkg_list_all(buf **buf, char **pkgs, int repo_fd) {
     DIR *db = fdopendir(repo_fd);
 
     if (!db) {
@@ -63,14 +63,14 @@ static int pkg_list_all(buf **buf, list *pkgs, int repo_fd) {
         buf_push_s(buf, dp->d_name);
         buf_push_c(buf, 0);
 
-        list_push_b(pkgs, *buf + len_pre);
+        arr_push_b(pkgs, *buf + len_pre);
     }
 
-    list_sort(pkgs, compare);
+    arr_sort(pkgs, compare);
 
     // i = 2 skips '.' and '..'
-    for (size_t i = 2; i < pkgs->len; i++) {
-        if (pkg_list(buf, repo_fd, pkgs->arr[i]) < 0) {
+    for (size_t i = 2; i < arr_len(pkgs); i++) {
+        if (pkg_list(buf, repo_fd, pkgs[i]) < 0) {
             closedir(db);
             return -1;
         }
@@ -97,16 +97,16 @@ int action_list(buf **buf, int argc, char *argv[]) {
     }
 
     if (argc == 2) {
-        list pkgs;
+        char **pkgs = arr_alloc(0, 256);
 
-        if ((ret = list_init(&pkgs, 256)) == 0) {
-            ret = pkg_list_all(buf, &pkgs, repo_fd);
+        if (pkgs) {
+            ret = pkg_list_all(buf, pkgs, repo_fd);
 
         } else {
             err("failed to allocate memory");
         }
 
-        list_free(&pkgs);
+        arr_free(pkgs);
     }
 
 error:
