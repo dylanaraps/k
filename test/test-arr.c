@@ -34,7 +34,10 @@ int main(int argc, char *argv[]) {
 
         arr_push_b(list, s); {
             test(arr_len(list) == i + 1);
-            test(strcmp(list[0], "apple") == 0);
+
+            for (size_t i = 0; i < arr_len(list); i++) {
+                test(strcmp(list[i], fruit[i]) == 0);
+            }
         }
     }
 
