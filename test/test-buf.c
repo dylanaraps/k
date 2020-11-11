@@ -71,20 +71,20 @@ int main(int argc, char *argv[]) {
         test(strcmp(s, "123452211") == 0);
     }
 
-    FILE *f = fopen("test/files/single_line", "r");
+    FILE *f = fopen("test/test_hier/repo/core/gzip/version", "r");
 
     ret = buf_getline(&s, f, 30); {
         test(ret == 0);
-        test(buf_len(s) == 20);
+        test(buf_len(s) == 15);
         test(buf_cap(s) == 63);
-        test(strcmp(s, "123452211single line") == 0);
+        test(strcmp(s, "1234522111.10 4") == 0);
     }
 
     ret = buf_getline(&s, f, 30); {
         test(ret == -1);
-        test(buf_len(s) == 20);
+        test(buf_len(s) == 15);
         test(buf_cap(s) == 63);
-        test(strcmp(s, "123452211single line") == 0);
+        test(strcmp(s, "1234522111.10 4") == 0);
     }
 
     fclose(f);
@@ -92,9 +92,9 @@ int main(int argc, char *argv[]) {
     char *test_buf = 0;
     ret = buf_push_s(&s, test_buf); {
         test(ret == -EINVAL);
-        test(buf_len(s) == 20);
+        test(buf_len(s) == 15);
         test(buf_cap(s) == 63);
-        test(strcmp(s, "123452211single line") == 0);
+        test(strcmp(s, "1234522111.10 4") == 0);
     }
 
     buf_free(&s);
