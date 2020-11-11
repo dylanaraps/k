@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -18,52 +19,82 @@ static const char *caches[] = {
     "../../bin",
 };
 
-static const size_t cache_len[] = {
-    5,  3, 7,
-   13, 10, 9,
-};
+int cache_init(struct cache *c) {
+    c->dir = buf_alloc(0, 256);
 
-static int cache_get_base(buf **s) {
-    if (buf_push_s(s, getenv("XDG_CACHE_HOME")) < 0) {
-        if (buf_push_s(s, getenv("HOME")) < 0) {
-            return -1;
-        }
-
-        buf_rstrip(s, '/');
-
-        if (buf_push_l(s, "/.cache", 7) < 0) {
-            return -1;
-        }
+    if (!c->dir) {
+        return -ENOMEM;
     }
 
-    buf_rstrip(s, '/');
-    return buf_printf(s, "/kiss/proc/%ld/", getpid());
-}
-
-int cache_init(buf **cache_dir) {
-    if (cache_get_base(cache_dir) < 0) {
+    if (cache_get_base(&c->dir) < 0) {
         return -1;
     }
 
-    if (mkdir_p(*cache_dir, 0755) < 0) {
+    if (cache_init_all(c) < 0) {
         return -1;
-    }
-
-    for (size_t i = 0; i < sizeof(caches) / sizeof(caches[0]); i++) {
-        buf_push_l(cache_dir, caches[i], cache_len[i]);
-
-        if (mkdir(*cache_dir, 0755) == -1 && errno != EEXIST) {
-            err_no("failed to create directory '%s'", *cache_dir);
-            return -1;
-        }
-
-        buf_set_len(cache_dir, buf_len(cache_dir) - cache_len[i]);
     }
 
     return 0;
 }
 
-int cache_clean(const char *cache_dir) {
-    return rm_rf(cache_dir);
+int cache_init_all(struct cache *c) {
+    if (mkdir_p(c->dir, 0755) < 0) {
+        return -1;
+    }
+
+    if ((c->fd[6] = open(c->dir, O_RDONLY)) == -1) {
+        err_no("failed to open directory '%s'", c->dir);
+        return -1;
+    }
+
+    for (size_t i = 0; i < CAC_DIR; i++) {
+        if (mkdirat(c->fd[6], caches[i], 0755) == -1 && errno != EEXIST) {
+            err_no("failed to create directory '%s%s'", c->dir, caches[i]);
+            return -1;
+        }
+
+        if ((c->fd[i] = openat(c->fd[6], caches[i], O_RDONLY)) == -1) {
+            err_no("failed to open directory '%s%s'", c->dir, caches[i]);
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+int cache_get_base(buf **c) {
+    switch(buf_push_s(c, getenv("XDG_CACHE_HOME"))) {
+        case -ENOMEM:
+            return -ENOMEM;
+
+        case -EINVAL:
+            switch (buf_push_s(c, getenv("HOME"))) {
+                case -ENOMEM:
+                    return -ENOMEM;
+
+                case -EINVAL:
+                    err("XDG_CACHE_HOME and HOME unset");
+                    return -1;
+            }
+
+            buf_rstrip(c, '/');
+            buf_push_l(c, "/.cache", 7);
+    }
+
+    buf_rstrip(c, '/');
+
+    return buf_printf(c, "/kiss/proc/%ld/", (long) getpid());
+}
+
+int cache_clean(struct cache *c) {
+    return rm_rf(c->dir);
+}
+
+void cache_free(struct cache *c) {
+    for (size_t i = 0; i < CAC_DIR; i++) {
+        close(c->fd[i]);
+    }
+
+    buf_free(&c->dir);
 }
 

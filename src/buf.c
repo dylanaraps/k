@@ -114,7 +114,7 @@ static int buf_vprintf(buf **s, const char *f, va_list ap) {
     }
 
     if (buf_alloc_maybe(s, (size_t) l1) < 0) {
-        return -1;
+        return -ENOMEM;
     }
 
     if (vsnprintf(*s + buf_len(*s), (size_t) l1 + 1, f, ap) != l1) {

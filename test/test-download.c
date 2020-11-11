@@ -20,12 +20,12 @@ int main(int argc, char *argv[]) {
 #ifdef USE_CURL
     int ret = test_begin(__FILE__);
 
-    FILE *dest = fopen("team.txt", "w");
+    FILE *dest = fopen("test/team.txt", "w");
 
     // TODO: Upload file to website specifically for this purpose.
     ret = source_download("https://k1ss.org/team.txt", dest); {
         test(ret == 0);
-        test(access("team.txt", F_OK) == 0);
+        test(access("test/team.txt", F_OK) == 0);
     }
 
     unsigned char hash[SHA256_DIGEST_LENGTH];
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
         test(hash[i] == file_hash[i]);
     }
 
-    remove("team.txt");
+    remove("test/team.txt");
     fclose(dest);
     source_curl_cleanup();
 

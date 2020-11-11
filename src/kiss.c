@@ -56,33 +56,40 @@ static int run_extension(char *argv[]) {
 int main (int argc, char *argv[]) {
     int err = 0;
 
+    if (argc < 2 || !argv[1] || !argv[1][0] || argv[1][0] == '-') {
+        usage(argv[0]);
+
 // Check if argument matches an action. True for b==build and build==build
 // strcmp is only reached when both first characters match.
 #define ARG(a, b) ((*a) == (*b) && ((!a[1]) || strcmp(a, b) == 0))
 
-    if (argc < 2 || !argv[1] || !argv[1][0] || argv[1][0] == '-') {
-        usage(argv[0]);
-
-    } else if (ARG(argv[1], "version")) {
-        version(argv[0]);
-
-    } else if (ARG(argv[1], "alt")      ||
-               ARG(argv[1], "build")    ||
+    } else if (ARG(argv[1], "build")    ||
                ARG(argv[1], "checksum") ||
-               ARG(argv[1], "download") ||
-               ARG(argv[1], "install")  ||
-               ARG(argv[1], "list")     ||
-               ARG(argv[1], "remove")   ||
-               ARG(argv[1], "search")   ||
-               ARG(argv[1], "update")) {
+               ARG(argv[1], "download")) {
+        struct cache c;
+
+        if (cache_init(&c) < 0) {
+            err_no("failed to init cache");
+            return -1;
+        }
+
+        cache_free(&c);
+
+    } else if (ARG(argv[1], "list") ||
+               ARG(argv[1], "search")) {
         buf *buf = buf_alloc(0, 1024);
 
         if (!buf) {
+            err("failed to allocate memory");
             return -ENOMEM;
         }
 
         err = actions[(unsigned char) argv[1][0]](&buf, argc, argv);
+
         buf_free(&buf);
+
+    } else if (ARG(argv[1], "version")) {
+        version(argv[0]);
 
     } else {
         err = run_extension(argv + 1);

@@ -7,7 +7,27 @@
 
 #include "buf.h"
 
-int cache_init(buf **cache_dir);
-int cache_clean(const char *cache_dir);
+struct cache {
+    buf *dir;
+    int fd[7];
+};
+
+enum cache_type {
+    CAC_MAK,
+    CAC_PKG,
+    CAC_EXT,
+
+    CAC_SRC,
+    CAC_LOG,
+    CAC_BIN,
+
+    CAC_DIR,
+};
+
+int cache_init(struct cache *c);
+int cache_init_all(struct cache *c);
+int cache_get_base(buf **c);
+int cache_clean(struct cache *c);
+void cache_free(struct cache *c);
 
 #endif
