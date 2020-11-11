@@ -8,8 +8,8 @@
 
 #include "arr.h"
 
-void *arr_alloc(void *s, size_t l) {
-    size_t *p = s ? arr_raw(s) : 0;
+void *arr_alloc(void *a, size_t l) {
+    size_t *p = a ? arr_raw(a) : 0;
     size_t *n = realloc(p, (sizeof(void *) * (l + 2)));
 
     if (!n) {
@@ -22,15 +22,15 @@ void *arr_alloc(void *s, size_t l) {
     return (void *) &n[2];
 }
 
-void arr_drop_b(void *s) {
-    ((size_t *) (s))[-1] -= 1;
+void arr_drop_b(void *a) {
+    ((size_t *) (a))[-1] -= 1;
 }
 
-void arr_sort(void *s, int (*cb)(const void *, const void *)) {
-    qsort(s, arr_len(s), sizeof (void *), cb);
+void arr_sort(void *a, int (*cb)(const void *, const void *)) {
+    qsort(a, arr_len(a), sizeof (void *), cb);
 }
 
-void arr_free(void *s) {
-    free(s ? arr_raw(s) : 0);
+void arr_free(void *a) {
+    free(a ? arr_raw(a) : 0);
 }
 
