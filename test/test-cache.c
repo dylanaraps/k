@@ -19,9 +19,9 @@ int main(int argc, char *argv[]) {
 
     int err = test_begin(__FILE__);
 
-    for (size_t i = 0; i < 2; i++) {
-        struct cache c;
+    struct cache c;
 
+    for (size_t i = 0; i < 2; i++) {
         setenv(i ? "XDG_CACHE_HOME" : "HOME", "./test/test_hier", 1);
         setenv(i ? "HOME" : "XDG_CACHE_HOME", "", 1);
 
@@ -62,6 +62,15 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+
+    setenv("XDG_CACHE_HOME", "", 1);
+    setenv("HOME", "", 1);
+
+    err = cache_init(&c); {
+        test(err == -1);
+    }
+
+    cache_free(&c);
 
     return test_finish();
 }
