@@ -64,6 +64,7 @@ check() {
 
     "$@" ./kiss v
     "$@" ./kiss
+    "$@" ./kiss s zlib
 }
 
 "${1:-build}"
