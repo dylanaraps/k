@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
         int fd = open(c.dir + len_pre, O_RDONLY);
         buf_set_len(c.dir, len_pre);
 
-        test(fd > 0);
+        test(fcntl(fd, F_GETFL) != -1 || errno != EBADF);
         test(faccessat(fd, "build", F_OK, 0) == 0);
         test(faccessat(fd, "extract", F_OK, 0) == 0);
         test(faccessat(fd, "pkg", F_OK, 0) == 0);
