@@ -76,11 +76,16 @@ int action_search(buf **buf, int argc, char *argv[]) {
             buf_push_s(buf, argv[i]);
             buf_push_c(buf, '/');
 
-            err = glob(*buf + len, g.gl_pathc ? GLOB_APPEND : 0, NULL, &g);
+            switch (glob(*buf + len, g.gl_pathc ? GLOB_APPEND : 0, NULL, &g)) {
+                case GLOB_NOSPACE:
+                case GLOB_ABORTED:
+                    err("glob encountered error with query '%s'", *buf + len);
+                    err = -1;
+                    goto glob_error;
 
-            if (err < 0) {
-                err("glob encountered error with query '%s'", *buf + len);
-                goto glob_error;
+                case GLOB_NOMATCH:
+                default:
+                    break;
             }
 
             buf_set_len(*buf, len);
