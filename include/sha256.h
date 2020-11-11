@@ -32,7 +32,14 @@ void SHA256_Final(unsigned char *md, SHA256_CTX *c);
 
 #endif
 
+/**
+ * Generate checksums for a file. Result is stored in hash.
+ */
 void sha256_file(unsigned char hash[SHA256_DIGEST_LENGTH], FILE *f);
+
+/**
+ * Convert hash to its string representation. Result is stored in out.
+ */
 void sha256_to_string(unsigned char hash[SHA256_DIGEST_LENGTH], char out[65]);
 
 #endif

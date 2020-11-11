@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
 
     remove("test/team.txt");
     fclose(dest);
+
     source_curl_cleanup();
 
     return test_finish();

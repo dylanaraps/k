@@ -69,8 +69,7 @@ int main (int argc, char *argv[]) {
         struct cache c;
 
         if (cache_init(&c) < 0) {
-            err_no("failed to init cache");
-            return -1;
+            err = -1;
         }
 
         cache_free(&c);
