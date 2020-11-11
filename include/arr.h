@@ -42,7 +42,6 @@ void *arr_alloc(void *a, size_t l);
 #define arr_push_b(a, d) do { \
     arr_alloc_maybe(a, 1);    \
     arr_set_end(a, d);        \
-    arr_add_len(a, 1);        \
 } while(0)
 
 /**
@@ -67,7 +66,7 @@ void *arr_alloc(void *a, size_t l);
 #define arr_raw(a)        ((size_t *) (a) - 2)
 #define arr_len(a)        (arr_raw(a)[1])
 #define arr_cap(a)        (arr_raw(a)[0])
-#define arr_set_end(a, d) ((a)[arr_len(a)] = (d))
+#define arr_set_end(a, d) ((a)[arr_len(a)++] = (d))
 #define arr_add_len(a, l) (arr_len(a) += (l))
 #define arr_rem_len(a, l) (arr_len(a) -= (l))
 #define arr_inc_cap(a)    (arr_cap(a) + (arr_cap(a) >> 1))
