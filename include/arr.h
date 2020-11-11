@@ -9,8 +9,19 @@
 #include <stdlib.h>
 
 /**
- * Initialize array and allocate memory for s elements. If s is 0, no additional
- * memory is allocated. Returns NULL when memory allocation fails.
+ * Allocate or grow array by l bytes. If a is NULL, memory will be allocted
+ * for the array. If a is not NULL, the array will grow by l elements. Returns
+ * NULL if memory allocation fails and a is unmodified.
+ *
+ * Functions will call this internally for you. This is only really needed
+ * during array creation.
+ *
+ * // create array, don't allocate any extra memory for elements.
+ * char **new = arr_alloc(0, 0);
+ *
+ * // create array and preallocate memory for 20 elements.
+ * char **new = buf_alloc(0, 20);
+ *
  */
 void *arr_alloc(void *a, size_t l);
 
@@ -21,7 +32,6 @@ void *arr_alloc(void *a, size_t l);
     if ((arr_len(a) + l) > arr_cap(a)) {      \
         void *_n = arr_alloc(a,               \
             arr_cap(a) + (arr_cap(a) >> 1));  \
-                                              \
         assert(_n);                           \
         (a) = _n;                             \
     }                                         \
