@@ -53,6 +53,8 @@ build() {
 }
 
 check() {
+    export KISS_PATH=$PWD/test/test_repo/core:$PWD/test/test_repo/extra
+
     command -v valgrind &&
         set -- valgrind --leak-check=full --track-origins=yes --error-exitcode=1
 
