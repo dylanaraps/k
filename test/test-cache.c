@@ -28,6 +28,19 @@ int main(int argc, char *argv[]) {
         }
 
         test(access(c.dir, F_OK) == 0);
+        test(access("test/test_hier/kiss/proc", F_OK) == 0);
+
+        size_t len_pre = buf_len(c.dir);
+        buf_printf(&c.dir, "test/test_hier/kiss/proc/%ld", getpid());
+        int fd = open(c.dir + len_pre, O_RDONLY);
+        buf_set_len(c.dir, len_pre);
+
+        test(fd > 0);
+        test(faccessat(fd, "build", F_OK, 0) == 0);
+        test(faccessat(fd, "extract", F_OK, 0) == 0);
+        test(faccessat(fd, "pkg", F_OK, 0) == 0);
+
+        close(fd);
     }
 
     cache_clean(&c); {

@@ -31,7 +31,7 @@ configure() {
     # SHA256 external implementation. Setting the environment variable OPENSSL
     # to '0' will cause the package manager to use an internal sha256
     # implementation rather than the optimized ASM from openssl.
-    case ${OPENSSL:=1} in 1)
+    case ${OPENSSL:=0} in 1)
         LDFLAGS="$(dep openssl '-lssl -lcrypto') $LDFLAGS"
         CFLAGS="-DUSE_OPENSSL $CFLAGS"
     esac
