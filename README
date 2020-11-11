@@ -60,7 +60,7 @@ ________________________________________________________________________________
         - [x] Individual
         - [x] All
     - [ ] remove
-    - [ ] search
+    - [x] search
     - [ ] update
         - [ ] avoid libgit2 (requires cmake, no support for shallow clones, etc)
         - [ ] possibly fork/exec command-line git initially
