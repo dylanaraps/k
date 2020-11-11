@@ -54,7 +54,7 @@ int action_search(buf **buf, int argc, char *argv[]) {
 
     if ((err = get_repositories(buf)) < 0) {
         err("failed to get repository list");
-        goto list_error;
+        return -1;
     }
 
     list repos;
