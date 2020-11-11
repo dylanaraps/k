@@ -81,7 +81,14 @@ static int pkg_list_all(buf **buf, char **pkgs, int repo_fd) {
 }
 
 int action_list(buf **buf, int argc, char *argv[]) {
-    int repo_fd = open("/var/db/kiss/installed", O_RDONLY);
+    if (buf_push_s(buf, getenv("KISS_ROOT")) == -ENOMEM) {
+        return -ENOMEM;
+    }
+
+    buf_rstrip(buf, '/');
+    buf_push_l(buf, "/var/db/kiss/installed", 22);
+
+    int repo_fd = open(*buf, O_RDONLY);
 
     if (repo_fd == -1) {
         err_no("failed to open database");

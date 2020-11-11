@@ -71,6 +71,7 @@ int main(int argc, char *argv[]) {
     err = cache_init(&c); {
         test(err == -1);
     }
+    buf_free(&c.dir);
 
     return test_finish();
 }

@@ -53,8 +53,6 @@ build() {
 }
 
 check() {
-    export KISS_PATH=$PWD/test/test_repo/core:$PWD/test/test_repo/extra
-
     command -v valgrind &&
         set -- valgrind --leak-check=full --track-origins=yes --error-exitcode=1
 
@@ -64,7 +62,15 @@ check() {
 
     "$@" ./kiss v
     "$@" ./kiss
-    "$@" ./kiss s zlib
+
+    KISS_PATH=$PWD/test/test_repo/core:$PWD/test/test_repo/extra \
+        "$@" ./kiss s zlib
+
+    KISS_ROOT=$PWD/test/test_hier \
+        "$@" ./kiss l zlib
+
+    KISS_ROOT=$PWD/test/test_hier \
+        "$@" ./kiss l
 }
 
 set -e
