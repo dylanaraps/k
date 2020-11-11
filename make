@@ -54,7 +54,6 @@ build() {
 
 check() {
     export KISS_PATH=$PWD/test/test_repo/core:$PWD/test/test_repo/extra
-    export XDG_CACHE_HOME=$PWD/test/test_hier
 
     command -v valgrind &&
         set -- valgrind --leak-check=full --track-origins=yes --error-exitcode=1
