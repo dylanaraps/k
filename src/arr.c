@@ -23,7 +23,7 @@ void *arr_alloc(void *a, size_t l) {
 }
 
 void arr_drop_b(void *a) {
-    ((size_t *) (a))[-1] -= 1;
+    ((size_t *) a)[-1] -= 1;
 }
 
 void arr_sort(void *a, int (*cb)(const void *, const void *)) {
