@@ -81,7 +81,7 @@ ________________________________________________________________________________
         - [ ] possibly fork/exec command-line tar initially
         - [ ] support zip
     - [ ] repositories
-    - [ ] caches
+    - [x] caches
     - [ ] dependency resolution
         - [ ] lets not make it recursive this time
     - [ ] dependency fixer
