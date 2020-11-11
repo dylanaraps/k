@@ -22,15 +22,15 @@ void *arr_alloc(void *a, size_t l) {
     return (void *) &n[2];
 }
 
-void arr_drop_b(void *a) {
-    ((size_t *) a)[-1] -= 1;
+inline void arr_drop_b(void *a) {
+    arr_rem_len(a, 1);
 }
 
-void arr_sort(void *a, int (*cb)(const void *, const void *)) {
-    qsort(a, arr_len(a), sizeof (void *), cb);
+inline void arr_sort(void *a, int (*cb)(const void *, const void *)) {
+    qsort(a, arr_len(a), sizeof(void *), cb);
 }
 
-void arr_free(void *a) {
+inline void arr_free(void *a) {
     free(a ? arr_raw(a) : 0);
 }
 
