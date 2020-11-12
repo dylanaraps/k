@@ -37,16 +37,14 @@ static int status(void *p,
     (void) a; (void) b;
 
 #define BAR_LEN 25
-    if (cur > 0 && tot > 0) {
-        curl_off_t elapsed = (cur * BAR_LEN) / tot;
+    const curl_off_t elapsed = (cur * BAR_LEN) / (tot ? tot : 1);
 
-        fprintf(stdout, "%-40s%.3ld / %.3ld [%.*s%*s] %ld%%\033[K\r",
-            (char *) p, cur, tot,
-            (int) elapsed, "================================",
-            (int) (BAR_LEN - elapsed), "",
-            cur * 100 / tot);
-        fflush(stdout);
-    }
+    fprintf(stdout, "%-40s%2.6ld / %2.6ld [%.*s%*s] %ld%%\033[K\r",
+        (char *) p, cur, tot,
+        (int) elapsed, "================================",
+        (int) (BAR_LEN - elapsed), "",
+        cur * 100 / (tot ? tot : 1));
+    fflush(stdout);
 
     return sigint ? -1 : 0;
 }
