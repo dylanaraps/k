@@ -12,6 +12,7 @@
 #include "error.h"
 #include "arr.h"
 #include "buf.h"
+#include "repo.h"
 #include "pkg.h"
 #include "action.h"
 
@@ -80,26 +81,25 @@ static int pkg_list_all(buf **buf, char **pkgs, int repo_fd) {
     return 0;
 }
 
-int action_list(buf **buf, int argc, char *argv[]) {
-    if (buf_push_s(buf, getenv("KISS_ROOT")) == -ENOMEM) {
+int action_list(int argc, char *argv[]) {
+    buf *buf = buf_alloc(0, 1024);
+
+    if (!buf) {
         return -ENOMEM;
     }
 
-    buf_rstrip(buf, '/');
-    buf_push_l(buf, "/var/db/kiss/installed", 22);
+    int err = 0;
+    struct repo *db = repo_open_db();
 
-    int repo_fd = open(*buf, O_RDONLY);
-
-    if (repo_fd == -1) {
+    if (!db) {
         err_no("failed to open database");
-        return -1;
+        err = -1;
+        goto repo_error;
     }
 
-    int ret = 0;
-
     for (int i = 2; i < argc; i++) {
-        if ((ret = pkg_list(buf, repo_fd, argv[i])) < 0) {
-            goto error;
+        if ((err = pkg_list(&buf, db->fd, argv[i])) < 0) {
+            goto pkg_error;
         }
     }
 
@@ -107,7 +107,7 @@ int action_list(buf **buf, int argc, char *argv[]) {
         char **pkgs = arr_alloc(0, 256);
 
         if (pkgs) {
-            ret = pkg_list_all(buf, pkgs, repo_fd);
+            err = pkg_list_all(&buf, pkgs, db->fd);
 
         } else {
             err("failed to allocate memory");
@@ -116,8 +116,11 @@ int action_list(buf **buf, int argc, char *argv[]) {
         arr_free(pkgs);
     }
 
-error:
-    close(repo_fd);
-    return ret;
+pkg_error:
+    buf_free(&buf);
+repo_error:
+    repo_free(db);
+
+    return err;
 }
 

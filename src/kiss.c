@@ -7,21 +7,12 @@
 #include <unistd.h>
 
 #include "action.h"
+#include "arr.h"
 #include "buf.h"
+#include "pkg.h"
+#include "repo.h"
 #include "cache.h"
 #include "error.h"
-
-static int (*actions[])(buf **, int, char *[]) = {
-    ['a'] = NULL,
-    ['b'] = NULL,
-    ['c'] = NULL,
-    ['d'] = NULL,
-    ['i'] = NULL,
-    ['l'] = action_list,
-    ['r'] = NULL,
-    ['s'] = action_search,
-    ['u'] = NULL,
-};
 
 static void version(char *arg0) {
     printf("%s 0.0.1 (compiled %s)\n", arg0, __DATE__);
@@ -66,26 +57,20 @@ int main (int argc, char *argv[]) {
     } else if (ARG(argv[1], "build")    ||
                ARG(argv[1], "checksum") ||
                ARG(argv[1], "download")) {
-        struct cache c;
+        struct state *s = state_init(argc, argv);
 
-        if (cache_init(&c) < 0) {
-            err = -1;
+        switch (argv[1][0]) {
+            case 'd':
+                err = action_download(s);
         }
 
-        cache_free(&c);
+        state_free(s);
 
-    } else if (ARG(argv[1], "list") ||
-               ARG(argv[1], "search")) {
-        buf *buf = buf_alloc(0, 1024);
+    } else if (ARG(argv[1], "list")) {
+        err = action_list(argc, argv);
 
-        if (!buf) {
-            err("failed to allocate memory");
-            return -ENOMEM;
-        }
-
-        err = actions[(unsigned char) argv[1][0]](&buf, argc, argv);
-
-        buf_free(&buf);
+    } else if (ARG(argv[1], "search")) {
+        err = action_search(argc, argv);
 
     } else if (ARG(argv[1], "version")) {
         version(argv[0]);
