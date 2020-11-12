@@ -3,6 +3,7 @@
  * Copyright (C) 2020 Dylan Araps
  */
 #include <stdlib.h>
+#include <signal.h>
 #include <string.h>
 
 #ifdef USE_CURL
@@ -22,6 +23,14 @@
 // same handle is used for all requests
 static CURL *curl = 0;
 
+// catch Ctrl+C
+static volatile sig_atomic_t sigint = 0;
+
+static void handle_sigint(int sig) {
+    (void) sig;
+    sigint = 1;
+}
+
 static int source_curl_init(void) {
     CURLcode ret = curl_global_init(CURL_GLOBAL_ALL);
 
@@ -30,42 +39,34 @@ static int source_curl_init(void) {
         return -1;
     }
 
-    curl = curl_easy_init();
-
-    if (!curl) {
-        curl_global_cleanup();
+    if (!(curl = curl_easy_init())) {
         err("failed to initialize curl");
+        goto error;
+    }
+
+    struct sigaction act = { .sa_handler = handle_sigint };
+
+    if (sigaction(SIGINT, &act, NULL) == -1) {
+        err_no("sigaction failed");
+        goto error;
+    }
+
+    return 0;
+
+error:
+    curl_global_cleanup();
+    return -1;
+}
+
+static int curl_s(void *p, long long D, long long d, long long U, long long u) {
+    (void) p; (void) D; (void) d; (void) U; (void) u;
+
+    if (sigint) {
+        err("download interrupted by signal");
         return -1;
     }
 
-    return 0;
-}
-
-static int curl_s(void *p,
-    curl_off_t D, curl_off_t d, curl_off_t U, curl_off_t u) {
-
-#define BAR_LEN 30
-
-    // unused
-    (void) u;
-    (void) U;
-
-    // values could still be 0.
-    if (d > 1 && D > 1) {
-        curl_off_t perc = d * 100 / D;
-        curl_off_t elap = d * BAR_LEN / D;
-
-        printf("%-40s (%" CURL_FORMAT_CURL_OFF_T " / %"
-            CURL_FORMAT_CURL_OFF_T ") KiB [", (char *) p, d, D);
-
-        for (curl_off_t i = 0; i < BAR_LEN; i++) {
-            putchar(i < elap ? '=' : ' ');
-        }
-
-        printf("] %" CURL_FORMAT_CURL_OFF_T "%%\r", perc);
-    }
-
-    return 0;
+    return CURL_PROGRESSFUNC_CONTINUE;
 }
 
 static CURLcode source_curl_setopts(void) {
@@ -107,13 +108,6 @@ static CURLcode source_curl_stage(const char *url, FILE *dest) {
         return ret;
     }
 
-    char *base = strrchr(url, '/') + 1;
-
-    if ((ret = curl_easy_setopt(curl, CURLOPT_XFERINFODATA, base)) != 0) {
-        err("CURLOPT_XFERINFODATA: %s", curl_easy_strerror(ret));
-        return ret;
-    }
-
     return ret;
 }
 
@@ -143,8 +137,10 @@ int source_download(const char *url, FILE *dest) {
 }
 
 void source_curl_cleanup(void) {
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
+    if (curl) {
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
+    }
 }
 
 /**
@@ -155,9 +151,9 @@ void source_curl_cleanup(void) {
 #else
 
 int source_download(const char *url, FILE *dest) {
-    (void) url;
-    (void) dest;
+    (void) url; (void) dest;
 
+    err("package manager compiled without download support");
     return -ENOSYS;
 }
 

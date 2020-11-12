@@ -99,7 +99,7 @@ int action_download(struct state *s) {
         fclose(src);
 
         if (err == -1) {
-            err_no("failed to parse sources file");
+            source_curl_cleanup();
             return -1;
         }
     }
