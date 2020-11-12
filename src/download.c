@@ -31,6 +31,21 @@ static void handle_sigint(int sig) {
     sigint = 1;
 }
 
+#ifdef CURL_PROGRESSFUNC_CONTINUE
+static int curl_s(void *p,
+                  curl_off_t dltotal, curl_off_t dlnow,
+                  curl_off_t ultotal, curl_off_t ulnow) {
+    (void) p; (void) dltotal; (void) dlnow; (void) ultotal; (void) ulnow;
+
+    if (sigint) {
+        err("download interrupted by signal");
+        return -1;
+    }
+
+    return CURL_PROGRESSFUNC_CONTINUE;
+}
+#endif
+
 static int source_curl_init(void) {
     CURLcode ret = curl_global_init(CURL_GLOBAL_ALL);
 
@@ -58,32 +73,11 @@ error:
     return -1;
 }
 
-static int curl_s(void *p, long long D, long long d, long long U, long long u) {
-    (void) p; (void) D; (void) d; (void) U; (void) u;
-
-    if (sigint) {
-        err("download interrupted by signal");
-        return -1;
-    }
-
-    return CURL_PROGRESSFUNC_CONTINUE;
-}
-
 static CURLcode source_curl_setopts(void) {
     CURLcode ret = 0;
 
     if ((ret = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L)) != 0) {
         err("CURLOPT_NOPROGRESS: %s", curl_easy_strerror(ret));
-        return ret;
-    }
-
-    if ((ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL)) != 0) {
-        err("CURLOPT_WRITEFUNCTION: %s", curl_easy_strerror(ret));
-        return ret;
-    }
-
-    if ((ret = curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curl_s)) != 0) {
-        err("CURLOPT_PROGRESSFUNCTION: %s", curl_easy_strerror(ret));
         return ret;
     }
 
@@ -96,6 +90,13 @@ static CURLcode source_curl_setopts(void) {
         err("CURLOPT_FOLLOWLOCATION: %s", curl_easy_strerror(ret));
         return ret;
     }
+
+#ifdef CURL_PROGRESSFUNC_CONTINUE
+    if ((ret = curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curl_s)) != 0) {
+        err("CURLOPT_XFERINFOFUNCTION: %s", curl_easy_strerror(ret));
+        return ret;
+    }
+#endif
 
     return ret;
 }
