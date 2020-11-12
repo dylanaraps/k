@@ -25,11 +25,15 @@ int action_download(struct state *s) {
                 return -1;
         }
 
-        while (buf_getline(&s->mem, src, 256) == 0) {
-            printf("%s\n", s->mem);
+        for (; buf_getline(&s->mem, src, 256) == 0; buf_set_len(s->mem, 0)) {
+            if (!*s->mem || *s->mem == '\n' || *s->mem == '#') {
+                continue;
+            }
 
-            buf_set_len(s->mem, 0);
+            printf("%s\n", s->mem);
         }
+
+        fclose(src);
     }
 
     return 0;
