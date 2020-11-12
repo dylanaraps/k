@@ -19,6 +19,7 @@ struct repo *repo_open(const char *path) {
     }
 
     memcpy(n->path, path, l);
+    n->path[l] = 0;
 
     if ((n->fd = open(n->path, O_RDONLY)) == -1) {
         err_no("failed to open repo '%s'", n->path);
