@@ -2,6 +2,9 @@
  * SPDX-License-Identifier: MIT
  * Copyright (C) 2020 Dylan Araps
  */
+#include <stdlib.h>
+#include <string.h>
+
 #ifdef USE_CURL
 #include <curl/curl.h>
 #endif
@@ -38,6 +41,33 @@ static int source_curl_init(void) {
     return 0;
 }
 
+static int curl_s(void *p,
+    curl_off_t D, curl_off_t d, curl_off_t U, curl_off_t u) {
+
+#define BAR_LEN 30
+
+    // unused
+    (void) u;
+    (void) U;
+
+    // values could still be 0.
+    if (d > 1 && D > 1) {
+        curl_off_t perc = d * 100 / D;
+        curl_off_t elap = d * BAR_LEN / D;
+
+        printf("%-40s (%" CURL_FORMAT_CURL_OFF_T " / %"
+            CURL_FORMAT_CURL_OFF_T ") KiB [", (char *) p, d, D);
+
+        for (curl_off_t i = 0; i < BAR_LEN; i++) {
+            putchar(i < elap ? '=' : ' ');
+        }
+
+        printf("] %" CURL_FORMAT_CURL_OFF_T "%%\r", perc);
+    }
+
+    return 0;
+}
+
 static CURLcode source_curl_setopts(void) {
     CURLcode ret = 0;
 
@@ -56,6 +86,11 @@ static CURLcode source_curl_setopts(void) {
         return ret;
     }
 
+    if ((ret = curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curl_s)) != 0) {
+        err("CURLOPT_PROGRESSFUNCTION: %s", curl_easy_strerror(ret));
+        return ret;
+    }
+
     return ret;
 }
 
@@ -69,6 +104,13 @@ static CURLcode source_curl_stage(const char *url, FILE *dest) {
 
     if ((ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, dest)) != 0) {
         err("CURLOPT_WRITEDATA: %s", curl_easy_strerror(ret));
+        return ret;
+    }
+
+    char *base = strrchr(url, '/') + 1;
+
+    if ((ret = curl_easy_setopt(curl, CURLOPT_XFERINFODATA, base)) != 0) {
+        err("CURLOPT_XFERINFODATA: %s", curl_easy_strerror(ret));
         return ret;
     }
 

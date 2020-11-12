@@ -7,5 +7,6 @@
 
 int mkdir_p(const char *path, mode_t m);
 int rm_rf(const char *path);
+FILE *fopenat(int fd, const char *path, int m, const char *m2);
 
 #endif

@@ -40,3 +40,13 @@ int rm_rf(const char *path) {
     return nftw(path, _rm_rf, 64, FTW_DEPTH | FTW_PHYS);
 }
 
+FILE *fopenat(int fd, const char *path, int m, const char *m2) {
+    int fd2 = openat(fd, path, m);
+
+    if (fd2 == -1) {
+        return NULL;
+    }
+
+    return fdopen(fd2, m2);
+}
+

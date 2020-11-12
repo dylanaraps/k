@@ -6,9 +6,63 @@
 #include <unistd.h>
 
 #include "arr.h"
+#include "download.h"
 #include "error.h"
+#include "file.h"
 #include "pkg.h"
 #include "action.h"
+
+static int parse_source_line(struct state *s, size_t i) {
+    char *f1 = strtok(s->mem, " 	\r\n");
+    char *f2 = strtok(NULL,   " 	\r\n");
+    char *bn = strrchr(f1, '/');
+
+    if (strncmp(f1, "git+", 4) == 0) {
+        printf("found git %s\n", f1);
+
+    } else if (strstr(f1, "://")) {
+        buf_push_c(&s->mem, 0);
+
+        size_t mem_pre = buf_len(s->mem);
+
+        buf_push_s(&s->mem, s->cache.dir);
+        buf_push_l(&s->mem, "../../sources/", 14);
+        buf_push_s(&s->mem, s->pkgs[i]->name);
+        buf_push_c(&s->mem, '/');
+
+        if (f2) {
+            while (*f2 && *f2 == '/') f2++;
+
+            buf_push_s(&s->mem, f2);
+            buf_rstrip(&s->mem, '/');
+            buf_push_c(&s->mem, '/');
+
+        }
+        buf_push_s(&s->mem, bn + 1);
+
+        if (access(s->mem + mem_pre, F_OK) == 0) {
+            printf("found cache %s\n", bn + 1);
+
+        } else {
+            FILE *src_file = fopen(s->mem + mem_pre, "w");
+
+            if (!src_file) {
+                err_no("failed to open source '%s'", s->mem + mem_pre);
+                return -1;
+            }
+
+            printf("[%s] downloading source %s\n", s->pkgs[i]->name, f1);
+
+            if (source_download(f1, src_file) < 0) {
+                remove(s->mem + mem_pre);
+            }
+
+            fclose(src_file);
+        }
+    }
+
+    return 0;
+}
 
 static int parse_source_file(struct state *s, size_t i, FILE *f) {
     for (; buf_getline(&s->mem, f, 256) == 0; buf_set_len(s->mem, 0)) {
@@ -16,35 +70,8 @@ static int parse_source_file(struct state *s, size_t i, FILE *f) {
             continue;
         }
 
-        char *f1 = strtok(s->mem, " 	\r\n");
-        char *f2 = strtok(NULL,   " 	\r\n");
-        char *bn = strrchr(f1, '/');
-
-        if (strncmp(f1, "git+", 4) == 0) {
-            printf("found git %s\n", f1);
-
-        } else if (strstr(f1, "://")) {
-            int cac = openat(s->cache.fd[CAC_SRC],
-                s->pkgs[i]->name, O_RDONLY);
-
-            if (cac == -1) {
-                err_no("failed to open sources directory");
-                return -1;
-            }
-
-            size_t mem_pre = buf_len(s->mem);
-
-            if (buf_push_s(&s->mem, f2) == 0) {
-                buf_rstrip(&s->mem, '/');
-                buf_push_c(&s->mem, '/');
-            }
-            buf_push_s(&s->mem, bn + 1);
-
-            if (faccessat(cac, s->mem + mem_pre, F_OK, 0) == 0) {
-                printf("found cache %s\n", s->mem + mem_pre);
-            }
-
-            close(cac);
+        if (parse_source_line(s, i) < 0) {
+            return -1;
         }
     }
 
