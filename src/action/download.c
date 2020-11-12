@@ -55,14 +55,13 @@ static int parse_source_line(struct state *s, size_t i) {
                 return -1;
             }
 
-            printf("[%s] downloading source %s\n", s->pkgs[i]->name, f1);
+            int err = source_download(f1, src_file);
+            fclose(src_file);
 
-            if (source_download(f1, src_file) < 0) {
+            if (err < 0) {
                 unlink(s->mem + mem_pre);
                 return -1;
             }
-
-            fclose(src_file);
         }
     }
 
@@ -100,6 +99,7 @@ int action_download(struct state *s) {
                 return -1;
         }
 
+        printf("[%s] downloading sources\n", s->pkgs[i]->name);
         int err = parse_source_file(s, i, src);
         fclose(src);
 

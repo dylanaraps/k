@@ -81,6 +81,17 @@ void buf_rstrip(buf **s, int d) {
     while (buf_undo_c(s, d) == 0);
 }
 
+int buf_set(buf **s, int c, size_t l) {
+    if (buf_alloc_maybe(s, l + 1) < 0) {
+        return -ENOMEM;
+    }
+
+    memset(*s + buf_len(*s), c, l);
+    buf_set_len(*s, buf_len(*s) + l);
+
+    return 0;
+}
+
 int buf_getline(buf **s, FILE *f, size_t l) {
     do {
         if (ferror(f) || feof(f)) {

@@ -10,6 +10,7 @@
 #include <curl/curl.h>
 #endif
 
+#include "buf.h"
 #include "error.h"
 #include "download.h"
 
@@ -21,30 +22,34 @@
 #ifdef USE_CURL
 
 // same handle is used for all requests
-static CURL *curl = 0;
+static CURL *curl;
 
 // catch Ctrl+C
-static volatile sig_atomic_t sigint = 0;
+static volatile sig_atomic_t sigint;
 
 static void handle_sigint(int sig) {
     (void) sig;
     sigint = 1;
 }
 
-#ifdef CURL_PROGRESSFUNC_CONTINUE
-static int curl_s(void *p,
-                  curl_off_t dltotal, curl_off_t dlnow,
-                  curl_off_t ultotal, curl_off_t ulnow) {
-    (void) p; (void) dltotal; (void) dlnow; (void) ultotal; (void) ulnow;
+static int status(void *p,
+                  curl_off_t tot, curl_off_t cur, curl_off_t a, curl_off_t b) {
+    (void) a; (void) b;
 
-    if (sigint) {
-        err("download interrupted by signal");
-        return -1;
+#define BAR_LEN 25
+    if (cur > 0 && tot > 0) {
+        curl_off_t elapsed = (cur * BAR_LEN) / tot;
+
+        fprintf(stdout, "%-40s%.3ld / %.3ld [%.*s%*s] %ld%%\033[K\r",
+            (char *) p, cur, tot,
+            (int) elapsed, "================================",
+            (int) (BAR_LEN - elapsed), "",
+            cur * 100 / tot);
+        fflush(stdout);
     }
 
-    return CURL_PROGRESSFUNC_CONTINUE;
+    return sigint ? -1 : 0;
 }
-#endif
 
 static int source_curl_init(void) {
     CURLcode ret = curl_global_init(CURL_GLOBAL_ALL);
@@ -91,12 +96,10 @@ static CURLcode source_curl_setopts(void) {
         return ret;
     }
 
-#ifdef CURL_PROGRESSFUNC_CONTINUE
-    if ((ret = curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curl_s)) != 0) {
+    if ((ret = curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, status)) != 0) {
         err("CURLOPT_XFERINFOFUNCTION: %s", curl_easy_strerror(ret));
         return ret;
     }
-#endif
 
     return ret;
 }
@@ -111,6 +114,13 @@ static CURLcode source_curl_stage(const char *url, FILE *dest) {
 
     if ((ret = curl_easy_setopt(curl, CURLOPT_WRITEDATA, dest)) != 0) {
         err("CURLOPT_WRITEDATA: %s", curl_easy_strerror(ret));
+        return ret;
+    }
+
+    char *basename = strrchr(url, '/') + 1;
+
+    if ((ret = curl_easy_setopt(curl, CURLOPT_XFERINFODATA, basename)) != 0) {
+        err("CURLOPT_XFERINFODATA: %s", curl_easy_strerror(ret));
         return ret;
     }
 
@@ -139,6 +149,7 @@ int source_download(const char *url, FILE *dest) {
         return -1;
     }
 
+    fputc('\n', stdout);
     return 0;
 }
 

@@ -77,6 +77,12 @@ int buf_getline(buf **s, FILE *f, size_t l);
 int buf_printf(buf **s, const char *f, ...);
 
 /**
+ * Wrapper around memset() which automatically grows buffer if needed.
+ * Returns 0 on success and -ENOMEM on failure.
+ */
+int buf_set(buf **s, int c, size_t l);
+
+/**
  * Get pointer to beginning of memory allocation.
  */
 #define buf_raw(s) ((s) ? (*s) ? ((size_t *) (*s) - 2) : 0 : 0)
