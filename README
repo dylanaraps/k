@@ -52,7 +52,7 @@ ________________________________________________________________________________
     - [ ] build
     - [ ] checksum
         - [x] find self-contained / permissively licensed sha256 implementation
-    - [ ] download
+    - [0] download
         - [x] libcurl stuff
         - [ ] catch Ctrl+C during download
     - [ ] install
@@ -80,7 +80,7 @@ ________________________________________________________________________________
         - [ ] avoid libarchive
         - [ ] possibly fork/exec command-line tar initially
         - [ ] support zip
-    - [ ] repositories
+    - [x] repositories
     - [x] caches
     - [ ] dependency resolution
         - [ ] lets not make it recursive this time
