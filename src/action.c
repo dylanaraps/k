@@ -2,6 +2,7 @@
 
 #include "arr.h"
 #include "cache.h"
+#include "error.h"
 #include "pkg.h"
 #include "repo.h"
 #include "action.h"
@@ -41,6 +42,13 @@ struct state *state_init(int argc, char *argv[]) {
         }
 
         if ((n->repo_fd = repo_find_pkg(s->repos, argv[i])) == -1) {
+            err_no("package '%s' not in any repository", argv[i]);
+            pkg_free(n);
+            goto error;
+        }
+
+        if (cache_init_pkg(&s->cache, argv[i]) < 0) {
+            pkg_free(n);
             goto error;
         }
 

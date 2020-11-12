@@ -59,9 +59,11 @@ int main (int argc, char *argv[]) {
                ARG(argv[1], "download")) {
         struct state *s = state_init(argc, argv);
 
-        switch (argv[1][0]) {
-            case 'd':
-                err = action_download(s);
+        if (!s) {
+            err = -1;
+
+        } else if (argv[1][0] == 'd') {
+            err = action_download(s);
         }
 
         state_free(s);

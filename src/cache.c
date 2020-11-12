@@ -62,6 +62,18 @@ int cache_init_all(struct cache *c) {
     return 0;
 }
 
+int cache_init_pkg(struct cache *c, const char *pkg) {
+    for (size_t i = 0; i < CAC_DIR; i++) {
+        if (mkdirat(c->fd[i], pkg, 0755) == -1 && errno != EEXIST) {
+            err_no("failed to create directory '%s%s/%s'",
+                c->dir, caches[i], pkg);
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
 int cache_get_base(buf **c) {
     switch(buf_push_s(c, getenv("XDG_CACHE_HOME"))) {
         case -ENOMEM:

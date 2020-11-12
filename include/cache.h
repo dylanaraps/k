@@ -26,6 +26,7 @@ enum cache_type {
 
 int cache_init(struct cache *c);
 int cache_init_all(struct cache *c);
+int cache_init_pkg(struct cache *c, const char *pkg);
 int cache_get_base(buf **c);
 int cache_clean(struct cache *c);
 void cache_free(struct cache *c);
