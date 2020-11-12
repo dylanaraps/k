@@ -77,11 +77,6 @@ static CURLcode source_curl_setopts(void) {
         return ret;
     }
 
-    if ((ret = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L)) != 0) {
-        err("CURLOPT_FOLLOWLOCATION: %s", curl_easy_strerror(ret));
-        return ret;
-    }
-
     if ((ret = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL)) != 0) {
         err("CURLOPT_WRITEFUNCTION: %s", curl_easy_strerror(ret));
         return ret;
@@ -89,6 +84,16 @@ static CURLcode source_curl_setopts(void) {
 
     if ((ret = curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curl_s)) != 0) {
         err("CURLOPT_PROGRESSFUNCTION: %s", curl_easy_strerror(ret));
+        return ret;
+    }
+
+    if ((ret = curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L)) != 0) {
+        err("CURLOPT_TCP_KEEPALIVE: %s", curl_easy_strerror(ret));
+        return ret;
+    }
+
+    if ((ret = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L)) != 0) {
+        err("CURLOPT_FOLLOWLOCATION: %s", curl_easy_strerror(ret));
         return ret;
     }
 

@@ -37,7 +37,11 @@ static int parse_source_line(struct state *s, size_t i) {
             buf_rstrip(&s->mem, '/');
             buf_push_c(&s->mem, '/');
 
+            if (mkdir_p(s->mem + mem_pre, 0755) < 0) {
+                return -1;
+            }
         }
+
         buf_push_s(&s->mem, bn + 1);
 
         if (access(s->mem + mem_pre, F_OK) == 0) {
@@ -54,7 +58,8 @@ static int parse_source_line(struct state *s, size_t i) {
             printf("[%s] downloading source %s\n", s->pkgs[i]->name, f1);
 
             if (source_download(f1, src_file) < 0) {
-                remove(s->mem + mem_pre);
+                unlink(s->mem + mem_pre);
+                return -1;
             }
 
             fclose(src_file);
