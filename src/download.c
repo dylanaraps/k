@@ -10,8 +10,8 @@
 #include <curl/curl.h>
 #endif
 
-#include "buf.h"
 #include "error.h"
+#include "util.h"
 #include "download.h"
 
 /**
@@ -32,18 +32,27 @@ static void handle_sigint(int sig) {
     sigint = 1;
 }
 
-static int status(void *p,
-                  curl_off_t tot, curl_off_t cur, curl_off_t a, curl_off_t b) {
-    (void) a; (void) b;
+static int status(void *p, curl_off_t tot, curl_off_t cur,
+                           curl_off_t a, curl_off_t b) {
+    (void) a;
+    (void) b;
+
+    char c[6];
+    char t[6];
 
 #define BAR_LEN 25
-    const curl_off_t elapsed = (cur * BAR_LEN) / (tot ? tot : 1);
+    int elapsed = (cur * BAR_LEN) / (tot ? tot : 1);
 
-    fprintf(stdout, "%-40s%2.6ld / %2.6ld [%.*s%*s] %ld%%\033[K\r",
-        (char *) p, cur, tot,
-        (int) elapsed, "================================",
-        (int) (BAR_LEN - elapsed), "",
-        cur * 100 / (tot ? tot : 1));
+    fprintf(stdout, "%-40s %s / %s [%.*s%*s] %3d%%\r",
+        (char *) p,
+        human_readable(cur, c),
+        human_readable(tot, t),
+        elapsed,
+        "================================",
+        BAR_LEN - elapsed,
+        "",
+        (int) ((cur * 100) / (tot ? tot : 1))
+    );
     fflush(stdout);
 
     return sigint ? -1 : 0;

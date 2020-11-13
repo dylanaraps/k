@@ -20,6 +20,12 @@ static int parse_source_line(struct state *s, size_t i) {
     if (strncmp(f1, "git+", 4) == 0) {
         printf("found git %s\n", f1);
 
+    } else if (*f1 == '/') {
+        if (access(f1, F_OK) == -1) {
+            return -1;
+        }
+        printf("found absolute %s\n", f1);
+
     } else if (strstr(f1, "://")) {
         buf_push_c(&s->mem, 0);
 
@@ -63,6 +69,34 @@ static int parse_source_line(struct state *s, size_t i) {
                 return -1;
             }
         }
+
+    } else {
+        buf_push_c(&s->mem, 0);
+
+        size_t mem_pre = buf_len(s->mem);
+
+        buf_push_s(&s->mem, s->pkgs[i]->name);
+        buf_push_c(&s->mem, '/');
+
+        if (f2) {
+            while (*f2 && *f2 == '/') f2++;
+
+            buf_push_s(&s->mem, f2);
+            buf_rstrip(&s->mem, '/');
+            buf_push_c(&s->mem, '/');
+
+            if (mkdir_p(s->mem + mem_pre, 0755) < 0) {
+                return -1;
+            }
+        }
+
+        buf_push_s(&s->mem, f1);
+
+        if (faccessat(s->pkgs[i]->repo_fd, s->mem + mem_pre, F_OK, 0) == -1) {
+            return -1;
+        }
+
+        printf("found relative %s\n", f1);
     }
 
     return 0;
