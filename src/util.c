@@ -3,54 +3,44 @@
 #include "util.h"
 
 char *human_readable(uint64_t n, char out[6]) {
-#define KB 1024LL
-#define MB (1024LL * KB)
-#define GB (1024LL * MB)
-#define TB (1024LL * GB)
-#define PB (1024LL * TB)
-    out[5] = 0;
+    out[5] = '\0';
 
-    // XXXXB
-    if (n <= KB) {
+    if (n <= 0x400) {
         out[4] = 'B';
-        out[3] = '0' + (n % 10);
 
-    // 0XXXK
-    } else if (n <= MB) {
+    } else if (n <= 0x100000) {
         out[4] = 'K';
-        out[3] = '0' + ((n /= KB) % 10);
+        n >>= 10;
 
-    // XX.XM
-    } else if (n < MB * 100) {
+    // XX.XM for < 100MB
+    } else if (n < 0x6400000) {
         out[4] = 'M';
-        out[3] = '0' + ((n /= (KB * 100)) % 10);
+        out[3] = '0' + ((n /= 0x19000) % 10);
         out[2] = '.';
         goto fake;
 
-    // XXXXM
-    } else if (n <= GB) {
+    } else if (n <= 0x40000000) {
         out[4] = 'M';
-        out[3] = '0' + ((n /= MB) % 10);
+        n >>= 20;
 
-    // XXXXG
-    } else if (n <= TB) {
+    } else if (n <= 0x10000000000) {
         out[4] = 'G';
-        out[3] = '0' + ((n /= GB) % 10);
+        n >>= 30;
 
-    // XXXXP
-    } else if (n <= PB) {
+    } else if (n <= 0x4000000000000) {
         out[4] = 'T';
-        out[3] = '0' + ((n /= TB) % 10);
+        n >>= 40;
 
     } else {
         out[4] = 'P';
-        out[3] = '0' + ((n /= PB) % 10);
+        n >>= 50;
     }
 
+    out[3] = '0' + (n % 10);
     out[2] = '0' + ((n /= 10) % 10);
 fake:
-    out[1] = '0' + ((n / 10)  % 10);
-    out[0] = '0' + ((n / 100) % 10);
+    out[1] = '0' + ((n /= 10) % 10);
+    out[0] = '0' + ((n /= 10) % 10);
 
     return out;
 }
