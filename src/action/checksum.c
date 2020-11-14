@@ -22,9 +22,6 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
         }
 
         char *f2 = s->mem + buf_scan(&s->mem, 0, ' ');
-
-        while (*f2 && *f2 == '/') f2++;
-
         FILE *src = 0;
 
         switch (pkg_source_type(p, s->mem)) {
@@ -36,11 +33,11 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
                 src = pkg_fopen(p->repo_fd, p->name, s->mem);
                 break;
 
-            case SRC_URL: {
+            case SRC_URL:
+                while (*f2 && *f2 == '/') f2++;
                 src = cache_fopen(s->cache.fd[CAC_SRC],
                     p->name, f2, strrchr(s->mem, '/') + 1);
                 break;
-            }
 
             case SRC_GIT:
                 continue;
@@ -54,12 +51,11 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
         static unsigned char hash[SHA256_DIGEST_LENGTH];
         sha256_file(hash, src);
         fclose(src);
-
         static char hash_string[65];
         sha256_to_string(hash, hash_string);
         parsed++;
 
-        printf("%s\n", hash_string);
+        puts(hash_string);
     }
 
     return parsed;
