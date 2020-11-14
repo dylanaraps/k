@@ -8,7 +8,7 @@
 #include "action.h"
 
 struct state *state_init(int argc, char *argv[], int opt) {
-    struct state *s = malloc(sizeof *s);
+    struct state *s = calloc(sizeof *s, 1);
 
     if (!s) {
         return NULL;

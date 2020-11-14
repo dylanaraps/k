@@ -18,7 +18,6 @@ static void cache_check(int err, const char *path) {
         test(fcntl(c.fd[CAC_DIR], F_GETFL) != -1 || errno != EBADF);
 
         for (size_t j = 0; j < CAC_DIR; j++) {
-            test(c.fd[j]);
             test(fcntl(c.fd[j], F_GETFL) != -1 || errno != EBADF);
         }
 
