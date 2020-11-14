@@ -9,11 +9,15 @@ jobs:
               run: |
                   sudo apt install tcc valgrind libcurl4-openssl-dev
                   export OPENSSL=0
-                  export CFLAGS='-Werror -fprofile-arcs -ftest-coverage'
+                  export CFLAGS='-Werror -O3'
+                  CC=clang ./make
+                  CC=tcc   ./make
+                  CC=gcc   ./make
+                  export CFLAGS='-Werror -O0 -g -fprofile-arcs -ftest-coverage'
                   export LDFLAGS='-lgcov --coverage'
                   CC=gcc ./make
-                  CC=gcc ./make check
-                  CC=gcc ./make check_runtime
+                  ./make check
+                  ./make check_runtime
 
             - uses: codecov/codecov-action@v1
               with:
