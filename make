@@ -51,11 +51,15 @@ build() {
 }
 
 check() {
+    export KISS_ROOT=$PWD/test/test_hier
+    export KISS_PATH=$KISS_ROOT/repo/core:$KISS_ROOT/repo/extra
+    export XDG_CACHE_HOME=$PWD/test/test_hier
+
     command -v valgrind &&
         set -- valgrind --leak-check=full --track-origins=yes --error-exitcode=1
 
     for file in test/*.c; do
-        "$@" "${file%%.c}"
+        "$@" "${file%%.c}" || return 1
     done
 }
 
