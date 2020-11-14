@@ -59,15 +59,15 @@ check_runtime() {
     export KISS_PATH=$KISS_ROOT/repo/core:$KISS_ROOT/repo/extra
     export PATH=$KISS_ROOT/bin:$PATH
 
-    "$@" ./kiss
-    "$@" ./kiss v
-    "$@" ./kiss s zlib
+    "$@" ./src/kiss
+    "$@" ./src/kiss v
+    "$@" ./src/kiss s zlib
 
     rm -rf "$KISS_ROOT/kiss"
-    "$@" ./kiss d zlib samurai
+    "$@" ./src/kiss d zlib samurai
 
-    "$@" ./kiss test | cmp "$KISS_ROOT/etc/test_output/test_ext"  -
-    "$@" ./kiss l    | cmp "$KISS_ROOT/etc/test_output/test_list" -
+    "$@" ./src/kiss test | cmp "$KISS_ROOT/etc/test_output/test_ext"  -
+    "$@" ./src/kiss l    | cmp "$KISS_ROOT/etc/test_output/test_list" -
 }
 
 check() {
