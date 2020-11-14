@@ -39,6 +39,11 @@ struct state *state_init(int argc, char *argv[], int opt);
 void state_free(struct state *s);
 
 /**
+ * kiss checksum
+ */
+int action_checksum(struct state *s);
+
+/**
  * kiss download
  */
 int action_download(struct state *s);
