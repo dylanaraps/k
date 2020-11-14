@@ -81,27 +81,25 @@ static int parse_source_file(struct state *s, size_t i, FILE *f) {
             continue;
         }
 
-        size_t f2 = buf_scan(&s->mem, ' ');
+        char *f2 = s->mem + buf_scan(&s->mem, ' ');
 
         switch (source_type(s, i, s->mem)) {
             case SRC_URL: {
-                size_t f3 = source_dest(s, i, s->mem + f2);
+                char *dest = s->mem + source_dest(s, i, f2);
 
-                if (mkdir_p(s->mem + f3, 0755) < 0) {
+                if (mkdir_p(dest, 0755) < 0) {
                     return -1;
                 }
 
-                char *bn = strrchr(s->mem, '/') + 1;
-
-                if (buf_push_s(&s->mem, bn) == -EINVAL) {
+                if (buf_push_s(&s->mem, strrchr(s->mem, '/') + 1) == -EINVAL) {
                     return -1;
                 }
 
-                if (access(s->mem + f3, F_OK) == 0) {
+                if (access(dest, F_OK) == 0) {
                     continue;
                 }
 
-                if (download(s->mem, s->mem + f3) < 0) {
+                if (download(s->mem, dest) < 0) {
                     return -1;
                 }
 
