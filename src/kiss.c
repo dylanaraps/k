@@ -57,7 +57,7 @@ int main (int argc, char *argv[]) {
 
     } else if (ARG(argv[1], "checksum")) {
         s = state_init(argc, argv, STATE_ALL);
-        err = s ? action_download(s) : -1;
+        err = s ? action_checksum(s) : -1;
 
     } else if (ARG(argv[1], "download")) {
         s = state_init(argc, argv, STATE_ALL);

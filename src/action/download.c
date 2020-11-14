@@ -101,6 +101,7 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
                 }
 
                 parsed++;
+
                 break;
             }
 
@@ -137,7 +138,7 @@ int action_download(struct state *s) {
         }
 
         if (parsed == 0) {
-            printf("nothing to do\n");
+            puts("nothing to do");
         }
     }
 

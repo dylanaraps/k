@@ -98,6 +98,31 @@ int cache_get_base(buf **c) {
     return buf_printf(c, "/kiss/proc/%ld/", (long) getpid());
 }
 
+FILE *cache_fopen(int fd, const char *pkg, const char *des, const char *f) {
+    int fd2 = openat(fd, pkg, O_RDONLY);
+
+    if (fd2 == -1) {
+        return NULL;
+    }
+
+    int fd3 = fd2;
+
+    if (des && *des) {
+        fd3 = openat(fd2, des, O_RDONLY);
+        close(fd2);
+    }
+
+    if (fd3 == -1) {
+        printf("oops fd3 == -1\n");
+        return NULL;
+    }
+
+    int fd4 = openat(fd3, f, O_RDONLY);
+    close(fd3);
+
+    return fdopen(fd4, "r");
+}
+
 int cache_clean(struct cache *c) {
     return rm_rf(c->dir);
 }
