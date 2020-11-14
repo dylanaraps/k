@@ -41,15 +41,13 @@ build() {
     configure
 
     for obj in src/*.c src/*/*.c; do
-        _cc $CFLAGS $CPPFLAGS -c -o "${obj%%.c}.o" "$obj"
-    done
+        _cc $CFLAGS $CPPFLAGS -c -o "${obj%%.c}.o" "$obj" &
+    done; wait
 
-    for obj in test/*.c; do
-        _cc $CFLAGS $CPPFLAGS -o "${obj%%.c}" "$obj" \
-            src/[!k]*.o src/*/*.o $LDFLAGS
-    done
-
-    _cc $CFLAGS $CPPFLAGS -o kiss src/*.c src/*/*.c $LDFLAGS
+    for prog in src/kiss.c test/*.c; do
+        _cc $CFLAGS $CPPFLAGS -o "${prog%%.c}" "$prog" \
+            src/[!k]*.o src/*/*.o $LDFLAGS &
+    done; wait
 }
 
 check_runtime() {
