@@ -52,7 +52,7 @@ ________________________________________________________________________________
     - [ ] build
     - [ ] checksum
         - [x] find self-contained / permissively licensed sha256 implementation
-    - [0] download
+    - [x] download
         - [x] libcurl stuff
         - [x] catch Ctrl+C during download
     - [ ] install

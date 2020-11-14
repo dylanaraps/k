@@ -46,7 +46,7 @@ static int status(void *file, curl_off_t dl_tot, curl_off_t dl_cur,
     }
 
 #define BAR_LEN 25
-    int cur = dl_cur * BAR_LEN / dl_tot % (BAR_LEN + 1);
+    const int cur = dl_cur * BAR_LEN / dl_tot % (BAR_LEN + 1);
 
     fprintf(stderr, "%-40.40s %5s / %5s [%.*s%*s] %3d%%\r",
         (char *) file,

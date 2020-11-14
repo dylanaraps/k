@@ -20,11 +20,9 @@ enum sources {
 };
 
 static size_t source_dest(struct state *s, char *name, char *des) {
-    buf_push_c(&s->mem, 0);
+    size_t mem_pre = buf_len(s->mem) + 1;
 
-    size_t mem_pre = buf_len(s->mem);
-
-    buf_printf(&s->mem, "%s../../sources/%s/", s->cache.dir, name);
+    buf_printf(&s->mem, "%c%s../../sources/%s/", 0, s->cache.dir, name);
 
     if (des) {
         while (*des && *des == '/') des++;
