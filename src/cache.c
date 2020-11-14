@@ -113,7 +113,6 @@ FILE *cache_fopen(int fd, const char *pkg, const char *des, const char *f) {
     }
 
     if (fd3 == -1) {
-        printf("oops fd3 == -1\n");
         return NULL;
     }
 
