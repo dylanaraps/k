@@ -83,6 +83,12 @@ int buf_printf(buf **s, const char *f, ...);
 int buf_set(buf **s, int c, size_t l);
 
 /**
+ * Find first occurance of c, zero this position in the string and return
+ * pos + 1. Can be used as a quick tokenizer. Length is not updated.
+ */
+size_t buf_scan(buf **s, int c);
+
+/**
  * Get pointer to beginning of memory allocation.
  */
 #define buf_raw(s) ((s) ? (*s) ? ((size_t *) (*s) - 2) : 0 : 0)

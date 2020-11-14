@@ -144,6 +144,20 @@ int buf_printf(buf **s, const char *f, ...) {
     return ret;
 }
 
+size_t buf_scan(buf **s, int c) {
+    size_t i = 0;
+
+    for (; i < buf_len(*s); i++) {
+        if ((*s)[i] == c) {
+            (*s)[i] = 0;
+            i++;
+            break;
+        }
+    }
+
+    return i;
+}
+
 void buf_free(buf **s) {
     free(buf_raw(s));
 }
