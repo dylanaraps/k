@@ -19,7 +19,7 @@ enum sources {
     SRC_REL,
 };
 
-static size_t source_contruct(struct state *s, size_t i, char *des, char *f) {
+static size_t source_contruct(struct state *s, size_t i, char *des) {
     buf_push_c(&s->mem, 0);
 
     size_t mem_pre = buf_len(s->mem);
@@ -35,13 +35,8 @@ static size_t source_contruct(struct state *s, size_t i, char *des, char *f) {
         buf_push_s(&s->mem, des);
         buf_rstrip(&s->mem, '/');
         buf_push_c(&s->mem, '/');
-
-        if (mkdir_p(s->mem + mem_pre, 0755) < 0) {
-            return 0;
-        }
     }
 
-    buf_push_s(&s->mem, f);
     return mem_pre;
 }
 
@@ -71,29 +66,34 @@ static int parse_source_line(struct state *s, size_t i) {
 
     switch (source_type(s, i, f1)) {
         case SRC_CAC: {
-            char *bn = strrchr(f1, '/') + 1;
-            size_t len_pre = source_contruct(s, i, f2, bn);
+            size_t len_pre = source_contruct(s, i, f2);
 
-            if (access(s->mem + len_pre, F_OK) == 0) {
-                printf("found cache %s\n", bn + 1);
-
-            } else {
-                FILE *src_file = fopen(s->mem + len_pre, "w");
-
-                if (!src_file) {
-                    err_no("failed to open source '%s'", s->mem + len_pre);
-                    return -1;
-                }
-
-                int err = source_download(f1, src_file);
-                fclose(src_file);
-
-                if (err < 0) {
-                    unlink(s->mem + len_pre);
-                    return -1;
-                }
+            if (mkdir_p(s->mem + len_pre, 0755) < 0) {
+                return -1;
             }
 
+            if (buf_push_s(&s->mem, strrchr(f1, '/') + 1) == -EINVAL) {
+                return -1;
+            }
+
+            if (access(s->mem + len_pre, F_OK) == 0) {
+                return 0;
+            }
+
+            FILE *src_file = fopen(s->mem + len_pre, "w");
+
+            if (!src_file) {
+                err_no("failed to open source '%s'", s->mem + len_pre);
+                return -1;
+            }
+
+            int err = source_download(f1, src_file);
+            fclose(src_file);
+
+            if (err < 0) {
+                unlink(s->mem + len_pre);
+                return -1;
+            }
             break;
         }
 

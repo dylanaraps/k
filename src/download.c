@@ -32,29 +32,25 @@ static void handle_sigint(int sig) {
     sigint = 1;
 }
 
-static int status(void *p, curl_off_t tot, curl_off_t cur,
-                           curl_off_t a, curl_off_t b) {
-    (void) a;
-    (void) b;
-
-    char c[6];
-    char t[6];
+static int status(void *file, curl_off_t dl_tot, curl_off_t dl_cur,
+                              curl_off_t ul_tot, curl_off_t ul_cur) {
+    (void) ul_tot;
+    (void) ul_cur;
 
 #define BAR_LEN 25
-    int elapsed = (cur * BAR_LEN) / (tot ? tot : 1);
+    int tot = (dl_tot < 1) ? 1 : (dl_tot < dl_cur) ? dl_cur : dl_tot;
+    int cur = ((dl_cur * BAR_LEN) / tot) % (BAR_LEN + 1);
 
-    fprintf(stdout, "%-40s %s / %s [%.*s%*s] %3d%%\r",
-        (char *) p,
-        human_readable(cur, c),
-        human_readable(tot, t),
-        elapsed,
-        "================================",
-        BAR_LEN - elapsed,
-        "",
-        (int) ((cur * 100) / (tot ? tot : 1))
+    fprintf(stderr, "%-40.40s %5s / %5s [%.*s%*s] %3d%%\r",
+        (char *) file,
+        human_readable(dl_cur, (char [6]){0}),
+        human_readable(dl_tot, (char [6]){0}),
+        cur,           "================================",
+        BAR_LEN - cur, "",
+        (int) ((dl_cur * 100) / tot) % 101
     );
-    fflush(stdout);
 
+    fflush(stderr);
     return sigint ? -1 : 0;
 }
 
@@ -151,12 +147,14 @@ int source_download(const char *url, FILE *dest) {
 
     CURLcode ret = curl_easy_perform(curl);
 
+    // final status newline
+    fputc('\n', stdout);
+
     if (ret != 0) {
         err("failed to download file '%s': %s", url, curl_easy_strerror(ret));
         return -1;
     }
 
-    fputc('\n', stdout);
     return 0;
 }
 
