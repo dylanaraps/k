@@ -10,9 +10,9 @@ jobs:
                   sudo apt install tcc valgrind libcurl4-openssl-dev
                   export OPENSSL=0
                   export CFLAGS='-Werror -O3'
-                  CC=clang ./make
-                  CC=tcc   ./make
-                  CC=gcc   ./make
+                  CC=clang time ./make
+                  CC=tcc   time ./make
+                  CC=gcc   time ./make
                   export CFLAGS='-Werror -O0 -g -fprofile-arcs -ftest-coverage'
                   export LDFLAGS='-lgcov --coverage'
                   CC=gcc ./make
