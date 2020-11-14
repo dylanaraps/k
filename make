@@ -53,19 +53,24 @@ build() {
 }
 
 check_runtime() {
-    export XDG_CACHE_HOME=$PWD/test/test_hier
-    export KISS_PATH=$PWD/test/test_hier/repo/extra
-    export KISS_PATH=$PWD/test/test_hier/repo/core:$KISS_PATH
-    export KISS_ROOT=$PWD/test/test_hier
+    (
+        export XDG_CACHE_HOME=$PWD/test/test_hier
+        export KISS_PATH=$PWD/test/test_hier/repo/extra
+        export KISS_PATH=$PWD/test/test_hier/repo/core:$KISS_PATH
+        export KISS_ROOT=$PWD/test/test_hier
+        export PATH=$PWD/test/test_hier/bin
 
-    command -v valgrind &&
-        set -- valgrind --leak-check=full --track-origins=yes --error-exitcode=1
+        command -v valgrind &&
+            set -- valgrind \
+                --leak-check=full --track-origins=yes --error-exitcode=1
 
-    "$@" ./kiss
-    "$@" ./kiss v
-    "$@" ./kiss d zlib samurai
-    "$@" ./kiss s zlib
-    "$@" ./kiss l
+        "$@" ./kiss
+        "$@" ./kiss v
+        "$@" ./kiss d zlib samurai
+        "$@" ./kiss s zlib
+        "$@" ./kiss l
+        "$@" ./kiss test
+    )
 
     rm -rf "$PWD/test/test_hier/kiss"
 }
