@@ -14,6 +14,8 @@ struct state *state_init(int argc, char *argv[], int opt) {
         return NULL;
     }
 
+    s->opt = opt;
+
     if (opt & STATE_MEM) {
         if (!(s->mem = buf_alloc(0, 1024))) {
             goto error;
@@ -84,19 +86,19 @@ void state_free(struct state *s) {
         return;
     }
 
-    if (s->pkgs) {
+    if (s->opt & STATE_PKG) {
         pkg_free_all(s->pkgs);
     }
 
-    if (s->repos) {
+    if (s->opt & STATE_REPO) {
         repo_free_all(s->repos);
     }
 
-    if (s->cache.dir) {
+    if (s->opt & STATE_CACHE) {
         cache_free(&s->cache);
     }
 
-    if (s->mem) {
+    if (s->opt & STATE_MEM) {
         buf_free(&s->mem);
     }
 

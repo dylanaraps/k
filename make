@@ -64,6 +64,8 @@ check_runtime() {
     "$@" ./kiss
     "$@" ./kiss v
     "$@" ./kiss d zlib samurai
+    "$@" ./kiss s zlib
+    "$@" ./kiss l
 
     rm -rf "$PWD/test/test_hier/kiss"
 }

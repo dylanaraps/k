@@ -11,10 +11,11 @@
 #include "repo.h"
 
 struct state {
-   struct cache cache;
-   struct repo **repos;
-   pkg **pkgs;
-   buf *mem;
+    int opt;
+    struct cache cache;
+    struct repo **repos;
+    pkg **pkgs;
+    buf *mem;
 };
 
 enum state_options {
