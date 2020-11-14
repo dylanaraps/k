@@ -52,6 +52,18 @@ build() {
     _cc $CFLAGS $CPPFLAGS -o kiss src/*.c src/*/*.c $LDFLAGS
 }
 
+check_runtime() {
+    export XDG_CACHE_HOME=$PWD/test/test_hier
+    export KISS_PATH=$PWD/test/test_hier/repo/extra
+    export KISS_PATH=$PWD/test/test_hier/repo/core:$KISS_PATH
+
+    "$@" ./kiss
+    "$@" ./kiss v
+    "$@" ./kiss d zlib samurai
+
+    rm -rf "$PWD/test/test_hier/kiss"
+}
+
 check() {
     command -v valgrind &&
         set -- valgrind --leak-check=full --track-origins=yes --error-exitcode=1
@@ -59,8 +71,10 @@ check() {
     for file in test/*.c; do
         "$@" "${file%%.c}"
     done
+
+    check_runtime "$@"
 }
 
 set -e
 
-"${1:-build}" "$2"
+"${1:-build}"
