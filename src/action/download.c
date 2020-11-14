@@ -19,13 +19,12 @@ enum sources {
     SRC_REL,
 };
 
-static size_t source_dest(struct state *s, size_t i, char *des) {
+static size_t source_dest(struct state *s, char *name, char *des) {
     buf_push_c(&s->mem, 0);
 
     size_t mem_pre = buf_len(s->mem);
 
-    buf_printf(&s->mem, "%s../../sources/%s/",
-        s->cache.dir, s->pkgs[i]->name);
+    buf_printf(&s->mem, "%s../../sources/%s/", s->cache.dir, name);
 
     if (des) {
         while (*des && *des == '/') des++;
@@ -38,7 +37,7 @@ static size_t source_dest(struct state *s, size_t i, char *des) {
     return mem_pre;
 }
 
-static int source_type(struct state *s, size_t i, char *src) {
+static int source_type(pkg *p, char *src) {
     if (src[0] == 'g' && src[1] == 'i' && src[2] == 't' && src[3] == '+') {
         return SRC_GIT;
 
@@ -48,7 +47,7 @@ static int source_type(struct state *s, size_t i, char *src) {
     } else if (strstr(src, "://")) {
         return SRC_URL;
 
-    } else if (pkg_faccessat(s->pkgs[i]->repo_fd, s->pkgs[i]->name, src) == 0) {
+    } else if (pkg_faccessat(p->repo_fd, p->name, src) == 0) {
         return SRC_REL;
     }
 
@@ -73,7 +72,7 @@ static int download(const char *url, const char *dest) {
     return err;
 }
 
-static int parse_source_file(struct state *s, size_t i, FILE *f) {
+static int parse_source_file(struct state *s, pkg *p, FILE *f) {
     int parsed = 0;
 
     for (; buf_getline(&s->mem, f, 256) == 0; buf_set_len(s->mem, 0)) {
@@ -83,9 +82,9 @@ static int parse_source_file(struct state *s, size_t i, FILE *f) {
 
         char *f2 = s->mem + buf_scan(&s->mem, ' ');
 
-        switch (source_type(s, i, s->mem)) {
+        switch (source_type(p, s->mem)) {
             case SRC_URL: {
-                char *dest = s->mem + source_dest(s, i, f2);
+                char *dest = s->mem + source_dest(s, p->name, f2);
 
                 if (mkdir_p(dest, 0755) < 0) {
                     return -1;
@@ -131,7 +130,7 @@ int action_download(struct state *s) {
         }
 
         printf("[%s] downloading sources\n", s->pkgs[i]->name);
-        int parsed = parse_source_file(s, i, src);
+        int parsed = parse_source_file(s, s->pkgs[i], src);
         fclose(src);
 
         if (parsed == -1) {

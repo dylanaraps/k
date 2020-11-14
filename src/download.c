@@ -37,9 +37,16 @@ static int status(void *file, curl_off_t dl_tot, curl_off_t dl_cur,
     (void) ul_tot;
     (void) ul_cur;
 
+    if (dl_cur < 1 || dl_tot <= 1 || dl_tot < dl_cur) {
+        return 0;
+    }
+
+    if (sigint) {
+        return -1;
+    }
+
 #define BAR_LEN 25
-    int tot = (dl_tot < 1) ? 1 : (dl_tot < dl_cur) ? dl_cur : dl_tot;
-    int cur = ((dl_cur * BAR_LEN) / tot) % (BAR_LEN + 1);
+    int cur = dl_cur * BAR_LEN / dl_tot % (BAR_LEN + 1);
 
     fprintf(stderr, "%-40.40s %5s / %5s [%.*s%*s] %3d%%\r",
         (char *) file,
@@ -47,11 +54,11 @@ static int status(void *file, curl_off_t dl_tot, curl_off_t dl_cur,
         human_readable(dl_tot, (char [6]){0}),
         cur,           "================================",
         BAR_LEN - cur, "",
-        (int) ((dl_cur * 100) / tot) % 101
+        (int) ((dl_cur * 100) / dl_tot) % 101
     );
 
     fflush(stderr);
-    return sigint ? -1 : 0;
+    return 0;
 }
 
 static int source_curl_init(void) {
