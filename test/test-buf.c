@@ -97,6 +97,21 @@ int main(int argc, char *argv[]) {
         test(strcmp(s, "1234522111.10 4") == 0);
     }
 
+    ret = buf_set(&s, ' ', 10); {
+        test(ret == 0);
+        test(buf_len(s) == 25);
+        test(buf_cap(s) == 63);
+        test(strcmp(s, "1234522111.10 4          ") == 0);
+    }
+
+    ret = buf_scan(&s, 0, ' '); {
+        test(ret == 14);
+        test(buf_len(s) == 25);
+        test(buf_cap(s) == 63);
+        test(strcmp(s, "1234522111.10") == 0);
+        test(strcmp(s + 14, "4          ") == 0);
+    }
+
     buf_free(&s);
 
     return test_finish();

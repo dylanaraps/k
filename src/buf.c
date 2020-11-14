@@ -88,7 +88,6 @@ int buf_set(buf **s, int c, size_t l) {
 
     memset(*s + buf_len(*s), c, l);
     buf_set_len(*s, buf_len(*s) + l);
-
     return 0;
 }
 
