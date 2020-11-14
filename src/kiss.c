@@ -14,12 +14,6 @@
 #include "cache.h"
 #include "error.h"
 
-enum actions {
-    ACT_DOWNLOAD = (STATE_ALL),
-    ACT_SEARCH   = (STATE_PKG | STATE_MEM | STATE_REPO),
-    ACT_LIST     = (STATE_PKG | STATE_MEM),
-};
-
 static void version(char *arg0) {
     printf("%s 0.0.1 (compiled %s)\n", arg0, __DATE__);
 }
