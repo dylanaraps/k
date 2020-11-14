@@ -25,6 +25,7 @@ struct repo *repo_open(const char *path) {
         return NULL;
     }
 
+    r->fd = n;
     memcpy(r->path, path, l);
     return r;
 }
