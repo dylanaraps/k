@@ -48,10 +48,10 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
             return -1;
         }
 
-        static unsigned char hash[SHA256_DIGEST_LENGTH];
+        unsigned char hash[SHA256_DIGEST_LENGTH];
         sha256_file(hash, src);
         fclose(src);
-        static char hash_string[65];
+        char hash_string[65];
         sha256_to_string(hash, hash_string);
         parsed++;
 
