@@ -52,7 +52,7 @@ ________________________________________________________________________________
     - [ ] build
     - [0] checksum
         - [x] find self-contained / permissively licensed sha256 implementation
-        - [ ] parse sources file
+        - [x] parse sources file
         - [ ] generate checksums file
         - [ ] add support for SKIP
         - [ ] add checksum verification
