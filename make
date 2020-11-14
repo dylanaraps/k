@@ -57,6 +57,9 @@ check_runtime() {
     export KISS_PATH=$PWD/test/test_hier/repo/extra
     export KISS_PATH=$PWD/test/test_hier/repo/core:$KISS_PATH
 
+    command -v valgrind &&
+        set -- valgrind --leak-check=full --track-origins=yes --error-exitcode=1
+
     "$@" ./kiss
     "$@" ./kiss v
     "$@" ./kiss d zlib samurai
@@ -71,8 +74,6 @@ check() {
     for file in test/*.c; do
         "$@" "${file%%.c}"
     done
-
-    check_runtime "$@"
 }
 
 set -e
