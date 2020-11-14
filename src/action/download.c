@@ -78,7 +78,7 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
             continue;
         }
 
-        char *f2 = s->mem + buf_scan(&s->mem, ' ');
+        char *f2 = s->mem + buf_scan(&s->mem, 0, ' ');
 
         switch (source_type(p, s->mem)) {
             case SRC_URL: {

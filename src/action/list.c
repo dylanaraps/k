@@ -38,7 +38,9 @@ static int pkg_list(buf **buf, int repo_fd, const char *pkg) {
 
     switch (buf_getline(buf, ver, 32)) {
         case 0:
-            printf("%s %s\n", pkg, *buf + len_pre);
+            fprintf(stdout, "%s %s %s\n", pkg,
+                *buf + len_pre,
+                *buf + buf_scan(buf, len_pre, ' '));
             buf_set_len(*buf, len_pre);
             fclose(ver);
             return 0;
