@@ -54,7 +54,7 @@ ________________________________________________________________________________
         - [x] find self-contained / permissively licensed sha256 implementation
     - [0] download
         - [x] libcurl stuff
-        - [ ] catch Ctrl+C during download
+        - [x] catch Ctrl+C during download
     - [ ] install
     - [x] list
         - [x] Individual

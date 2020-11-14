@@ -15,5 +15,6 @@ int pkg_find_path(pkg *p);
 void pkg_free(pkg *p);
 void pkg_free_all(pkg **p);
 FILE *pkg_fopen(int repo_fd, const char *pkg, const char *file);
+int pkg_faccessat(int repo_fd, const char *pkg, const char *file);
 
 #endif

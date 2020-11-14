@@ -56,3 +56,15 @@ FILE *pkg_fopen(int repo_fd, const char *pkg, const char *file) {
     return fdopen(ffd, "r");
 }
 
+int pkg_faccessat(int repo_fd, const char *pkg, const char *file) {
+    int pfd = openat(repo_fd, pkg, O_RDONLY);
+
+    if (pfd == -1) {
+        return -1;
+    }
+
+    int ret = faccessat(pfd, file, F_OK, 0);
+    close(pfd);
+    return ret;
+}
+
