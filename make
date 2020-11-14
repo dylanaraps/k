@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/sh -e
 
-dep() {
+_dep() {
     pkg-config --libs --cflags "${static:+--static}" "$1" ||
     printf '%s\n' "$2"
 }
@@ -24,7 +24,7 @@ configure() {
     # disable the package manager's ability to download sources. Git sources
     # will continue to work as normal (so long as git does).
     case ${CURL:=1} in 1)
-        LDFLAGS="$(dep libcurl -lcurl) $LDFLAGS"
+        LDFLAGS="$(_dep libcurl -lcurl) $LDFLAGS"
         CFLAGS="-DUSE_CURL $CFLAGS"
     esac
 
@@ -32,7 +32,7 @@ configure() {
     # to '0' will cause the package manager to use an internal sha256
     # implementation rather than the optimized ASM from openssl.
     case ${OPENSSL:=0} in 1)
-        LDFLAGS="$(dep openssl '-lssl -lcrypto') $LDFLAGS"
+        LDFLAGS="$(_dep openssl '-lssl -lcrypto') $LDFLAGS"
         CFLAGS="-DUSE_OPENSSL $CFLAGS"
     esac
 }
@@ -53,26 +53,23 @@ build() {
 }
 
 check_runtime() {
-    (
-        export XDG_CACHE_HOME=$PWD/test/test_hier
-        export KISS_PATH=$PWD/test/test_hier/repo/extra
-        export KISS_PATH=$PWD/test/test_hier/repo/core:$KISS_PATH
-        export KISS_ROOT=$PWD/test/test_hier
-        export PATH=$PWD/test/test_hier/bin
+    command -v valgrind && set -- valgrind \
+        --leak-check=full --track-origins=yes --error-exitcode=1
 
-        command -v valgrind &&
-            set -- valgrind \
-                --leak-check=full --track-origins=yes --error-exitcode=1
+    export KISS_ROOT=$PWD/test/test_hier
+    export XDG_CACHE_HOME=$KISS_ROOT
+    export KISS_PATH=$KISS_ROOT/repo/core:$KISS_ROOT/repo/extra
+    export PATH=$KISS_ROOT/bin:$PATH
 
-        "$@" ./kiss
-        "$@" ./kiss v
-        "$@" ./kiss d zlib samurai
-        "$@" ./kiss s zlib
-        "$@" ./kiss l
-        "$@" ./kiss test
-    )
+    "$@" ./kiss
+    "$@" ./kiss v
+    "$@" ./kiss s zlib
 
-    rm -rf "$PWD/test/test_hier/kiss"
+    rm -rf "$KISS_ROOT/kiss"
+    "$@" ./kiss d zlib samurai
+
+    "$@" ./kiss test | cmp "$KISS_ROOT/etc/test_output/test_ext"  -
+    "$@" ./kiss l    | cmp "$KISS_ROOT/etc/test_output/test_list" -
 }
 
 check() {
@@ -84,6 +81,7 @@ check() {
     done
 }
 
-set -e
-
-"${1:-build}"
+"${1:-build}" || {
+    printf 'error during %s\n' "${1:-build}" >&2
+    exit 1
+}
