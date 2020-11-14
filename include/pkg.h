@@ -17,4 +17,12 @@ void pkg_free_all(pkg **p);
 FILE *pkg_fopen(int repo_fd, const char *pkg, const char *file);
 int pkg_faccessat(int repo_fd, const char *pkg, const char *file);
 
+enum pkg_source_types {
+    SRC_URL,
+    SRC_GIT,
+    SRC_ABS,
+    SRC_REL,
+};
+int pkg_source_type(pkg *p, char *src);
+
 #endif

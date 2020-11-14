@@ -13,30 +13,6 @@
 #include "sha256.h"
 #include "action.h"
 
-enum sources {
-    SRC_URL,
-    SRC_GIT,
-    SRC_ABS,
-    SRC_REL,
-};
-
-static int source_type(pkg *p, char *src) {
-    if (src[0] == 'g' && src[1] == 'i' && src[2] == 't' && src[3] == '+') {
-        return SRC_GIT;
-
-    } else if (src[0] == '/') {
-        return access(src, F_OK) == 0 ? SRC_ABS : -1;
-
-    } else if (strstr(src, "://")) {
-        return SRC_URL;
-
-    } else if (pkg_faccessat(p->repo_fd, p->name, src) == 0) {
-        return SRC_REL;
-    }
-
-    return -1;
-}
-
 static int parse_source_file(struct state *s, pkg *p, FILE *f) {
     int parsed = 0;
 
@@ -51,7 +27,7 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
 
         FILE *src = 0;
 
-        switch (source_type(p, s->mem)) {
+        switch (pkg_source_type(p, s->mem)) {
             case SRC_ABS:
                 src = fopen(s->mem, O_RDONLY);
                 break;

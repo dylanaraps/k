@@ -12,13 +12,6 @@
 #include "pkg.h"
 #include "action.h"
 
-enum sources {
-    SRC_URL,
-    SRC_GIT,
-    SRC_ABS,
-    SRC_REL,
-};
-
 static size_t source_dest(struct state *s, char *name, char *des) {
     size_t mem_pre = buf_len(s->mem) + 1;
 
@@ -33,23 +26,6 @@ static size_t source_dest(struct state *s, char *name, char *des) {
     }
 
     return mem_pre;
-}
-
-static int source_type(pkg *p, char *src) {
-    if (src[0] == 'g' && src[1] == 'i' && src[2] == 't' && src[3] == '+') {
-        return SRC_GIT;
-
-    } else if (src[0] == '/') {
-        return access(src, F_OK) == 0 ? SRC_ABS : -1;
-
-    } else if (strstr(src, "://")) {
-        return SRC_URL;
-
-    } else if (pkg_faccessat(p->repo_fd, p->name, src) == 0) {
-        return SRC_REL;
-    }
-
-    return -1;
 }
 
 static int download(const char *url, const char *dest) {
@@ -80,7 +56,7 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
 
         char *f2 = s->mem + buf_scan(&s->mem, 0, ' ');
 
-        switch (source_type(p, s->mem)) {
+        switch (pkg_source_type(p, s->mem)) {
             case SRC_URL: {
                 char *dest = s->mem + source_dest(s, p->name, f2);
 
