@@ -46,6 +46,9 @@ static const uint64_t n[] = {
     5517216,
     16304,
     53169001,
+    180000000,
+    104143736,
+    1073741823,
 };
 
 static const char a[][6] = {
@@ -90,6 +93,9 @@ static const char a[][6] = {
     "05.3M",
     "0015K",
     "51.9M",
+    "0171M",
+    "0099M",
+    "1023M",
 };
 
 int main(int argc, char *argv[]) {
@@ -98,10 +104,8 @@ int main(int argc, char *argv[]) {
 
     test_begin(__FILE__);
 
-    char res[6];
-
     for (size_t i = 0; i < sizeof(a) / sizeof(a[0]); i++) {
-        test(strcmp(human_readable(n[i], res), a[i]) == 0);
+        test(strcmp(human_readable(n[i], (char [6]){0}), a[i]) == 0);
     }
 
     return test_finish();

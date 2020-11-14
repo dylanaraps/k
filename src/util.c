@@ -12,8 +12,8 @@ char *human_readable(uint64_t n, char out[6]) {
         out[4] = 'K';
         n >>= 10;
 
-    // XX.XM for < 100MB
-    } else if (n < 0x6400000) {
+    // XX.XM for < 100MB~
+    } else if (n < 100000000) {
         out[4] = 'M';
         out[3] = '0' + ((n /= 0x19000) % 10);
         out[2] = '.';
