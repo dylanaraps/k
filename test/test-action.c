@@ -83,6 +83,8 @@ int main(int argc, char *argv[]) {
         test(!s->cache.dir);
         test(strcmp(s->pkgs[0]->name, "zlib") == 0);
         test(strcmp(s->pkgs[1]->name, "samurai") == 0);
+        test(s->pkgs[0]->repo_fd == 0);
+        test(s->pkgs[1]->repo_fd == 0);
     }
     state_free(s);
 
@@ -95,6 +97,8 @@ int main(int argc, char *argv[]) {
         test(s->cache.dir);
         test(strcmp(s->pkgs[0]->name, "zlib") == 0);
         test(strcmp(s->pkgs[1]->name, "samurai") == 0);
+        test(s->pkgs[0]->repo_fd == 0);
+        test(s->pkgs[1]->repo_fd == 0);
     }
     state_free(s);
 
@@ -106,8 +110,25 @@ int main(int argc, char *argv[]) {
         test(s->pkgs);
         test(!s->repos);
         test(s->cache.dir);
+        test(s->pkgs[0]->repo_fd == 0);
+        test(s->pkgs[1]->repo_fd == 0);
         test(strcmp(s->pkgs[0]->name, "zlib") == 0);
         test(strcmp(s->pkgs[1]->name, "samurai") == 0);
+    }
+    state_free(s);
+
+    s = state_init(4, (char **) pkgs,
+            STATE_PKG | STATE_REPO | STATE_PKG_REPO); {
+        test(s);
+        test(s->opt == (STATE_PKG | STATE_REPO | STATE_PKG_REPO));
+        test(!s->mem);
+        test(s->pkgs);
+        test(s->repos);
+        test(!s->cache.dir);
+        test(strcmp(s->pkgs[0]->name, "zlib") == 0);
+        test(strcmp(s->pkgs[1]->name, "samurai") == 0);
+        test(s->pkgs[0]->repo_fd != 0);
+        test(s->pkgs[1]->repo_fd != 0);
         test(fcntl(s->pkgs[0]->repo_fd, F_GETFL) != -1 || errno != EBADF);
         test(fcntl(s->pkgs[1]->repo_fd, F_GETFL) != -1 || errno != EBADF);
     }
