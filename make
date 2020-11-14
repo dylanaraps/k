@@ -56,6 +56,7 @@ check_runtime() {
     export XDG_CACHE_HOME=$PWD/test/test_hier
     export KISS_PATH=$PWD/test/test_hier/repo/extra
     export KISS_PATH=$PWD/test/test_hier/repo/core:$KISS_PATH
+    export KISS_ROOT=$PWD/test/test_hier
 
     command -v valgrind &&
         set -- valgrind --leak-check=full --track-origins=yes --error-exitcode=1

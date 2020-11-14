@@ -11,21 +11,22 @@
 #include "repo.h"
 
 struct repo *repo_open(const char *path) {
+    int n = open(path, O_RDONLY);
+
+    if (n == -1) {
+        err_no("failed to open repo '%s'", path);
+        return NULL;
+    }
+
     size_t l = strlen(path) + 1;
-    struct repo *n = malloc(sizeof *n + l);
+    struct repo *r = malloc(sizeof *r + l);
 
-    if (!n) {
+    if (!r) {
         return NULL;
     }
 
-    memcpy(n->path, path, l);
-
-    if ((n->fd = open(n->path, O_RDONLY)) == -1) {
-        err_no("failed to open repo '%s'", n->path);
-        return NULL;
-    }
-
-    return n;
+    memcpy(r->path, path, l);
+    return r;
 }
 
 struct repo *repo_open_db(void) {
