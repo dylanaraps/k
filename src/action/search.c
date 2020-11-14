@@ -12,43 +12,24 @@
 #include "repo.h"
 #include "action.h"
 
-int action_search(int argc, char *argv[]) {
-    buf *buf = buf_alloc(0, 1024);
-
-    if (!buf) {
-        return -ENOMEM;
-    }
-
+int action_search(struct state *s) {
     int err = 0;
-    struct repo **repos = arr_alloc(0, 12);
-
-    if (!repos) {
-        err("failed to allocate memory");
-        err = -1;
-        goto repo_error;
-    }
-
-    if ((err = repo_open_PATH(repos, getenv("KISS_PATH"))) < 0) {
-        err_no("failed to read KISS_PATH");
-        goto repo_error;
-    }
-
     glob_t g = { .gl_pathc = 0, };
 
-    for (int i = 2; i < argc; i++) {
+    for (size_t i = 0; i < arr_len(s->pkgs); i++) {
         size_t glob_pre = g.gl_pathc;
 
-        for (size_t j = 0, len = buf_len(buf); j < arr_len(repos); j++) {
-            buf_push_s(&buf, repos[j]->path);
-            buf_rstrip(&buf, '/');
-            buf_push_c(&buf, '/');
-            buf_push_s(&buf, argv[i]);
-            buf_push_c(&buf, '/');
+        for (size_t j = 0, l = buf_len(s->mem); j < arr_len(s->repos); j++) {
+            buf_push_s(&s->mem, s->repos[j]->path);
+            buf_rstrip(&s->mem, '/');
+            buf_push_c(&s->mem, '/');
+            buf_push_s(&s->mem, s->pkgs[i]->name);
+            buf_push_c(&s->mem, '/');
 
-            switch (glob(buf + len, g.gl_pathc ? GLOB_APPEND : 0, NULL, &g)) {
+            switch (glob(s->mem + l, g.gl_pathc ? GLOB_APPEND : 0, NULL, &g)) {
                 case GLOB_NOSPACE:
                 case GLOB_ABORTED:
-                    err("glob encountered error with query '%s'", buf + len);
+                    err("glob encountered error with query '%s'", s->mem + l);
                     goto glob_error;
 
                 case GLOB_NOMATCH:
@@ -56,11 +37,11 @@ int action_search(int argc, char *argv[]) {
                     break;
             }
 
-            buf_set_len(buf, len);
+            buf_set_len(s->mem, l);
         }
 
         if ((g.gl_pathc - glob_pre) == 0) {
-            err("no search results for '%s'", argv[i]);
+            err("no search results for '%s'", s->pkgs[i]->name);
             err = -1;
             goto glob_error;
         }
@@ -72,10 +53,6 @@ int action_search(int argc, char *argv[]) {
 
 glob_error:
     globfree(&g);
-repo_error:
-    repo_free_all(repos);
-
-    buf_free(&buf);
     return err;
 }
 

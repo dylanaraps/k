@@ -83,33 +83,27 @@ static int pkg_list_all(buf **buf, char **pkgs, int repo_fd) {
     return 0;
 }
 
-int action_list(int argc, char *argv[]) {
-    buf *buf = buf_alloc(0, 1024);
-
-    if (!buf) {
-        return -ENOMEM;
-    }
-
+int action_list(struct state *s) {
     int err = 0;
+
     struct repo *db = repo_open_db();
 
     if (!db) {
         err_no("failed to open database");
-        err = -1;
-        goto repo_error;
+        return -1;
     }
 
-    for (int i = 2; i < argc; i++) {
-        if ((err = pkg_list(&buf, db->fd, argv[i])) < 0) {
-            goto pkg_error;
+    for (size_t i = 0; i < arr_len(s->pkgs); i++) {
+        if ((err = pkg_list(&s->mem, db->fd, s->pkgs[i]->name)) < 0) {
+            break;
         }
     }
 
-    if (argc == 2) {
+    if (arr_len(s->pkgs) == 0) {
         char **pkgs = arr_alloc(0, 256);
 
         if (pkgs) {
-            err = pkg_list_all(&buf, pkgs, db->fd);
+            err = pkg_list_all(&s->mem, pkgs, db->fd);
 
         } else {
             err("failed to allocate memory");
@@ -118,11 +112,7 @@ int action_list(int argc, char *argv[]) {
         arr_free(pkgs);
     }
 
-pkg_error:
-    buf_free(&buf);
-repo_error:
     repo_free(db);
-
     return err;
 }
 

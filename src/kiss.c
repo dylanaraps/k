@@ -14,6 +14,12 @@
 #include "cache.h"
 #include "error.h"
 
+enum actions {
+    ACT_DOWNLOAD = (STATE_ALL),
+    ACT_SEARCH   = (STATE_PKG | STATE_MEM | STATE_REPO),
+    ACT_LIST     = (STATE_PKG | STATE_MEM),
+};
+
 static void version(char *arg0) {
     printf("%s 0.0.1 (compiled %s)\n", arg0, __DATE__);
 }
@@ -45,6 +51,7 @@ static int run_extension(char *argv[]) {
 }
 
 int main (int argc, char *argv[]) {
+    struct state *s = 0;
     int err = 0;
 
     if (argc < 2 || !argv[1] || !argv[1][0] || argv[1][0] == '-') {
@@ -54,25 +61,17 @@ int main (int argc, char *argv[]) {
 // strcmp is only reached when both first characters match.
 #define ARG(a, b) ((*a) == (*b) && ((!a[1]) || strcmp(a, b) == 0))
 
-    } else if (ARG(argv[1], "build")    ||
-               ARG(argv[1], "checksum") ||
-               ARG(argv[1], "download")) {
-        struct state *s = state_init(argc, argv);
-
-        if (!s) {
-            err = -1;
-
-        } else if (argv[1][0] == 'd') {
-            err = action_download(s);
-        }
-
-        state_free(s);
+    } else if (ARG(argv[1], "download")) {
+        s = state_init(argc, argv, STATE_ALL);
+        err = s ? action_download(s) : -1;
 
     } else if (ARG(argv[1], "list")) {
-        err = action_list(argc, argv);
+        s = state_init(argc, argv, STATE_PKG | STATE_MEM);
+        err = s ? action_list(s) : -1;
 
     } else if (ARG(argv[1], "search")) {
-        err = action_search(argc, argv);
+        s = state_init(argc, argv, STATE_PKG | STATE_MEM | STATE_REPO);
+        err = s ? action_search(s) : -1;
 
     } else if (ARG(argv[1], "version")) {
         version(argv[0]);
@@ -81,6 +80,7 @@ int main (int argc, char *argv[]) {
         err = run_extension(argv + 1);
     }
 
+    state_free(s);
     return err;
 }
 
