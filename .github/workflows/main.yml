@@ -17,7 +17,6 @@ jobs:
                   export LDFLAGS='-lgcov --coverage'
                   CC=gcc ./make
                   ./make check
-                  ./make check_runtime
 
             - uses: codecov/codecov-action@v1
               with:

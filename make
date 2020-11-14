@@ -50,26 +50,6 @@ build() {
     done; wait
 }
 
-check_runtime() {
-    command -v valgrind && set -- valgrind \
-        --leak-check=full --track-origins=yes --error-exitcode=1
-
-    export KISS_ROOT=$PWD/test/test_hier
-    export XDG_CACHE_HOME=$KISS_ROOT
-    export KISS_PATH=$KISS_ROOT/repo/core:$KISS_ROOT/repo/extra
-    export PATH=$KISS_ROOT/bin:$PATH
-
-    "$@" ./src/kiss
-    "$@" ./src/kiss v
-    "$@" ./src/kiss s zlib
-
-    rm -rf "$KISS_ROOT/kiss"
-    "$@" ./src/kiss d zlib samurai
-
-    "$@" ./src/kiss test | cmp "$KISS_ROOT/etc/test_output/test_ext"  -
-    "$@" ./src/kiss l    | cmp "$KISS_ROOT/etc/test_output/test_list" -
-}
-
 check() {
     command -v valgrind &&
         set -- valgrind --leak-check=full --track-origins=yes --error-exitcode=1
