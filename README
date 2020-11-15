@@ -50,12 +50,10 @@ ________________________________________________________________________________
 - [ ] actions
     - [ ] alternatives
     - [ ] build
-    - [0] checksum
+    - [x] checksum
         - [x] find self-contained / permissively licensed sha256 implementation
         - [x] parse sources file
-        - [ ] generate checksums file
-        - [ ] add support for SKIP
-        - [ ] add checksum verification
+        - [x] generate checksums file
     - [x] download
         - [x] libcurl stuff
         - [x] catch Ctrl+C during download
@@ -84,6 +82,9 @@ ________________________________________________________________________________
         - [ ] avoid libarchive
         - [ ] possibly fork/exec command-line tar initially
         - [ ] support zip
+    - [ ] checksum verification
+        - [ ] add support for SKIP
+        - [ ] add checksum verification
     - [x] repositories
     - [x] caches
     - [ ] dependency resolution
