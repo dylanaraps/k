@@ -104,10 +104,10 @@ int action_list(struct state *s) {
             goto error;
         }
 
+        size_t rel = buf_scan(&s->mem, 0, ' ');
+
         fprintf(stdout, "%s %s %s\n",
-            s->pkgs[i]->name,
-            s->mem,
-            s->mem + buf_scan(&s->mem, 0, ' '));
+            s->pkgs[i]->name, s->mem, s->mem + rel);
     }
 
 error:
