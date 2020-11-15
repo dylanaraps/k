@@ -24,7 +24,8 @@ enum state_options {
     STATE_PKG       = (1L << 2),
     STATE_PKG_REPO  = (1L << 3),
     STATE_PKG_CACHE = (1L << 4),
-    STATE_MEM       = (1L << 5),
+    STATE_PKG_PWD   = (1L << 5),
+    STATE_MEM       = (1L << 6),
 };
 #define STATE_ALL (~0L)
 

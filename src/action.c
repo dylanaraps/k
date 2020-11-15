@@ -7,6 +7,37 @@
 #include "repo.h"
 #include "action.h"
 
+static int state_init_pkg(struct state *s, char *p) {
+    if (strstr(p, "/")) {
+        err("invalid argument '%s'", p);
+        return -1;
+    }
+
+    pkg *n = pkg_alloc(p);
+
+    if (!n) {
+        return -1;
+    }
+
+    if (s->opt & STATE_PKG_REPO) {
+        if ((n->repo_fd = repo_find_pkg(s->repos, p)) == -1) {
+            err_no("package '%s' not in any repository", p);
+            pkg_free(n);
+            return -1;
+        }
+    }
+
+    if (s->opt & STATE_PKG_CACHE) {
+        if (cache_init_pkg(&s->cache, p) < 0) {
+            pkg_free(n);
+            return -1;
+        }
+    }
+
+    arr_push_b(s->pkgs, n);
+    return 0;
+}
+
 struct state *state_init(int argc, char *argv[], int opt) {
     struct state *s = calloc(sizeof *s, 1);
 
@@ -43,34 +74,29 @@ struct state *state_init(int argc, char *argv[], int opt) {
             goto error;
         }
 
+        if ((opt & STATE_PKG_PWD) && argc == 2) {
+            if (buf_push_s(&s->mem, getenv("PWD")) == -EINVAL) {
+                goto error;
+            }
+
+            if (state_init_pkg(s, strrchr(s->mem, '/') + 1) < 0) {
+                goto error;
+            }
+
+            buf_push_c(&s->mem, ':');
+            buf_push_s(&s->mem, getenv("PATH"));
+
+            if (setenv("PATH", s->mem, 1) == -1) {
+                goto error;
+            }
+
+            buf_set_len(s->mem, 0);
+        }
+
         for (int i = 2; i < argc; i++) {
-            if (strstr(argv[i], "/")) {
-                err("invalid argument '%s'", argv[i]);
+            if (state_init_pkg(s, argv[i]) < 0) {
                 goto error;
             }
-
-            pkg *n = pkg_alloc(argv[i]);
-
-            if (!n) {
-                goto error;
-            }
-
-            if (opt & STATE_PKG_REPO) {
-                if ((n->repo_fd = repo_find_pkg(s->repos, argv[i])) == -1) {
-                    err_no("package '%s' not in any repository", argv[i]);
-                    pkg_free(n);
-                    goto error;
-                }
-            }
-
-            if (opt & STATE_PKG_CACHE) {
-                if (cache_init_pkg(&s->cache, argv[i]) < 0) {
-                    pkg_free(n);
-                    goto error;
-                }
-            }
-
-            arr_push_b(s->pkgs, n);
         }
     }
 

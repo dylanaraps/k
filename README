@@ -100,7 +100,7 @@ ________________________________________________________________________________
         - [ ] avoid nftw() (XSI, not POSIX)
     - [ ] 3-way handshake for files in /etc/
 - [ ] misc
-    - [ ] crux-like usage
+    - [x] crux-like usage
     - [ ] logging
     - [ ] pretty output
     - [x] string library
