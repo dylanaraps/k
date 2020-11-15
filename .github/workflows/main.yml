@@ -18,9 +18,6 @@ jobs:
                   export LDFLAGS='-lgcov --coverage'
                   CC=gcc ./make
                   ./make check
-                  export LIBARCHIVE=0
-                  CC=gcc ./make
-                  ./make check
 
             - uses: codecov/codecov-action@v1
               with:
