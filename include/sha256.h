@@ -32,7 +32,7 @@ typedef br_sha256_context SHA256_CTX;
 #define SHA256_Final(md, c)    br_sha256_out(c, md)
 
 /**
- * Fallback to internal sha256 implementation.
+ * Fallback internal sha256 implementation.
  */
 #else
 

@@ -51,6 +51,14 @@ configure() {
             CFLAGS="-DUSE_OPENSSL $CFLAGS"
         esac
     }
+
+    # tar external implementation. Setting the environment variable
+    # LIBARCHIVE to '1' will cause the package manager to use tar from
+    # libarchive.
+    case ${LIBARCHIVE:=0} in 1)
+        LDFLAGS="$(_dep libarchive '-larchive') $LDFLAGS"
+        CFLAGS="-DUSE_LIBARCHIVE $CFLAGS"
+    esac
 }
 
 build() {

@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: MIT
  * Copyright (C) 2020 Dylan Araps
  */
-#ifndef KISS_buf_H
-#define KISS_buf_H
+#ifndef KISS_BUF_H
+#define KISS_BUF_H
 
 #include <stdlib.h>
 #include <stdio.h>
