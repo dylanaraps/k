@@ -2,15 +2,14 @@
 #define KISS_TAR_H
 
 /**
- * Use libarchive for tar archives if available falling back to an internal
- * tar implementation.
+ * Use libarchive for tar archives.
  */
 #ifdef USE_LIBARCHIVE
 #include <archive.h>
 #include <archive_entry.h>
 
 /**
- * Fallback internal tar implementation.
+ * Fallback to executing tar utility if libarchive not available.
  */
 #else
 

@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -8,7 +9,6 @@ int main(int argc, char *argv[]) {
     (void) argc;
     (void) argv;
 
-#ifdef USE_LIBARCHIVE
     int ret = test_begin(__FILE__);
 
     ret = tar_extract("test/test_hier/bin/test.tar", 0); {
@@ -36,8 +36,5 @@ int main(int argc, char *argv[]) {
     }
 
     return test_finish();
-#endif
-
-    return 0;
 }
 

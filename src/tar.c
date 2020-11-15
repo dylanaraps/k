@@ -1,9 +1,13 @@
+#include <unistd.h>
+#include <sys/wait.h>
+
+#include "arr.h"
 #include "error.h"
+#include "util.h"
 #include "tar.h"
 
 /**
- * Use libarchive for tar archives if available falling back to an internal
- * tar implementation.
+ * Use libarchive for tar archives.
  */
 #ifdef USE_LIBARCHIVE
 
@@ -113,15 +117,44 @@ r_error:
 }
 
 /**
- * Fallback internal tar implementation.
+ * Fallback to executing tar utility if libarchive not available.
  */
 #else
 
 int tar_extract(const char *f, int flags) {
-    (void) f;
     (void) flags;
 
-    return -1;
+    if (!f) {
+        return -1;
+    }
+
+    pid_t pid = fork();
+
+    if (pid == -1) {
+        err_no("failed to fork");
+        return -1;
+
+    } else if (pid == 0) {
+        /**
+         * Requires a "smart" tar that is aware of compression and can
+         * automagically deal with it (GNU tar, libarchive tar (BSDtar),
+         * busybox tar, ...), The same applies to the use of
+         * --strip-components 1.
+         */
+        execlp("tar", "tar", "xf", f, "--strip-components", "1", 0);
+
+    } else {
+        int status = 0;
+
+        waitpid(pid, &status, 0);
+
+        if (WEXITSTATUS(status)) {
+            err_no("tar exited %d", status);
+            return -1;
+        }
+    }
+
+    return 0;
 }
 
 #endif

@@ -1,5 +1,8 @@
+#include <unistd.h>
 #include <stdint.h>
+#include <sys/wait.h>
 
+#include "error.h"
 #include "util.h"
 
 char *human_readable(uint64_t n, char out[6]) {
