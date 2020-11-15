@@ -23,6 +23,9 @@ configure() {
     # Download functionality. Setting the environment variable CURL to '0' will
     # disable the package manager's ability to download sources. Git sources
     # will continue to work as normal (so long as git does).
+    #
+    # NOTE: The package manager does not depend on a specific SSL library. It
+    #       only directly depends on libcurl.
     case ${CURL:=1} in 1)
         LDFLAGS="$(_dep libcurl -lcurl) $LDFLAGS"
         CFLAGS="-DUSE_CURL $CFLAGS"
@@ -54,13 +57,13 @@ build() {
     configure
 
     for obj in src/*.c src/*/*.c; do
-        _cc $CFLAGS $CPPFLAGS -c -o "${obj%%.c}.o" "$obj" &
-    done; wait
+        _cc $CFLAGS $CPPFLAGS -c -o "${obj%%.c}.o" "$obj"
+    done
 
     for prog in src/kiss.c test/*.c; do
         _cc $CFLAGS $CPPFLAGS -o "${prog%%.c}" "$prog" \
-            src/[!k]*.o src/*/*.o $LDFLAGS &
-    done; wait
+            src/[!k]*.o src/*/*.o $LDFLAGS
+    done
 }
 
 check() {

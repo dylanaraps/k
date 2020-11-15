@@ -15,7 +15,7 @@
 #include "error.h"
 
 static void version(char *arg0) {
-    printf("%s 0.0.1 (compiled %s)\n", arg0, __DATE__);
+    msg("%s 0.0.1 (compiled %s)", arg0, __DATE__);
 }
 
 static void usage(char *arg0) {

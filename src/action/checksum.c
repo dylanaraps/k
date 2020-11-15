@@ -91,7 +91,9 @@ int action_checksum(struct state *s) {
             return -1;
         }
 
-        printf("[%s] generating checksums\n", s->pkgs[i]->name);
+        msg("[%zu/%zu] generating checksums for [%s]",
+            i, arr_len(s->pkgs) - 1, s->pkgs[i]->name);
+
         int parsed = parse_source_file(s, s->pkgs[i], src, chk);
         fclose(src);
         fclose(chk);

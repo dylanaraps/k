@@ -26,4 +26,9 @@
     fputc('\n', stderr);                        \
 } while (0)
 
+#define msg(...) do {             \
+    fprintf(stdout, __VA_ARGS__); \
+    fputc('\n', stdout);          \
+} while (0)
+
 #endif
