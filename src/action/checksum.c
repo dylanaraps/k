@@ -53,10 +53,9 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f, FILE *d) {
         fclose(src);
         char hash_string[65];
         sha256_to_string(hash, hash_string);
-        parsed++;
-
         fprintf(d, "%s\n", hash_string);
         puts(hash_string);
+        parsed++;
     }
 
     return parsed;
