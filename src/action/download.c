@@ -12,19 +12,18 @@
 #include "pkg.h"
 #include "action.h"
 
-static size_t source_dest(struct state *s, char *name, char *des) {
+static size_t source_dest_path(struct state *s,
+                          const char *n, const char *d, const char *f) {
     size_t mem_pre = buf_len(s->mem) + 1;
+    buf_printf(&s->mem, "%c%s../../sources/%s/", 0, s->cache.dir, n);
 
-    buf_printf(&s->mem, "%c%s../../sources/%s/", 0, s->cache.dir, name);
-
-    if (des) {
-        while (*des && *des == '/') des++;
-
-        buf_push_s(&s->mem, des);
+    if (d) {
+        buf_push_s(&s->mem, d);
         buf_rstrip(&s->mem, '/');
         buf_push_c(&s->mem, '/');
     }
 
+    buf_push_s(&s->mem, strrchr(f, '/') + 1);
     return mem_pre;
 }
 
@@ -58,18 +57,16 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
 
         switch (pkg_source_type(p, s->mem)) {
             case SRC_URL: {
-                char *dest = s->mem + source_dest(s, p->name, f2);
+                while (*f2 && *f2 == '/') f2++;
 
-                if (mkdir_p(dest, 0755) < 0) {
-                    return -1;
-                }
-
-                if (buf_push_s(&s->mem, strrchr(s->mem, '/') + 1) == -EINVAL) {
-                    return -1;
-                }
+                char *dest = s->mem + source_dest_path(s, p->name, f2, s->mem);
 
                 if (access(dest, F_OK) == 0) {
                     continue;
+                }
+
+                if (cache_mkdirat(s->cache.fd[CAC_SRC], p->name, f2) < 0) {
+                    return -1;
                 }
 
                 if (download(s->mem, dest) < 0) {
@@ -77,7 +74,6 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
                 }
 
                 parsed++;
-
                 break;
             }
 

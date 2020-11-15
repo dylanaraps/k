@@ -98,7 +98,8 @@ int cache_get_base(buf **c) {
     return buf_printf(c, "/kiss/proc/%ld/", (long) getpid());
 }
 
-FILE *cache_fopen(int fd, const char *pkg, const char *des, const char *f) {
+FILE *cache_fopen(int fd, const char *pkg, const char *des, const char *f,
+                  int M, const char *m) {
     int fd2 = openat(fd, pkg, O_RDONLY);
 
     if (fd2 == -1) {
@@ -116,10 +117,31 @@ FILE *cache_fopen(int fd, const char *pkg, const char *des, const char *f) {
         return NULL;
     }
 
-    int fd4 = openat(fd3, f, O_RDONLY);
+    int fd4 = openat(fd3, f, M);
     close(fd3);
 
-    return fdopen(fd4, "r");
+    return fdopen(fd4, m);
+}
+
+int cache_mkdirat(int fd, const char *pkg, const char *des) {
+    if (!des || !*des) {
+        return 0;
+    }
+
+    int pfd = openat(fd, pkg, O_RDONLY);
+
+    if (pfd == -1) {
+        return -1;
+    }
+
+    int ret = mkdirat(pfd, des, 0755);
+    close(pfd);
+
+    if (ret == -1 && errno != EEXIST) {
+        return -1;
+    }
+
+    return 0;
 }
 
 int cache_clean(struct cache *c) {

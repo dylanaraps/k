@@ -28,7 +28,9 @@ int cache_init(struct cache *c);
 int cache_init_all(struct cache *c);
 int cache_init_pkg(struct cache *c, const char *pkg);
 int cache_get_base(buf **c);
-FILE *cache_fopen(int fd, const char *pkg, const char *des, const char *f);
+FILE *cache_fopen(int fd, const char *pkg, const char *des, const char *f,
+                  int M, const char *m);
+int cache_mkdirat(int fd, const char *pkg, const char *des);
 int cache_clean(struct cache *c);
 void cache_free(struct cache *c);
 
