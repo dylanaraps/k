@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     (void) argc;
     (void) argv;
 
-    test_begin(__FILE__);
+    int err = test_begin(__FILE__);
     struct state *s = 0;
 
     s = state_init(4, (char **) pkgs, STATE_ALL); {
@@ -156,6 +156,55 @@ int main(int argc, char *argv[]) {
         path_basename(pwd);
         test(strncmp(getenv("KISS_PATH"), pwd, strlen(pwd)) == 0);
         free(pwd);
+    }
+    state_free(s);
+
+    s = state_init(4, (char **) pkgs, STATE_PKG | STATE_MEM); {
+        test(s);
+        test(s->opt == (STATE_PKG | STATE_MEM));
+        test(s->mem);
+        test(s->pkgs);
+        test(!s->repos);
+        test(!s->cache.dir);
+
+        err = action_list(s); {
+            test(err == 0);
+        }
+    }
+    state_free(s);
+
+    s = state_init(4, (char **) pkgs, STATE_PKG | STATE_MEM | STATE_REPO); {
+        test(s);
+        test(s->opt == (STATE_PKG | STATE_MEM | STATE_REPO));
+        test(s->mem);
+        test(s->pkgs);
+        test(s->repos);
+        test(!s->cache.dir);
+
+        err = action_search(s); {
+            test(err == 0);
+        }
+    }
+    state_free(s);
+
+    s = state_init(4, (char **) pkgs, STATE_ALL); {
+        test(s);
+        test(s->opt == STATE_ALL);
+        test(s->mem);
+        test(buf_len(s->mem) == 0);
+        test(buf_cap(s->mem) == 1024);
+        test(strcmp(s->pkgs[0]->name, "zlib") == 0);
+        test(strcmp(s->pkgs[1]->name, "samurai") == 0);
+        test(s->repos);
+        test(s->repos[0]->path[0]);
+
+        for (size_t i = 0; i < CAC_DIR; i++) {
+            test(fcntl(s->cache.fd[i], F_GETFL) != -1 || errno != EBADF);
+        }
+
+        err = action_checksum(s); {
+            test(err == 0);
+        }
     }
     state_free(s);
 
