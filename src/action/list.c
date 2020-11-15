@@ -23,40 +23,66 @@ static int compare(void const *a, void const *b) {
     return strcmp(p1->name, p2->name);
 }
 
-static int pkg_list(buf **buf, int repo_fd, const char *pkg) {
-    FILE *ver = pkg_fopen(repo_fd, pkg, "version", O_RDONLY, "r");
+static int db_to_list(struct state *s, const char *db) {
+    DIR *d = opendir(db);
+
+    if (!d) {
+        err_no("failed to open database");
+        return -1;
+    }
+
+    for (struct dirent *dp; (dp = readdir(d)); ) {
+        if (dp->d_name[0] == '.' && (!dp->d_name[1] ||
+           (dp->d_name[1] == '.' && !dp->d_name[2]))) {
+            continue;
+        }
+
+        if (state_init_pkg(s, dp->d_name) < 0) {
+            closedir(d);
+            return -1;
+        }
+    }
+
+    closedir(d);
+    arr_sort(s->pkgs, compare);
+    return 0;
+}
+
+static FILE *open_version(int fd, const char *pkg) {
+    FILE *ver = pkg_fopen(fd, pkg, "version", O_RDONLY, "r");
 
     if (!ver) {
         if (errno == ENOENT) {
-            err("package '%s' not installed", pkg);
+            err_no("package '%s' not installed", pkg);
 
         } else {
             err_no("[%s] failed to open version file", pkg);
         }
 
+        return NULL;
+    }
+
+    return ver;
+}
+
+static int read_version(struct state *s, int fd, const char *pkg) {
+    FILE *f = open_version(fd, pkg);
+
+    if (!f) {
         return -1;
     }
 
-    size_t len_pre = buf_len(*buf);
+    int err = buf_getline(&s->mem, f, 32);
+    fclose(f);
 
-    switch (buf_getline(buf, ver, 32)) {
-        case 0:
-            fprintf(stdout, "%s %s %s\n", pkg,
-                *buf + len_pre,
-                *buf + buf_scan(buf, len_pre, ' '));
-            buf_set_len(*buf, len_pre);
-            fclose(ver);
-            return 0;
-
-        default:
-            err_no("[%s] failed to read version file", pkg);
-            fclose(ver);
-            return -1;
+    if (err < 0) {
+        err_no("[%s] failed to read version file", pkg);
     }
+
+    return err;
 }
 
 int action_list(struct state *s) {
-    int err = 0;
     struct repo *db = repo_open_db();
 
     if (!db) {
@@ -64,36 +90,27 @@ int action_list(struct state *s) {
         return -1;
     }
 
-    DIR *d = fdopendir(db->fd);
+    int err = 0;
 
-    if (!d) {
-        err_no("failed to open database");
-        return -1;
-    }
-
-    if (arr_len(s->pkgs) == 0) {
-        for (struct dirent *dp; (dp = readdir(d)); ) {
-            if (dp->d_name[0] == '.' && (!dp->d_name[1] ||
-               (dp->d_name[1] == '.' && !dp->d_name[2]))) {
-                continue;
-            }
-
-            if ((err = state_init_pkg(s, dp->d_name)) < 0) {
-                goto error;
-            }
-        }
-
-        arr_sort(s->pkgs, compare);
+    if (arr_len(s->pkgs) == 0 && (err = db_to_list(s, db->path)) < 0) {
+        err_no("failed to read database");
+        goto error;
     }
 
     for (size_t i = 0; i < arr_len(s->pkgs); i++) {
-        if ((err = pkg_list(&s->mem, db->fd, s->pkgs[i]->name)) < 0) {
-            break;
+        buf_set_len(s->mem, 0);
+
+        if (read_version(s, db->fd, s->pkgs[i]->name) < 0) {
+            goto error;
         }
+
+        fprintf(stdout, "%s %s %s\n",
+            s->pkgs[i]->name,
+            s->mem,
+            s->mem + buf_scan(&s->mem, 0, ' '));
     }
 
 error:
-    closedir(d);
     repo_free(db);
     return err;
 }
