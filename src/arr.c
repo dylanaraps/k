@@ -8,7 +8,7 @@
 
 void *arr_alloc(void *a, size_t l) {
     size_t *p = a ? arr_raw(a) : 0;
-    size_t *n = realloc(p, (sizeof(void *) * (l + 2)));
+    size_t *n = realloc(p, (sizeof(*n) * (l + 2)));
 
     if (!n) {
         return NULL;

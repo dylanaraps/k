@@ -43,7 +43,7 @@ char *human_readable(uint64_t n, char out[6]) {
     out[2] = '0' + ((n /= 10) % 10);
 fake:
     out[1] = '0' + ((n /= 10) % 10);
-    out[0] = '0' + ((n /= 10) % 10);
+    out[0] = '0' + ((n / 10) % 10);
 
     return out;
 }

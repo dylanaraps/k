@@ -54,7 +54,7 @@ configure() {
 
     # tar external implementation. Setting the environment variable
     # LIBARCHIVE to '1' will cause the package manager to use tar from
-    # libarchive.
+    # libarchive. If set to '0', the tar command will be executed.
     case ${LIBARCHIVE:=0} in 1)
         LDFLAGS="$(_dep libarchive '-larchive') $LDFLAGS"
         CFLAGS="-DUSE_LIBARCHIVE $CFLAGS"
@@ -64,7 +64,7 @@ configure() {
 build() {
     configure
 
-    for obj in src/*.c src/*/*.c; do
+    for obj in src/[!k]*.c src/*/*.c; do
         _cc $CFLAGS $CPPFLAGS -c -o "${obj%%.c}.o" "$obj"
     done
 
@@ -86,6 +86,22 @@ check() {
         "$@" "${file%%.c}" || return 1
     done
 }
+
+compdb() {
+    configure
+
+    printf '[\n'
+    for obj in src/*.c src/*/*.c; do
+cat <<EOF
+    {
+        "directory": "$PWD",
+        "command": "${CC:=cc} $CFLAGS $CPPFLAGS -c -o ${obj%%.c}.o $obj",
+        "file": "$obj"
+    },
+EOF
+    done
+    printf ']\n'
+} > compile_commands.json
 
 "${1:-build}" || {
     printf 'error during %s\n' "${1:-build}" >&2
