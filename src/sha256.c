@@ -112,10 +112,18 @@ static void sha256_transform(uint32_t *state, const uint32_t *data) {
     uint32_t g = state[6];
     uint32_t h = state[7];
 
-    for (unsigned j = 0; j < 64; j += 16) {
-        RX_8(0);
-        RX_8(8);
-    }
+    unsigned j = 0;
+    RX_8(0);
+    RX_8(8);
+    j += 16;
+    RX_8(0);
+    RX_8(8);
+    j += 16;
+    RX_8(0);
+    RX_8(8);
+    j += 16;
+    RX_8(0);
+    RX_8(8);
 
 #undef S0
 #undef S1
