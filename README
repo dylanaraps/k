@@ -10,39 +10,6 @@ The at-some-point-in-the-future replacement for the current POSIX shell
 package manager written in C99.
 
 
-Dependencies
-________________________________________________________________________________
-
-Required:
-
-- C99 compiler
-- Various POSIX.1-2008 interfaces
-- libcurl
-
-
-Compilation
-________________________________________________________________________________
-
-$ CFLAGS="" LDFLAGS="" CPPFLAGS="" ./make
-
-
-Changes from the shell version (present and future)
-________________________________________________________________________________
-
-- The 'alternatives' action will be renamed to 'alt' to make the long form
-  action name easier to use ('a' will still work as it did).
-
-- The 'nostrip' file will be replaced with a more thought out alternative. This
-  current method breaks when user hooks are used at runtime to modify cache
-  directories.
-
-- KISS_HOOK will not be implemented. A new means of configuration will be
-  added to fill this gap.
-
-- KISS_DEBUG may be changed to display verbose messages among other things.
-
-- ...
-
 
 TODO
 ________________________________________________________________________________
@@ -78,10 +45,10 @@ ________________________________________________________________________________
     - [ ] KISS_DEBUG
     - [ ] KISS_TMPDIR
 - [ ] components
-    - [ ] source extraction / tarball creation
-        - [ ] avoid libarchive
-        - [ ] possibly fork/exec command-line tar initially
-        - [ ] support zip
+    - [0] source extraction / tarball creation
+        - [0] avoid libarchive
+        - [x] possibly fork/exec command-line tar initially
+        - [x] support zip
     - [ ] checksum verification
         - [ ] add support for SKIP
         - [ ] add checksum verification
@@ -108,4 +75,3 @@ ________________________________________________________________________________
     - [x] list library
     - [ ] privileges
         - Run as root + drop permissions? (shell method not feasible)
-    - [ ] support paths and packages containing special characters.
