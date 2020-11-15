@@ -7,7 +7,7 @@
 #include "repo.h"
 #include "action.h"
 
-static int state_init_pkg(struct state *s, char *p) {
+int state_init_pkg(struct state *s, char *p) {
     if (strstr(p, "/")) {
         err("invalid argument '%s'", p);
         return -1;

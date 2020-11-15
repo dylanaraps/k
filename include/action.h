@@ -35,6 +35,11 @@ enum state_options {
 struct state *state_init(int argc, char *argv[], int opt);
 
 /**
+ * initialize pkg
+ */
+int state_init_pkg(struct state *s, char *p);
+
+/**
  * free state
  */
 void state_free(struct state *s);

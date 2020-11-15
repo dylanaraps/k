@@ -17,7 +17,10 @@
 #include "action.h"
 
 static int compare(void const *a, void const *b) {
-    return strcmp(*(const char **) a, *(const char **) b);
+    pkg const *p1 = *(pkg const **) a;
+    pkg const *p2 = *(pkg const **) b;
+
+    return strcmp(p1->name, p2->name);
 }
 
 static int pkg_list(buf **buf, int repo_fd, const char *pkg) {
@@ -52,45 +55,35 @@ static int pkg_list(buf **buf, int repo_fd, const char *pkg) {
     }
 }
 
-static int pkg_list_all(buf **buf, char **pkgs, int repo_fd) {
-    DIR *db = fdopendir(repo_fd);
-
-    if (!db) {
-        err_no("failed to open database");
-        return -1;
-    }
-
-    for (struct dirent *dp; (dp = readdir(db)); ) {
-        size_t len_pre = buf_len(*buf);
-
-        buf_push_s(buf, dp->d_name);
-        buf_push_c(buf, 0);
-
-        arr_push_b(pkgs, *buf + len_pre);
-    }
-
-    arr_sort(pkgs, compare);
-
-    // i = 2 skips '.' and '..'
-    for (size_t i = 2; i < arr_len(pkgs); i++) {
-        if (pkg_list(buf, repo_fd, pkgs[i]) < 0) {
-            closedir(db);
-            return -1;
-        }
-    }
-
-    closedir(db);
-    return 0;
-}
-
 int action_list(struct state *s) {
     int err = 0;
-
     struct repo *db = repo_open_db();
 
     if (!db) {
         err_no("failed to open database");
         return -1;
+    }
+
+    DIR *d = fdopendir(db->fd);
+
+    if (!d) {
+        err_no("failed to open database");
+        return -1;
+    }
+
+    if (arr_len(s->pkgs) == 0) {
+        for (struct dirent *dp; (dp = readdir(d)); ) {
+            if (dp->d_name[0] == '.' && (!dp->d_name[1] ||
+               (dp->d_name[1] == '.' && !dp->d_name[2]))) {
+                continue;
+            }
+
+            if ((err = state_init_pkg(s, dp->d_name)) < 0) {
+                goto error;
+            }
+        }
+
+        arr_sort(s->pkgs, compare);
     }
 
     for (size_t i = 0; i < arr_len(s->pkgs); i++) {
@@ -99,19 +92,8 @@ int action_list(struct state *s) {
         }
     }
 
-    if (arr_len(s->pkgs) == 0) {
-        char **pkgs = arr_alloc(0, 256);
-
-        if (pkgs) {
-            err = pkg_list_all(&s->mem, pkgs, db->fd);
-
-        } else {
-            err("failed to allocate memory");
-        }
-
-        arr_free(pkgs);
-    }
-
+error:
+    closedir(d);
     repo_free(db);
     return err;
 }

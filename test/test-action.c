@@ -173,6 +173,20 @@ int main(int argc, char *argv[]) {
     }
     state_free(s);
 
+    s = state_init(2, NULL, STATE_PKG | STATE_MEM); {
+        test(s);
+        test(s->opt == (STATE_PKG | STATE_MEM));
+        test(s->mem);
+        test(!s->pkgs);
+        test(!s->repos);
+        test(!s->cache.dir);
+
+        err = action_list(s); {
+            test(err == 0);
+        }
+    }
+    state_free(s);
+
     s = state_init(4, (char **) pkgs, STATE_PKG | STATE_MEM | STATE_REPO); {
         test(s);
         test(s->opt == (STATE_PKG | STATE_MEM | STATE_REPO));
