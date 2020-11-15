@@ -13,7 +13,7 @@
 #include "sha256.h"
 #include "action.h"
 
-static int parse_source_file(struct state *s, pkg *p, FILE *f) {
+static int parse_source_file(struct state *s, pkg *p, FILE *f, FILE *d) {
     int parsed = 0;
 
     for (; buf_getline(&s->mem, f, 256) == 0; buf_set_len(s->mem, 0)) {
@@ -30,7 +30,7 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
                 break;
 
             case SRC_REL:
-                src = pkg_fopen(p->repo_fd, p->name, s->mem);
+                src = pkg_fopen(p->repo_fd, p->name, s->mem, O_RDONLY, "r");
                 break;
 
             case SRC_URL:
@@ -55,6 +55,7 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
         sha256_to_string(hash, hash_string);
         parsed++;
 
+        fprintf(d, "%s\n", hash_string);
         puts(hash_string);
     }
 
@@ -69,7 +70,8 @@ int action_checksum(struct state *s) {
     }
 
     for (size_t i = 0; i < arr_len(s->pkgs); i++) {
-        FILE *src = pkg_fopen(s->pkgs[i]->repo_fd, s->pkgs[i]->name, "sources");
+        FILE *src = pkg_fopen(s->pkgs[i]->repo_fd,
+            s->pkgs[i]->name, "sources", O_RDONLY, "r");
 
         if (!src && errno == ENOENT) {
             err("[%s] no sources file, skipping", s->pkgs[i]->name);
@@ -81,9 +83,19 @@ int action_checksum(struct state *s) {
             return -1;
         }
 
+        FILE *chk = pkg_fopen(s->pkgs[i]->repo_fd,
+            s->pkgs[i]->name, "checksums", O_RDWR | O_CREAT, "w");
+
+        if (!chk) {
+            err_no("[%s] failed to open checksums file", s->pkgs[i]->name);
+            fclose(src);
+            return -1;
+        }
+
         printf("[%s] generating checksums\n", s->pkgs[i]->name);
-        int parsed = parse_source_file(s, s->pkgs[i], src);
+        int parsed = parse_source_file(s, s->pkgs[i], src, chk);
         fclose(src);
+        fclose(chk);
 
         if (parsed == -1) {
             return -1;

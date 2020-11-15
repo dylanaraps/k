@@ -39,21 +39,21 @@ void pkg_free_all(pkg **p) {
     arr_free(p);
 }
 
-FILE *pkg_fopen(int repo_fd, const char *pkg, const char *file) {
-    int pfd = openat(repo_fd, pkg, O_RDONLY);
+FILE *pkg_fopen(int fd, const char *p, const char *f, int M, const char *m) {
+    int pfd = openat(fd, p, O_RDONLY);
 
     if (pfd == -1) {
         return NULL;
     }
 
-    int ffd = openat(pfd, file, O_RDONLY);
+    int ffd = openat(pfd, f, M, 0644);
     close(pfd);
 
     if (ffd == -1) {
         return NULL;
     }
 
-    return fdopen(ffd, "r");
+    return fdopen(ffd, m);
 }
 
 int pkg_faccessat(int repo_fd, const char *pkg, const char *file) {

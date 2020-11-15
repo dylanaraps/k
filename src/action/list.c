@@ -21,7 +21,7 @@ static int compare(void const *a, void const *b) {
 }
 
 static int pkg_list(buf **buf, int repo_fd, const char *pkg) {
-    FILE *ver = pkg_fopen(repo_fd, pkg, "version");
+    FILE *ver = pkg_fopen(repo_fd, pkg, "version", O_RDONLY, "r");
 
     if (!ver) {
         if (errno == ENOENT) {
