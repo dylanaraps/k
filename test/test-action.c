@@ -14,10 +14,6 @@ static const char *pkgs[] = {
 };
 
 static char *path_basename(char *p) {
-    if (!p) {
-        return NULL;
-    }
-
     for (size_t i = strlen(p); p[--i] == '/'; p[i] = 0);
 
     char *b = strrchr(p, '/');
