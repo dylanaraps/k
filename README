@@ -102,7 +102,7 @@ ________________________________________________________________________________
 - [ ] misc
     - [x] crux-like usage
     - [ ] logging
-    - [ ] pretty output
+    - [x] pretty output
     - [x] string library
         - [x] str_push_int() (or snprintf wrapper)
     - [x] list library
