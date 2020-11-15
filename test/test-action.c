@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
         test(s);
         test(s->opt == (STATE_PKG | STATE_MEM));
         test(s->mem);
-        test(!s->pkgs);
+        test(s->pkgs);
         test(!s->repos);
         test(!s->cache.dir);
 
