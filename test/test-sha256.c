@@ -6,7 +6,7 @@
 #include "sha256.h"
 #include "test.h"
 
-static const unsigned char test1[SHA256_DIGEST_LENGTH] = {
+static const unsigned char test1[SHA256_LEN] = {
     0x77, 0xd1, 0x02, 0x4b, 0xf4, 0xf9, 0x7c, 0x32, 0xf8, 0x15, 0xda,
     0x89, 0x6f, 0x7a, 0xbe, 0xec, 0xeb, 0x49, 0x21, 0x54, 0x89, 0x15,
     0x58, 0xf3, 0x3e, 0xde, 0x29, 0x95, 0x8b, 0xb5, 0x2b, 0x0f,
@@ -21,12 +21,12 @@ int main(int argc, char *argv[]) {
 
     test_begin(__FILE__);
 
-    unsigned char hash[SHA256_DIGEST_LENGTH];
+    unsigned char hash[SHA256_LEN];
     FILE *f = fopen("test/test_hier/repo/core/zlib/version", "r");
     sha256_file(hash, f);
     fclose(f);
 
-    for (size_t i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+    for (size_t i = 0; i < SHA256_LEN; i++) {
         test(hash[i] == test1[i]);
     }
 

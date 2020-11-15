@@ -4,7 +4,7 @@
 
 #include "sha256.h"
 
-void sha256_file(unsigned char hash[SHA256_DIGEST_LENGTH], FILE *f) {
+void sha256_file(unsigned char hash[SHA256_LEN], FILE *f) {
     unsigned char buf[BUFSIZ];
 
     SHA256_CTX ctx;
@@ -17,8 +17,8 @@ void sha256_file(unsigned char hash[SHA256_DIGEST_LENGTH], FILE *f) {
     SHA256_Final(hash, &ctx);
 }
 
-void sha256_to_string(unsigned char hash[SHA256_DIGEST_LENGTH], char out[65]) {
-    for (size_t i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+void sha256_to_string(unsigned char hash[SHA256_LEN], char out[65]) {
+    for (size_t i = 0; i < SHA256_LEN; i++) {
         snprintf(out + (i * 2), 65, "%02x", hash[i]);
     }
 
@@ -33,6 +33,7 @@ void sha256_to_string(unsigned char hash[SHA256_DIGEST_LENGTH], char out[65]) {
  * This code is based on public domain code from Wei Dai's Crypto++ library.
  */
 #ifndef USE_OPENSSL
+#ifndef USE_BEARSSL
 
 void SHA256_Init(SHA256_CTX *c) {
     c->count = 0;
@@ -201,5 +202,6 @@ void SHA256_Final(unsigned char *md, SHA256_CTX *c) {
     }
 }
 
+#endif
 #endif
 

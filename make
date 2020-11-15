@@ -28,13 +28,26 @@ configure() {
         CFLAGS="-DUSE_CURL $CFLAGS"
     esac
 
-    # SHA256 external implementation. Setting the environment variable OPENSSL
-    # to '0' will cause the package manager to use an internal sha256
-    # implementation rather than the optimized ASM from openssl.
-    case ${OPENSSL:=0} in 1)
-        LDFLAGS="$(_dep openssl '-lssl -lcrypto') $LDFLAGS"
-        CFLAGS="-DUSE_OPENSSL $CFLAGS"
-    esac
+    # Which sha256 implementation to use. If all options are '0', an internal
+    # sha256 implementation will be used. NOTE: Only one option may be enabled
+    # at a time.
+    {
+        # SHA256 external implementation. Setting the environment variable
+        # BEARSSL to '1' will cause the package manager to use sha256 from
+        # bearssl.
+        case ${BEARSSL:=0} in 1)
+            LDFLAGS="$(_dep bearssl '-lbearssl') $LDFLAGS"
+            CFLAGS="-DUSE_BEARSSL $CFLAGS"
+        esac
+
+        # SHA256 external implementation. Setting the environment variable
+        # OPENSSL to '1' will cause the package manager to use sha256 from
+        # openssl.
+        case ${OPENSSL:=0} in 1)
+            LDFLAGS="$(_dep openssl '-lssl -lcrypto') $LDFLAGS"
+            CFLAGS="-DUSE_OPENSSL $CFLAGS"
+        esac
+    }
 }
 
 build() {
