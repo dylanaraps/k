@@ -107,11 +107,11 @@ int tar_extract(const char *f, int flags) {
     }
 
 w_error:
-	archive_write_close(e);
-  	archive_write_free(e);
+    archive_write_close(e);
+    archive_write_free(e);
 r_error:
-	archive_read_close(a);
-	archive_read_free(a);
+    archive_read_close(a);
+    archive_read_free(a);
 
     return ret;
 }
