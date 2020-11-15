@@ -90,6 +90,12 @@ int buf_set(buf **s, int c, size_t l);
 size_t buf_scan(buf **s, size_t l, int c);
 
 /**
+ * Find last occurance of c, zero this position in the string and
+ * return pos + 1. Length is not updated.
+ */
+size_t buf_scan_rev(buf **s, int c);
+
+/**
  * Get pointer to beginning of memory allocation.
  */
 #define buf_raw(s) ((s) ? (*s) ? ((size_t *) (*s) - 2) : 0 : 0)

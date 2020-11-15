@@ -38,6 +38,30 @@ static int state_init_pkg(struct state *s, char *p) {
     return 0;
 }
 
+static int state_init_pkg_pwd(struct state *s) {
+    if (buf_push_s(&s->mem, getenv("PWD")) == -EINVAL) {
+        return -1;
+    }
+
+    size_t bn = buf_scan_rev(&s->mem, '/');
+
+    if (state_init_pkg(s, s->mem + bn) < 0) {
+        return -1;
+    }
+
+    buf_set_len(s->mem, bn - 1);
+    buf_push_c(&s->mem, ':');
+    buf_push_s(&s->mem, getenv("KISS_PATH"));
+
+    if (setenv("KISS_PATH", s->mem, 1) == -1) {
+        err_no("failed to set KISS_PATH");
+        return -1;
+    }
+
+    buf_set_len(s->mem, 0);
+    return 0;
+}
+
 struct state *state_init(int argc, char *argv[], int opt) {
     struct state *s = calloc(sizeof *s, 1);
 
@@ -75,22 +99,9 @@ struct state *state_init(int argc, char *argv[], int opt) {
         }
 
         if ((opt & STATE_PKG_PWD) && argc == 2) {
-            if (buf_push_s(&s->mem, getenv("PWD")) == -EINVAL) {
+            if (state_init_pkg_pwd(s) < 0) {
                 goto error;
             }
-
-            if (state_init_pkg(s, strrchr(s->mem, '/') + 1) < 0) {
-                goto error;
-            }
-
-            buf_push_c(&s->mem, ':');
-            buf_push_s(&s->mem, getenv("PATH"));
-
-            if (setenv("PATH", s->mem, 1) == -1) {
-                goto error;
-            }
-
-            buf_set_len(s->mem, 0);
         }
 
         for (int i = 2; i < argc; i++) {

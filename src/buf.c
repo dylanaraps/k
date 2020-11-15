@@ -157,6 +157,20 @@ size_t buf_scan(buf **s, size_t l, int c) {
     return i;
 }
 
+size_t buf_scan_rev(buf **s, int c) {
+    size_t i = buf_len(*s);
+
+    for (; i; i--) {
+        if ((*s)[i] == c) {
+            (*s)[i] = 0;
+            i++;
+            break;
+        }
+    }
+
+    return i;
+}
+
 void buf_free(buf **s) {
     free(buf_raw(s));
 }

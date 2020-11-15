@@ -13,6 +13,19 @@ static const char *pkgs[] = {
     "samurai"
 };
 
+static char *path_basename(char *p) {
+    if (!p) {
+        return NULL;
+    }
+
+    for (size_t i = strlen(p); p[--i] == '/'; p[i] = 0);
+
+    char *b = strrchr(p, '/');
+
+    // p now points to dirname
+    return p ? b ? (*b++ = 0, b) : (*p = '/', p) : NULL;
+}
+
 int main(int argc, char *argv[]) {
     (void) argc;
     (void) argv;
@@ -131,6 +144,22 @@ int main(int argc, char *argv[]) {
         test(s->pkgs[1]->repo_fd != 0);
         test(fcntl(s->pkgs[0]->repo_fd, F_GETFL) != -1 || errno != EBADF);
         test(fcntl(s->pkgs[1]->repo_fd, F_GETFL) != -1 || errno != EBADF);
+    }
+    state_free(s);
+
+    s = state_init(2, NULL, STATE_PKG | STATE_PKG_PWD | STATE_MEM); {
+        test(s);
+        test(s->opt == (STATE_PKG | STATE_PKG_PWD | STATE_MEM));
+        test(s->mem);
+        test(s->pkgs);
+        test(!s->repos);
+        test(!s->cache.dir);
+        test(strcmp(s->pkgs[0]->name, strrchr(getenv("PWD"), '/') + 1) == 0);
+
+        char *pwd = strdup(getenv("PWD"));
+        path_basename(pwd);
+        test(strncmp(getenv("KISS_PATH"), pwd, strlen(pwd)) == 0);
+        free(pwd);
     }
     state_free(s);
 
