@@ -36,8 +36,7 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f, FILE *d) {
             case SRC_URL:
                 while (*f2 && *f2 == '/') f2++;
                 src = cache_fopen(s->cache.fd[CAC_SRC],
-                    p->name, f2, strrchr(s->mem, '/') + 1,
-                    O_RDWR | O_CREAT, "w");
+                    p->name, f2, strrchr(s->mem, '/') + 1, O_RDONLY, "r");
                 break;
 
             case SRC_GIT:
