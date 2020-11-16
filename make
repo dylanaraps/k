@@ -84,10 +84,11 @@ check() {
         --leak-check=full \
         --track-origins=yes \
         --error-exitcode=1 \
-        --gen-suppressions=all
+        --suppressions=test/valgrind/musl.supp \
+        --suppressions=test/valgrind/lzma.supp
 
     for file in test/*.c; do
-        "$@" "${file%%.c}" || return 1
+        "$@" "${file%%.c}" || exit 1
     done
 }
 

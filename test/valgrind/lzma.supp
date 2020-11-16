@@ -1,0 +1,14 @@
+{
+   libarchive-lzma-glibc-uninitialized-values
+   Memcheck:Cond
+   obj:/lib/x86_64-linux-gnu/liblzma.so.5.2.2
+   obj:/lib/x86_64-linux-gnu/liblzma.so.5.2.2
+   obj:/lib/x86_64-linux-gnu/liblzma.so.5.2.2
+   obj:/lib/x86_64-linux-gnu/liblzma.so.5.2.2
+   obj:/lib/x86_64-linux-gnu/liblzma.so.5.2.2
+   fun:lzma_stream_encoder
+   obj:/usr/lib/x86_64-linux-gnu/libarchive.so.13.2.2
+   fun:archive_write_open
+   fun:tar_create
+   fun:main
+}
