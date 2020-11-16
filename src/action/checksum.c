@@ -30,7 +30,7 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f, FILE *d) {
                 break;
 
             case SRC_REL:
-                src = pkg_fopen(p->repo_fd, p->name, s->mem, O_RDONLY, "r");
+                src = pkg_fopen(p, s->mem, O_RDONLY, "r");
                 break;
 
             case SRC_URL:
@@ -62,15 +62,14 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f, FILE *d) {
 }
 
 int action_checksum(struct state *s) {
-    int err = action_download(s);
+    int ret = action_download(s);
 
-    if (err < 0) {
-        return err;
+    if (ret < 0) {
+        return ret;
     }
 
     for (size_t i = 0; i < arr_len(s->pkgs); i++) {
-        FILE *src = pkg_fopen(s->pkgs[i]->repo_fd,
-            s->pkgs[i]->name, "sources", O_RDONLY, "r");
+        FILE *src = pkg_fopen(s->pkgs[i], "sources", O_RDONLY, "r");
 
         if (!src && errno == ENOENT) {
             err("[%s] no sources file, skipping", s->pkgs[i]->name);
@@ -82,8 +81,7 @@ int action_checksum(struct state *s) {
             return -1;
         }
 
-        FILE *chk = pkg_fopen(s->pkgs[i]->repo_fd,
-            s->pkgs[i]->name, "checksums", O_RDWR | O_CREAT, "w");
+        FILE *chk = pkg_fopen(s->pkgs[i], "checksums", O_RDWR | O_CREAT, "w");
 
         if (!chk) {
             err_no("[%s] failed to open checksums file", s->pkgs[i]->name);
@@ -94,16 +92,21 @@ int action_checksum(struct state *s) {
         msg("[%zu/%zu] generating checksums for [%s]",
             i + 1, arr_len(s->pkgs), s->pkgs[i]->name);
 
-        int parsed = parse_source_file(s, s->pkgs[i], src, chk);
+        ret = parse_source_file(s, s->pkgs[i], src, chk);
+
         fclose(src);
         fclose(chk);
 
-        if (parsed == -1) {
-            return -1;
-        }
+        switch (ret) {
+            case 0:
+                puts("nothing to do");
+                break;
 
-        if (parsed == 0) {
-            puts("nothing to do");
+            case -1:
+                return -1;
+
+            default:
+                puts("updated checksums file");
         }
     }
 

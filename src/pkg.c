@@ -39,8 +39,8 @@ void pkg_free_all(pkg **p) {
     arr_free(p);
 }
 
-FILE *pkg_fopen(int fd, const char *p, const char *f, int M, const char *m) {
-    int pfd = openat(fd, p, O_RDONLY);
+FILE *pkg_fopen(pkg *p, const char *f, int M, const char *m) {
+    int pfd = openat(p->repo_fd, p->name, O_RDONLY);
 
     if (pfd == -1) {
         return NULL;

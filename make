@@ -61,7 +61,7 @@ build() {
 
     _cc() {
         printf '%s %s\n' "${CC:=cc}" "$*"
-        "$CC" "$@" || return 1
+        "$CC" "$@" || exit 1
     }
 
     for obj in src/[!k]*.c src/*/*.c; do

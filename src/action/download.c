@@ -89,8 +89,7 @@ int action_download(struct state *s) {
     int err = 0;
 
     for (size_t i = 0; i < arr_len(s->pkgs); i++) {
-        FILE *src = pkg_fopen(s->pkgs[i]->repo_fd,
-            s->pkgs[i]->name, "sources", O_RDONLY, "r");
+        FILE *src = pkg_fopen(s->pkgs[i], "sources", O_RDONLY, "r");
 
         if (!src && errno == ENOENT) {
             err("[%s] no sources file, skipping", s->pkgs[i]->name);

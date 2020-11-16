@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <string.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <ftw.h>
 
@@ -40,13 +41,30 @@ int rm_rf(const char *path) {
     return nftw(path, _rm_rf, 64, FTW_DEPTH | FTW_PHYS);
 }
 
-FILE *fopenat(int fd, const char *path, int m, const char *m2) {
-    int fd2 = openat(fd, path, m);
+FILE *fopenat(int fd, const char *p, int m, const char *M) {
+    int fd2 = openat(fd, p, m);
 
     if (fd2 == -1) {
         return NULL;
     }
 
-    return fdopen(fd2, m2);
+    return fdopen(fd2, M);
+}
+
+FILE *fopenatat(int fd, const char *p, const char *f, int m, const char *M) {
+    int pfd = openat(fd, p, O_RDONLY);
+
+    if (pfd == -1) {
+        return NULL;
+    }
+
+    int ffd = openat(pfd, f, m, 0644);
+    close(pfd);
+
+    if (ffd == -1) {
+        return NULL;
+    }
+
+    return fdopen(ffd, M);
 }
 

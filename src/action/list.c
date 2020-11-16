@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 
 #include "error.h"
+#include "file.h"
 #include "arr.h"
 #include "buf.h"
 #include "repo.h"
@@ -49,7 +50,7 @@ static int db_to_list(struct state *s, const char *db) {
 }
 
 static FILE *open_version(int fd, const char *pkg) {
-    FILE *ver = pkg_fopen(fd, pkg, "version", O_RDONLY, "r");
+    FILE *ver = fopenatat(fd, pkg, "version", O_RDONLY, "r");
 
     if (!ver) {
         if (errno == ENOENT) {

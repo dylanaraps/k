@@ -21,6 +21,12 @@ int rm_rf(const char *path);
 /**
  * Wrapper around openat() to return a FILE rather than an fd.
  */
-FILE *fopenat(int fd, const char *path, int m, const char *m2);
+FILE *fopenat(int fd, const char *p, int m, const char *M);
+
+/**
+ * Wrapper around openat() to return a FILE rather than an fd.
+ * (opens p at fd and then f at p)
+ */
+FILE *fopenatat(int fd, const char *p, const char *f, int m, const char *M);
 
 #endif
