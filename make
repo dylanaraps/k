@@ -80,7 +80,11 @@ check() {
     export XDG_CACHE_HOME=$PWD/test/test_hier
 
     command -v valgrind &&
-        set -- valgrind --leak-check=full --track-origins=yes --error-exitcode=1
+        set -- valgrind \
+        --leak-check=full \
+        --track-origins=yes \
+        --error-exitcode=1 \
+        --gen-suppressions=all
 
     for file in test/*.c; do
         "$@" "${file%%.c}" || return 1
