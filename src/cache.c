@@ -75,26 +75,25 @@ int cache_init_pkg(struct cache *c, const char *pkg) {
 }
 
 int cache_get_base(buf **c) {
-    switch(buf_push_s(c, getenv("XDG_CACHE_HOME"))) {
-        case -ENOMEM:
-            return -ENOMEM;
+    int err = buf_push_s(c, getenv("KISS_TMPDIR"));
 
-        case -EINVAL:
-            switch (buf_push_s(c, getenv("HOME"))) {
-                case -ENOMEM:
-                    return -ENOMEM;
+    if (err == -EINVAL) {
+        err = buf_push_s(c, getenv("XDG_CACHE_HOME"));
 
-                case -EINVAL:
-                    err("XDG_CACHE_HOME and HOME unset");
-                    return -1;
+        if (err == -EINVAL) {
+            err = buf_push_s(c, getenv("HOME"));
+
+            if (err == -EINVAL) {
+                err("failed to find cache directory");
+                return -1;
             }
 
             buf_rstrip(c, '/');
             buf_push_l(c, "/.cache", 7);
+        }
     }
 
     buf_rstrip(c, '/');
-
     return buf_printf(c, "/kiss/proc/%ld/", (long) getpid());
 }
 

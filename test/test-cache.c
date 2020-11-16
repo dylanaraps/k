@@ -54,16 +54,26 @@ int main(int argc, char *argv[]) {
 
     int err = test_begin(__FILE__);
 
+    // check KISS_TMPDIR
+    setenv("KISS_TMPDIR", "test/test_hier", 1);
+    setenv("XDG_CACHE_HOME", "", 1);
+    setenv("HOME", "", 1);
+    cache_check(err, "test/test_hier/kiss/proc");
+
     // check XDG_CACHE_HOME
+    setenv("KISS_TMPDIR", "", 1);
     setenv("XDG_CACHE_HOME", "test/test_hier", 1);
+    setenv("HOME", "", 1);
     cache_check(err, "test/test_hier/kiss/proc");
 
     // check HOME
+    setenv("KISS_TMPDIR", "", 1);
     setenv("XDG_CACHE_HOME", "", 1);
     setenv("HOME", "test/test_hier", 1);
     cache_check(err, "test/test_hier/.cache/kiss/proc");
 
     // check invalid
+    setenv("KISS_TMPDIR", "", 1);
     setenv("XDG_CACHE_HOME", "", 1);
     setenv("HOME", "", 1);
     struct cache c;

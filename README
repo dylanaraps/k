@@ -35,15 +35,16 @@ ________________________________________________________________________________
         - [ ] possibly fork/exec command-line git initially
     - [ ] help-ext
 - [ ] environment variables
-    - [ ] KISS_ROOT
+    - [0] KISS_ROOT
     - [ ] KISS_PROMPT
-    - [ ] KISS_PATH
+    - [X] KISS_PATH
     - [ ] KISS_STRIP
     - [ ] KISS_COMPRESS
     - [ ] KISS_FORCE
     - [ ] KISS_CHOICE
     - [ ] KISS_DEBUG
-    - [ ] KISS_TMPDIR
+        - Will be changed to print extra debugging information.
+    - [X] KISS_TMPDIR
 - [ ] components
     - [0] source extraction / tarball creation
         - [0] avoid libarchive
