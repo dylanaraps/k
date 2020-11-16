@@ -22,12 +22,12 @@
 
 enum compression_type {
     TAR_NONE,
-    TAR_XZ,
-    TAR_GZ,
     TAR_BZ2,
-    TAR_ZSTD,
-    TAR_LZMA,
+    TAR_GZ,
     TAR_LZ,
+    TAR_LZMA,
+    TAR_XZ,
+    TAR_ZSTD,
 };
 
 /**

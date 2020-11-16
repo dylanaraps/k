@@ -107,6 +107,8 @@ static int tar_enable_compression(struct archive *a, int compress) {
             return ARCHIVE_OK;
     }
 
+    err("no compression method found");
+    err("was libarchive configured correctly?");
     return -1;
 }
 
