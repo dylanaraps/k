@@ -56,7 +56,7 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
         char *f2 = s->mem + buf_scan(&s->mem, 0, ' ');
 
         switch (pkg_source_type(p, s->mem)) {
-            case SRC_URL: {
+            case SRC_URL:
                 while (*f2 && *f2 == '/') f2++;
 
                 char *dest = s->mem + source_dest_path(s, p->name, f2, s->mem);
@@ -75,7 +75,6 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
 
                 parsed++;
                 break;
-            }
 
             case -1:
                 err_no("source '%s' not found", s->mem);
