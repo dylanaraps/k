@@ -87,6 +87,8 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f) {
 }
 
 int action_download(struct state *s) {
+    int err = 0;
+
     for (size_t i = 0; i < arr_len(s->pkgs); i++) {
         FILE *src = pkg_fopen(s->pkgs[i]->repo_fd,
             s->pkgs[i]->name, "sources", O_RDONLY, "r");
@@ -98,7 +100,8 @@ int action_download(struct state *s) {
 
         if (!src) {
             err_no("failed to open sources file");
-            return -1;
+            err = -1;
+            goto error;
         }
 
         msg("[%zu/%zu] downloading sources for [%s]",
@@ -109,7 +112,8 @@ int action_download(struct state *s) {
 
         if (parsed == -1) {
             source_curl_cleanup();
-            return -1;
+            err = -1;
+            goto error;
         }
 
         if (parsed == 0) {
@@ -117,7 +121,8 @@ int action_download(struct state *s) {
         }
     }
 
+error:
     source_curl_cleanup();
-    return 0;
+    return err;
 }
 

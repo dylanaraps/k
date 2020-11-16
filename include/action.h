@@ -45,6 +45,11 @@ int state_init_pkg(struct state *s, char *p);
 void state_free(struct state *s);
 
 /**
+ * kiss build
+ */
+int action_build(struct state *s);
+
+/**
  * kiss checksum
  */
 int action_checksum(struct state *s);
