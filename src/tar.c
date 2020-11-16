@@ -334,7 +334,7 @@ int tar_create(const char *d, const char *f, int compression) {
         return -1;
 
     } else if (pid == 0) {
-        msg("exec tar cf %s %s", f, d);
+        msg("exec 'tar' 'cf' '%s' '%s'", f, d);
         execlp("tar", "tar", "cf", f, d, 0);
 
     } else {
@@ -359,7 +359,7 @@ int tar_extract(const char *f) {
         return -1;
 
     } else if (pid == 0) {
-        msg("exec tar xf %s --strip-components 1", f);
+        msg("exec 'tar' 'xf' '%s' '--strip-components' '1'", f);
         execlp("tar", "tar", "xf", f, "--strip-components", "1", 0);
 
     } else {
