@@ -61,17 +61,17 @@ build() {
 
     _cc() {
         printf '%s %s\n' "${CC:=cc}" "$*"
-        "$CC" "$@" || kill 0
+        "$CC" "$@" || return 1
     }
 
     for obj in src/[!k]*.c src/*/*.c; do
-        _cc $CFLAGS $CPPFLAGS -c -o "${obj%%.c}.o" "$obj" &
-    done; wait
+        _cc $CFLAGS $CPPFLAGS -c -o "${obj%%.c}.o" "$obj"
+    done
 
     for prog in src/kiss.c test/*.c; do
         _cc $CFLAGS $CPPFLAGS -o "${prog%%.c}" "$prog" \
-            src/[!k]*.o src/*/*.o $LDFLAGS &
-    done; wait
+            src/[!k]*.o src/*/*.o $LDFLAGS
+    done
 }
 
 check() {

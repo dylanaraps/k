@@ -20,9 +20,25 @@
 
 #endif
 
+enum compression_type {
+    TAR_NONE,
+    TAR_XZ,
+    TAR_GZ,
+    TAR_BZ2,
+    TAR_ZSTD,
+    TAR_LZMA,
+    TAR_LZ,
+};
+
+/**
+ * Create a tar archive from contents of directory d, save to file f.
+ * compression is one of the above enum values.
+ */
+int tar_create(const char *d, const char *f, int compression);
+
 /**
  * Extract a tar archive to the current directory.
  */
-int tar_extract(const char *f, int flags);
+int tar_extract(const char *f);
 
 #endif

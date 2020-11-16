@@ -5,6 +5,8 @@
 #ifndef KISS_FILE_H
 #define KISS_FILE_H
 
+#include <sys/stat.h>
+
 /**
  * Recursively create a directory tree. The last path component is skipped
  * unless the path ends in '/'. Returns < 0 for error.
