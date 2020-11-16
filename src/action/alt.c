@@ -13,9 +13,17 @@
 #include "sha256.h"
 #include "action.h"
 
-int action_build(struct state *s) {
-    for (size_t i = 0; i < arr_len(s->pkgs); i++) {
+int action_alt(struct state *s) {
+    switch (arr_len(s->argv)) {
+        case 0:
+            break;
 
+        case 2:
+            break;
+
+        default:
+            err("invalid arguments passed");
+            return -1;
     }
 
     return 0;

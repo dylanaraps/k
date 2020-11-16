@@ -15,7 +15,7 @@ TODO
 ________________________________________________________________________________
 
 - [ ] actions
-    - [ ] alternatives
+    - [0] alternatives
     - [0] build
     - [x] checksum
         - [x] find self-contained / permissively licensed sha256 implementation

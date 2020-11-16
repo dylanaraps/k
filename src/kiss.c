@@ -55,6 +55,14 @@ int main (int argc, char *argv[]) {
 // strcmp is only reached when both first characters match.
 #define ARG(a, b) ((*a) == (*b) && ((!a[1]) || strcmp(a, b) == 0))
 
+    } else if (ARG(argv[1], "alt")) {
+        s = state_init(argc, argv, STATE_ARGV | STATE_MEM);
+        err = s ? action_alt(s) : -1;
+
+    } else if (ARG(argv[1], "build")) {
+        s = state_init(argc, argv, STATE_ALL);
+        err = s ? action_build(s) : -1;
+
     } else if (ARG(argv[1], "checksum")) {
         s = state_init(argc, argv, STATE_ALL);
         err = s ? action_checksum(s) : -1;

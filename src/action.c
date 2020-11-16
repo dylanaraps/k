@@ -126,6 +126,16 @@ struct state *state_init(int argc, char *argv[], int opt) {
         }
     }
 
+    if (opt & STATE_ARGV) {
+        if (!(s->argv = arr_alloc(0, (size_t) argc))) {
+            goto error;
+        }
+
+        for (int i = 2; i < argc; i++) {
+            arr_set_end(s->argv, argv[i]);
+        }
+    }
+
     return s;
 
 error:
@@ -136,6 +146,10 @@ error:
 void state_free(struct state *s) {
     if (!s) {
         return;
+    }
+
+    if (s->opt & STATE_ARGV) {
+        arr_free(s->argv);
     }
 
     if (s->opt & STATE_PKG) {

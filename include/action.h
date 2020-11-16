@@ -15,6 +15,7 @@ struct state {
     struct cache cache;
     struct repo **repos;
     pkg **pkgs;
+    char **argv;
     buf *mem;
 };
 
@@ -26,6 +27,7 @@ enum state_options {
     STATE_PKG_CACHE = (1L << 4),
     STATE_PKG_PWD   = (1L << 5),
     STATE_MEM       = (1L << 6),
+    STATE_ARGV      = (1L << 7),
 };
 #define STATE_ALL (~0L)
 
@@ -43,6 +45,11 @@ int state_init_pkg(struct state *s, char *p);
  * free state
  */
 void state_free(struct state *s);
+
+/**
+ * kiss alt
+ */
+int action_alt(struct state *s);
 
 /**
  * kiss build
