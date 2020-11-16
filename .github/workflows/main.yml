@@ -14,7 +14,7 @@ jobs:
                   CC=clang time ./make
                   CC=tcc   time ./make
                   CC=gcc   time ./make
-                  export CFLAGS='-Werror -O0 -g -fprofile-arcs -ftest-coverage'
+                  export CFLAGS='-Werror -O3 -fprofile-arcs -ftest-coverage'
                   export LDFLAGS='-lgcov --coverage'
                   CC=gcc ./make
                   ./make check
