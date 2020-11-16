@@ -6,7 +6,7 @@
 #include <signal.h>
 #include <string.h>
 
-#ifdef USE_CURL
+#ifdef DL_USE_CURL
 #include <curl/curl.h>
 #endif
 
@@ -19,7 +19,7 @@
  * by setting the environment variable CURL to 0 prior to the build. Disabling
  * this dependency will also disable the download feature.
  */
-#ifdef USE_CURL
+#ifdef DL_USE_CURL
 
 // same handle is used for all requests
 static CURL *curl;
@@ -190,5 +190,5 @@ void source_curl_cleanup(void) {
     //
 }
 
-#endif // USE_CURL
+#endif
 

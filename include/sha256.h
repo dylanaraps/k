@@ -15,14 +15,14 @@
  * OpenSSL has ASM implementations of sha256 (which use SSSE3, AVX, whatever)
  * for various architectures.
  */
-#if defined(USE_OPENSSL)
+#if defined(SHA256_USE_OPENSSL)
 #include <openssl/sha.h>
 
 /**
  * Use bearssl sha256 if available falling back to a standalone implementation.
  * (This is the fastest implementation in my testing).
  */
-#elif defined(USE_BEARSSL)
+#elif defined(SHA256_USE_BEARSSL)
 #include <bearssl_hash.h>
 
 typedef br_sha256_context SHA256_CTX;

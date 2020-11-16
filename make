@@ -23,7 +23,7 @@ configure() {
     #       only directly depends on libcurl.
     case ${CURL:=1} in 1)
         LDFLAGS="$(_dep libcurl -lcurl) $LDFLAGS"
-        CFLAGS="-DUSE_CURL $CFLAGS"
+        CFLAGS="-DDL_USE_CURL $CFLAGS"
     esac
 
     # Which sha256 implementation to use. If all options are '0', an internal
@@ -35,7 +35,7 @@ configure() {
         # bearssl.
         case ${BEARSSL:=0} in 1)
             LDFLAGS="$(_dep bearssl '-lbearssl') $LDFLAGS"
-            CFLAGS="-DUSE_BEARSSL $CFLAGS"
+            CFLAGS="-DSHA256_USE_BEARSSL $CFLAGS"
         esac
 
         # SHA256 external implementation. Setting the environment variable
@@ -43,7 +43,7 @@ configure() {
         # openssl.
         case ${OPENSSL:=0} in 1)
             LDFLAGS="$(_dep openssl '-lssl -lcrypto') $LDFLAGS"
-            CFLAGS="-DUSE_OPENSSL $CFLAGS"
+            CFLAGS="-DSHA256_USE_OPENSSL $CFLAGS"
         esac
     }
 
@@ -52,7 +52,7 @@ configure() {
     # libarchive. If set to '0', the tar command will be executed.
     case ${LIBARCHIVE:=0} in 1)
         LDFLAGS="$(_dep libarchive '-larchive') $LDFLAGS"
-        CFLAGS="-DUSE_LIBARCHIVE $CFLAGS"
+        CFLAGS="-DTAR_USE_LIBARCHIVE $CFLAGS"
     esac
 }
 

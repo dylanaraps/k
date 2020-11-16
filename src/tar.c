@@ -13,7 +13,7 @@
 /**
  * Use libarchive for tar archives.
  */
-#ifdef USE_LIBARCHIVE
+#ifdef TAR_USE_LIBARCHIVE
 
 static const int archive_opts = \
     // Refuse to extract an absolute path.

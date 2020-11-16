@@ -32,8 +32,8 @@ void sha256_to_string(unsigned char hash[SHA256_LEN], char out[65]) {
  * 2010-06-11 : Igor Pavlov : Public domain
  * This code is based on public domain code from Wei Dai's Crypto++ library.
  */
-#ifndef USE_OPENSSL
-#ifndef USE_BEARSSL
+#ifndef SHA256_USE_OPENSSL
+#ifndef SHA256_USE_BEARSSL
 
 void SHA256_Init(SHA256_CTX *c) {
     c->count = 0;

@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     (void) argc;
     (void) argv;
 
-#ifdef USE_CURL
+#ifdef DL_USE_CURL
     int ret = test_begin(__FILE__);
 
     FILE *dest = fopen("test/team.txt", "w");

@@ -8,7 +8,7 @@
 /**
  * Use libarchive for tar archives.
  */
-#ifdef USE_LIBARCHIVE
+#ifdef TAR_USE_LIBARCHIVE
 #include <archive.h>
 #include <archive_entry.h>
 
