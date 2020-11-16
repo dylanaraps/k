@@ -165,7 +165,7 @@ static int tar_write_file(struct archive *w, const char *f) {
         }
 
         char m[4096];
-        for (ssize_t l; (l = read(fd, m, sizeof(m))) > 0;) {
+        for (ssize_t l = 0; (l = read(fd, m, sizeof(m))) > 0;) {
             if ((ret = archive_write_data(w, m, l)) == -1) {
                 err("failed to write data: %s", archive_error_string(w));
                 goto d_error;
@@ -242,7 +242,7 @@ int tar_create(const char *d, const char *f, int compression) {
 
     size_t len_pre = buf_len(mem);
 
-    for (struct dirent *dp; (dp = readdir(dir)); ) {
+    for (struct dirent *dp = 0; (dp = readdir(dir)); ) {
         if (dp->d_name[0] == '.' && (!dp->d_name[1] ||
            (dp->d_name[1] == '.' && !dp->d_name[2]))) {
             continue;
