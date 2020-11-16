@@ -47,6 +47,8 @@ ________________________________________________________________________________
 - [ ] components
     - [0] source extraction / tarball creation
         - [0] avoid libarchive
+            - [x] tar utility fallback
+            - [ ] alternative tar library
         - [x] possibly fork/exec command-line tar initially
         - [x] support zip
     - [ ] checksum verification
