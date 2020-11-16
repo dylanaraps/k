@@ -48,3 +48,27 @@ fake:
     return out;
 }
 
+int run_cmd(char *const argv[]) {
+    pid_t pid = fork();
+
+    if (pid == -1) {
+        err_no("failed to fork");
+        return -1;
+
+    } else if (pid == 0) {
+        execvp(argv[0], argv);
+
+    } else {
+        int status = 0;
+
+        waitpid(pid, &status, 0);
+
+        if (WEXITSTATUS(status)) {
+            err_no("command exited %d", status);
+            return -1;
+        }
+    }
+
+    return 0;
+}
+

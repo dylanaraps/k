@@ -327,53 +327,19 @@ r_error:
 int tar_create(const char *d, const char *f, int compression) {
     (void) compression;
 
-    pid_t pid = fork();
+    const char *cmd[] = {
+        "tar", "cf", f, d, 0
+    };
 
-    if (pid == -1) {
-        err_no("failed to fork");
-        return -1;
-
-    } else if (pid == 0) {
-        msg("exec 'tar' 'cf' '%s' '%s'", f, d);
-        execlp("tar", "tar", "cf", f, d, 0);
-
-    } else {
-        int status = 0;
-
-        waitpid(pid, &status, 0);
-
-        if (WEXITSTATUS(status)) {
-            err_no("tar exited %d", status);
-            return -1;
-        }
-    }
-
-    return 0;
+    return run_cmd((char **) cmd);
 }
 
 int tar_extract(const char *f) {
-    pid_t pid = fork();
+    const char *cmd[] = {
+        "tar", "xf", f, "--strip-components", "1", 0
+    };
 
-    if (pid == -1) {
-        err_no("failed to fork");
-        return -1;
-
-    } else if (pid == 0) {
-        msg("exec 'tar' 'xf' '%s' '--strip-components' '1'", f);
-        execlp("tar", "tar", "xf", f, "--strip-components", "1", 0);
-
-    } else {
-        int status = 0;
-
-        waitpid(pid, &status, 0);
-
-        if (WEXITSTATUS(status)) {
-            err_no("tar exited %d", status);
-            return -1;
-        }
-    }
-
-    return 0;
+    return run_cmd((char **) cmd);
 }
 
 #endif
