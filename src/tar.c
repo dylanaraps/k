@@ -191,6 +191,11 @@ r_error:
 }
 
 int tar_create(const char *d, const char *f, int compression) {
+    if (!f || !*f) {
+        err("empty input");
+        return -1;
+    }
+
     struct archive *w = archive_write_new();
 
     if (!w) {
@@ -273,6 +278,11 @@ w_error:
 }
 
 int tar_extract(const char *f) {
+    if (!f || !*f) {
+        err("empty input");
+        return -1;
+    }
+
     struct archive *r = archive_read_new();
 
     if (!r) {
@@ -344,6 +354,10 @@ r_error:
 int tar_create(const char *d, const char *f, int compression) {
     (void) compression;
 
+    if (!d || !*d || !f || !*f) {
+        return -1;
+    }
+
     const char *cmd[] = {
         "tar", "acf", f, d, 0
     };
@@ -352,6 +366,10 @@ int tar_create(const char *d, const char *f, int compression) {
 }
 
 int tar_extract(const char *f) {
+    if (!f || !*f) {
+        return -1;
+    }
+
     const char *cmd[] = {
         "tar", "xf", f, "--strip-components", "1", 0
     };
