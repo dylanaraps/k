@@ -7,6 +7,9 @@
 
 #include <stdint.h>
 
+/**
+ * Turn bytes into human readable representation.
+ */
 char *human_readable(uint64_t n, char out[6]);
 
 #endif

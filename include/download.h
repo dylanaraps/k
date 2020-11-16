@@ -1,16 +1,6 @@
 /**
  * SPDX-License-Identifier: MIT
  * Copyright (C) 2020 Dylan Araps
- *
- * Notes:
- *
- * - The first call to source_download() initializes curl. All subsequent calls
- *   reuse the same handle.
- *
- * - This is merely a wrapper around libcurl and any code unrelated to it should
- *   live elsewhere. This keeps the libcurl dependency contained to a single,
- *   small file. It should be easy to swap out libcurl for something else.
- *
  */
 #ifndef KISS_DOWNLOAD_H
 #define KISS_DOWNLOAD_H
