@@ -73,26 +73,41 @@ static int tar_strip_component(struct archive_entry *e) {
 
 static int tar_enable_compression(struct archive *a, int compress) {
     switch (compress) {
+#ifdef ARCHIVE_FILTER_BZIP2
         case TAR_BZ2:
             return archive_write_add_filter_bzip2(a);
+#endif
 
+#ifdef ARCHIVE_FILTER_GZIP
         case TAR_GZ:
             return archive_write_add_filter_gzip(a);
+#endif
 
+#ifdef ARCHIVE_FILTER_XZ
         case TAR_XZ:
             return archive_write_add_filter_xz(a);
+#endif
 
+#ifdef ARCHIVE_FILTER_LZIP
         case TAR_LZ:
             return archive_write_add_filter_lzip(a);
+#endif
 
+#ifdef ARCHIVE_FILTER_LZMA
         case TAR_LZMA:
             return archive_write_add_filter_lzma(a);
+#endif
 
+#ifdef ARCHIVE_FILTER_ZSTD
         case TAR_ZSTD:
             return archive_write_add_filter_zstd(a);
+#endif
+
+        case TAR_NONE:
+            return ARCHIVE_OK;
     }
 
-    return 0;
+    return -1;
 }
 
 static int tar_write_file(struct archive *w, const char *f) {
