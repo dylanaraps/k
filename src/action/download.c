@@ -110,7 +110,6 @@ int action_download(struct state *s) {
         fclose(src);
 
         if (parsed == -1) {
-            source_curl_cleanup();
             err = -1;
             goto error;
         }
