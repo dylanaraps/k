@@ -328,7 +328,7 @@ int tar_create(const char *d, const char *f, int compression) {
     (void) compression;
 
     const char *cmd[] = {
-        "tar", "cf", f, d, 0
+        "tar", "acf", f, d, 0
     };
 
     return run_cmd((char **) cmd);
