@@ -1,7 +1,7 @@
 #include <errno.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -71,14 +71,17 @@ int pkg_faccessat(int repo_fd, const char *pkg, const char *file) {
 int pkg_source_type(pkg *p, char *src) {
     if (src[0] == 'g' && src[1] == 'i' && src[2] == 't' && src[3] == '+') {
         return SRC_GIT;
+    }
 
-    } else if (src[0] == '/') {
+    if (src[0] == '/') {
         return access(src, F_OK) == 0 ? SRC_ABS : -1;
+    }
 
-    } else if (strstr(src, "://")) {
+    if (strstr(src, "://")) {
         return SRC_URL;
+    }
 
-    } else if (pkg_faccessat(p->repo_fd, p->name, src) == 0) {
+    if (pkg_faccessat(p->repo_fd, p->name, src) == 0) {
         return SRC_REL;
     }
 

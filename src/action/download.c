@@ -1,16 +1,16 @@
 /* SPDX-License-Identifier: MIT
  * Copyright (C) 2020 Dylan Araps
 **/
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <unistd.h>
 
+#include "action.h"
 #include "arr.h"
 #include "download.h"
 #include "error.h"
 #include "file.h"
 #include "pkg.h"
-#include "action.h"
 
 static size_t source_dest_path(struct state *s,
                           const char *n, const char *d, const char *f) {

@@ -2,17 +2,17 @@
  * SPDX-License-Identifier: MIT
  * Copyright (C) 2020 Dylan Araps
  */
-#include <stdlib.h>
 #include <signal.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifdef DL_USE_CURL
 #include <curl/curl.h>
 #endif
 
+#include "download.h"
 #include "error.h"
 #include "util.h"
-#include "download.h"
 
 /**
  * CURL is used to download remote sources. This dependency can be disabled

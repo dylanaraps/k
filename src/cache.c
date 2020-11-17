@@ -1,8 +1,8 @@
 #include <errno.h>
-#include <stdlib.h>
 #include <fcntl.h>
-#include <unistd.h>
+#include <stdlib.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "buf.h"
 #include "file.h"

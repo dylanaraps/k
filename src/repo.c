@@ -1,9 +1,9 @@
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "arr.h"
 #include "buf.h"

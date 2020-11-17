@@ -1,6 +1,6 @@
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 
 #include "sha256.h"
 
@@ -51,14 +51,15 @@ void SHA256_Init(SHA256_CTX *c) {
 #define rotrFixed(x, n) (((x) >> (n)) | ((x) << (32 - (n))))
 #define S0(x) (rotrFixed(x, 2) ^ rotrFixed(x,13) ^ rotrFixed(x, 22))
 #define S1(x) (rotrFixed(x, 6) ^ rotrFixed(x,11) ^ rotrFixed(x, 25))
-#define s0(x) (rotrFixed(x, 7) ^ rotrFixed(x,18) ^ (x >> 3))
-#define s1(x) (rotrFixed(x,17) ^ rotrFixed(x,19) ^ (x >> 10))
+#define s0(x) (rotrFixed(x, 7) ^ rotrFixed(x,18) ^ ((x) >> 3))
+#define s1(x) (rotrFixed(x,17) ^ rotrFixed(x,19) ^ ((x) >> 10))
 
 #define blk0(i) (W[i] = data[i])
-#define blk2(i) (W[(i)&15] += s1(W[(i-2)&15]) + W[(i-7)&15] + s0(W[(i-15)&15]))
+#define blk2(i) \
+    (W[(i)&15] += s1(W[((i)-2)&15]) + W[((i)-7)&15] + s0(W[((i)-15)&15]))
 
-#define Ch(x,y,z) (z^(x&(y^z)))
-#define Maj(x,y,z) ((x&y)|(z&(x|y)))
+#define Ch(x,y,z) ((z)^((x)&((y)^(z))))
+#define Maj(x,y,z) (((x)&(y))|((z)&((x)|(y))))
 
 #define a(i) T[(0-(i))&7]
 #define b(i) T[(1-(i))&7]
@@ -69,18 +70,18 @@ void SHA256_Init(SHA256_CTX *c) {
 #define g(i) T[(6-(i))&7]
 #define h(i) T[(7-(i))&7]
 
-#define R(a,b,c,d,e,f,g,h, i) h += S1(e) + Ch(e,f,g) + K[i+j] + \
-    (j?blk2(i):blk0(i)); d += h; h += S0(a) + Maj(a, b, c)
+#define R(a,b,c,d,e,f,g,h, i) h += S1(e) + Ch(e,f,g) + K[(i)+(j)] + \
+    ((j)?blk2(i):blk0(i)); (d) += (h); (h) += S0(a) + Maj(a, b, c)
 
 #define RX_8(i) \
-    R(a,b,c,d,e,f,g,h, i);   \
-    R(h,a,b,c,d,e,f,g, i+1); \
-    R(g,h,a,b,c,d,e,f, i+2); \
-    R(f,g,h,a,b,c,d,e, i+3); \
-    R(e,f,g,h,a,b,c,d, i+4); \
-    R(d,e,f,g,h,a,b,c, i+5); \
-    R(c,d,e,f,g,h,a,b, i+6); \
-    R(b,c,d,e,f,g,h,a, i+7)
+    R(a,b,c,d,e,f,g,h, (i));   \
+    R(h,a,b,c,d,e,f,g, (i)+1); \
+    R(g,h,a,b,c,d,e,f, (i)+2); \
+    R(f,g,h,a,b,c,d,e, (i)+3); \
+    R(e,f,g,h,a,b,c,d, (i)+4); \
+    R(d,e,f,g,h,a,b,c, (i)+5); \
+    R(c,d,e,f,g,h,a,b, (i)+6); \
+    R(b,c,d,e,f,g,h,a, (i)+7)
 
 static const uint32_t K[64] = {
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,

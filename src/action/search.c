@@ -1,16 +1,16 @@
 /* SPDX-License-Identifier: MIT
  * Copyright (C) 2020 Dylan Araps
 **/
-#include <glob.h>
 #include <errno.h>
-#include <unistd.h>
+#include <glob.h>
 #include <string.h>
+#include <unistd.h>
 
-#include "error.h"
+#include "action.h"
 #include "arr.h"
 #include "buf.h"
+#include "error.h"
 #include "repo.h"
-#include "action.h"
 
 int action_search(struct state *s) {
     glob_t g = { .gl_pathc = 0, };

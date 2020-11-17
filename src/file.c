@@ -1,10 +1,10 @@
 #include <dirent.h>
 #include <errno.h>
-#include <string.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
 #include <ftw.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "error.h"
 #include "file.h"
@@ -24,7 +24,7 @@ int mkdir_p(const char *path, mode_t m) {
     return 0;
 }
 
-static int _rm_rf(const char *p, const struct stat *sb, int t, struct FTW *b) {
+static int rm_cb(const char *p, const struct stat *sb, int t, struct FTW *b) {
     (void) sb;
     (void) t;
     (void) b;
@@ -38,7 +38,7 @@ static int _rm_rf(const char *p, const struct stat *sb, int t, struct FTW *b) {
 }
 
 int rm_rf(const char *path) {
-    return nftw(path, _rm_rf, 64, FTW_DEPTH | FTW_PHYS);
+    return nftw(path, rm_cb, 64, FTW_DEPTH | FTW_PHYS);
 }
 
 FILE *fopenat(int fd, const char *p, int m, const char *M) {

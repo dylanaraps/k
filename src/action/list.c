@@ -3,19 +3,19 @@
 **/
 #include <dirent.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#include "error.h"
-#include "file.h"
+#include "action.h"
 #include "arr.h"
 #include "buf.h"
-#include "repo.h"
+#include "error.h"
+#include "file.h"
 #include "pkg.h"
-#include "action.h"
+#include "repo.h"
 
 static int compare(void const *a, void const *b) {
     pkg const *p1 = *(pkg const **) a;

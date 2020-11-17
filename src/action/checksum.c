@@ -1,17 +1,17 @@
 /* SPDX-License-Identifier: MIT
  * Copyright (C) 2020 Dylan Araps
 **/
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <unistd.h>
 
+#include "action.h"
 #include "arr.h"
 #include "download.h"
 #include "error.h"
 #include "file.h"
 #include "pkg.h"
 #include "sha256.h"
-#include "action.h"
 
 static int parse_source_file(struct state *s, pkg *p, FILE *f, FILE *d) {
     int parsed = 0;

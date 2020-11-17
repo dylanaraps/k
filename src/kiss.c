@@ -2,17 +2,17 @@
  * SPDX-License-Identifier: MIT
  * Copyright (C) 2020 Dylan Araps
  */
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "action.h"
 #include "arr.h"
 #include "buf.h"
-#include "pkg.h"
-#include "repo.h"
 #include "cache.h"
 #include "error.h"
+#include "pkg.h"
+#include "repo.h"
 
 static void version(char *arg0) {
     msg("%s 0.0.1 (compiled %s)", arg0, __DATE__);
@@ -53,7 +53,7 @@ int main (int argc, char *argv[]) {
 
 // Check if argument matches an action. True for b==build and build==build
 // strcmp is only reached when both first characters match.
-#define ARG(a, b) ((*a) == (*b) && ((!a[1]) || strcmp(a, b) == 0))
+#define ARG(a, b) ((*(a)) == (*(b)) && ((!(a)[1]) || strcmp(a, b) == 0))
 
     } else if (ARG(argv[1], "alt")) {
         s = state_init(argc, argv, STATE_ARGV | STATE_MEM);

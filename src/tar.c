@@ -1,14 +1,14 @@
 #include <dirent.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include "arr.h"
 #include "buf.h"
 #include "error.h"
-#include "util.h"
 #include "tar.h"
+#include "util.h"
 
 /**
  * Use libarchive for tar archives.

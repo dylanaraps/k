@@ -1,7 +1,7 @@
-#include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "download.h"
 #include "sha256.h"

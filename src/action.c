@@ -1,11 +1,11 @@
 #include <stdlib.h>
 
+#include "action.h"
 #include "arr.h"
 #include "cache.h"
 #include "error.h"
 #include "pkg.h"
 #include "repo.h"
-#include "action.h"
 
 int state_init_pkg(struct state *s, char *p) {
     if (strstr(p, "/")) {

@@ -1,6 +1,6 @@
-#include <unistd.h>
 #include <stdint.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include "error.h"
 #include "util.h"
@@ -54,8 +54,9 @@ int run_cmd(char *const argv[]) {
     if (pid == -1) {
         err_no("failed to fork");
         return -1;
+    }
 
-    } else if (pid == 0) {
+    if (pid == 0) {
         execvp(argv[0], argv);
 
     } else {
