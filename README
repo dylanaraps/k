@@ -16,6 +16,8 @@ ________________________________________________________________________________
 
 - [ ] actions
     - [0] alternatives
+        - [x] list all
+        - [ ] swap alts
     - [0] build
     - [x] checksum
         - [x] find self-contained / permissively licensed sha256 implementation
