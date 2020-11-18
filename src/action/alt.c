@@ -16,16 +16,16 @@
 #include "util.h"
 
 static void print_alt(const char *n) {
-    for (size_t i = 0, l = strlen(n), f = 0; i < l; i++) {
-        if (n[i] == '>') {
-            if (f++ == 0) {
+    for (size_t f = 0; *n; n++) {
+        if (*n == '>') {
+            if (!f++) {
                 putchar(' ');
             }
 
             putchar('/');
 
         } else {
-            putchar(n[i]);
+            putchar(*n);
         }
     }
 
