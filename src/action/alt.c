@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: MIT
  * Copyright (C) 2020 Dylan Araps
 **/
+#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -13,11 +14,61 @@
 #include "pkg.h"
 #include "sha256.h"
 
+static int compare(void const *a, void const *b) {
+    char const *p1 = *(char const **) a;
+    char const *p2 = *(char const **) b;
+
+    return strcmp(p1, p2);
+}
+
+static void print_alt(const char *n) {
+    for (size_t i = 0, l = strlen(n), f = 0; i < l; i++) {
+        if (n[i] == '>') {
+            if (f++ == 0) {
+                putchar(' ');
+            }
+
+            putchar('/');
+
+        } else {
+            putchar(n[i]);
+        }
+    }
+
+    putchar('\n');
+}
+
+static int list_alts(struct state *s, const char *db) {
+    DIR *d = opendir(db);
+
+    if (!d) {
+        err_no("failed to open database");
+        return -1;
+    }
+
+    for (struct dirent *dp; (dp = readdir(d)); ) {
+        if (dp->d_name[0] == '.' && (!dp->d_name[1] ||
+           (dp->d_name[1] == '.' && !dp->d_name[2]))) {
+            continue;
+        }
+
+        arr_push_b(s->argv, dp->d_name);
+    }
+    arr_sort(s->argv, compare);
+
+    for (size_t i = 0; i < arr_len(s->argv); i++) {
+        print_alt(s->argv[i]);
+    }
+
+    closedir(d);
+    return 0;
+}
+
 int action_alt(struct state *s) {
-    struct repo *db = repo_open_db();
+    struct repo *db = repo_open_db("choices");
 
     if (!db) {
-        err_no("failed to open database");
+        err_no("failed to open alt database");
         return -1;
     }
 
@@ -25,7 +76,9 @@ int action_alt(struct state *s) {
 
     switch (arr_len(s->argv)) {
         case 0:
-            // list all
+            if ((ret = list_alts(s, db->path)) < 0) {
+                err_no("failed to list alts");
+            }
             break;
 
         case 2:

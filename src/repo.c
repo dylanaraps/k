@@ -30,7 +30,7 @@ struct repo *repo_open(const char *path) {
     return r;
 }
 
-struct repo *repo_open_db(void) {
+struct repo *repo_open_db(const char *type) {
     buf *db = buf_alloc(0, 128);
 
     if (!db) {
@@ -39,7 +39,8 @@ struct repo *repo_open_db(void) {
 
     buf_push_s(&db, getenv("KISS_ROOT"));
     buf_rstrip(&db, '/');
-    buf_push_l(&db, "/var/db/kiss/installed", 22);
+    buf_push_l(&db, "/var/db/kiss/", 13);
+    buf_push_s(&db, type);
 
     struct repo *n = repo_open(db);
 
@@ -77,7 +78,7 @@ int repo_open_PATH(struct repo **r, const char *PATH) {
     free(p);
 
 open_db:;
-    struct repo *n = repo_open_db();
+    struct repo *n = repo_open_db("installed");
 
     if (!n) {
         return -1;

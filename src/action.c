@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "action.h"
+
 #include "arr.h"
 #include "cache.h"
 #include "error.h"

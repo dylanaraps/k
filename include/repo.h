@@ -21,9 +21,9 @@ struct repo *repo_open(const char *path);
 int repo_open_PATH(struct repo **r, const char *PATH);
 
 /**
- * Open the installed database. Returns NULL on error;
+ * Open the installed database of type. Returns NULL on error;
  */
-struct repo *repo_open_db(void);
+struct repo *repo_open_db(const char *type);
 
 /**
  * Find the first occurrence of pkg in a repository list;

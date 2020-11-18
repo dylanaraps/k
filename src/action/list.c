@@ -84,7 +84,7 @@ static int read_version(struct state *s, int fd, const char *pkg) {
 }
 
 int action_list(struct state *s) {
-    struct repo *db = repo_open_db();
+    struct repo *db = repo_open_db("installed");
 
     if (!db) {
         err_no("failed to open database");
