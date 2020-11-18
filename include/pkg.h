@@ -16,6 +16,7 @@ void pkg_free(pkg *p);
 void pkg_free_all(pkg **p);
 FILE *pkg_fopen(pkg *p, const char *f, int M, const char *m);
 int pkg_faccessat(int repo_fd, const char *pkg, const char *file);
+int pkg_sort_name(void const *a, void const *b);
 
 enum pkg_source_types {
     SRC_URL,

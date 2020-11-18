@@ -5,6 +5,7 @@
 #ifndef KISS_FILE_H
 #define KISS_FILE_H
 
+#include <dirent.h>
 #include <sys/stat.h>
 
 /**
@@ -28,5 +29,10 @@ FILE *fopenat(int fd, const char *p, int m, const char *M);
  * (opens p at fd and then f at p)
  */
 FILE *fopenatat(int fd, const char *p, const char *f, int m, const char *M);
+
+/**
+ * Wrapper around readdir() to skip '.' and '..'.
+ */
+struct dirent *read_dir(DIR *d);
 
 #endif

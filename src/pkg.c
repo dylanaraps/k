@@ -88,3 +88,9 @@ int pkg_source_type(pkg *p, char *src) {
     return -1;
 }
 
+int pkg_sort_name(void const *a, void const *b) {
+    pkg const *p1 = *(pkg const **) a;
+    pkg const *p2 = *(pkg const **) b;
+
+    return strcmp(p1->name, p2->name);
+}

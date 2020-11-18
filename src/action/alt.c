@@ -36,18 +36,14 @@ static int list_alts(struct state *s, const char *db) {
     DIR *d = opendir(db);
 
     if (!d) {
-        err_no("failed to open database");
+        err_no("failed to open alt database");
         return -1;
     }
 
-    for (struct dirent *dp; (dp = readdir(d)); ) {
-        if (dp->d_name[0] == '.' && (!dp->d_name[1] ||
-           (dp->d_name[1] == '.' && !dp->d_name[2]))) {
-            continue;
-        }
-
+    for (struct dirent *dp; (dp = read_dir(d)); ) {
         arr_push_b(s->argv, dp->d_name);
     }
+
     arr_sort(s->argv, qsort_cb_str);
 
     for (size_t i = 0; i < arr_len(s->argv); i++) {
@@ -68,24 +64,17 @@ int action_alt(struct state *s) {
 
     int ret = 0;
 
-    switch (arr_len(s->argv)) {
-        case 0:
-            if ((ret = list_alts(s, db->path)) < 0) {
-                err_no("failed to list alts");
-            }
-            break;
+    if (arr_len(s->argv) == 0) {
+        ret = list_alts(s, db->path);
 
-        case 2:
-            // swap
-            break;
+    } else if (arr_len(s->argv) == 2) {
+        // swap alts
 
-        default:
-            err("invalid arguments passed");
-            ret = -1;
-            goto error;
+    } else {
+        err_no("invalid arguments");
+        ret = -1;
     }
 
-error:
     repo_free(db);
     return ret;
 }

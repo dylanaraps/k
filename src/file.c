@@ -68,3 +68,14 @@ FILE *fopenatat(int fd, const char *p, const char *f, int m, const char *M) {
     return fdopen(ffd, M);
 }
 
+struct dirent *read_dir(DIR *d) {
+    struct dirent *r = readdir(d);
+
+    if (r && r->d_name[0] == '.') {
+        if (!r->d_name[1] || (r->d_name[1] == '.' && !r->d_name[2])) {
+            return read_dir(d);
+        }
+    }
+
+    return r;
+}

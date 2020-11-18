@@ -26,20 +26,15 @@ static int db_to_list(struct state *s, const char *db) {
         return -1;
     }
 
-    for (struct dirent *dp; (dp = readdir(d)); ) {
-        if (dp->d_name[0] == '.' && (!dp->d_name[1] ||
-           (dp->d_name[1] == '.' && !dp->d_name[2]))) {
-            continue;
-        }
-
+    for (struct dirent *dp; (dp = read_dir(d)); ) {
         if (state_init_pkg(s, dp->d_name) < 0) {
             closedir(d);
             return -1;
         }
     }
 
+    arr_sort(s->pkgs, pkg_sort_name);
     closedir(d);
-    arr_sort(s->pkgs, qsort_cb_str);
     return 0;
 }
 

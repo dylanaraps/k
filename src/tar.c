@@ -7,6 +7,7 @@
 #include "arr.h"
 #include "buf.h"
 #include "error.h"
+#include "file.h"
 #include "tar.h"
 #include "util.h"
 
@@ -247,19 +248,14 @@ int tar_create(const char *d, const char *f, int compression) {
 
     size_t len_pre = buf_len(mem);
 
-    for (struct dirent *dp = 0; (dp = readdir(dir)); ) {
-        if (dp->d_name[0] == '.' && (!dp->d_name[1] ||
-           (dp->d_name[1] == '.' && !dp->d_name[2]))) {
-            continue;
-        }
-
+    for (struct dirent *dp = 0; (dp = read_dir(dir)); ) {
         if ((ret = buf_push_s(&mem, dp->d_name)) < 0) {
             err_no("buf erorr");
             break;
         }
 
         if ((ret = tar_write_file(w, mem)) != 0) {
-            err("failed to read dirent: %s", archive_error_string(w));
+            err("failed to read dir: %s", archive_error_string(w));
             break;
         }
 
