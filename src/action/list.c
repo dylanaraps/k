@@ -63,12 +63,12 @@ static int read_version(struct state *s, int fd, const char *pkg) {
     }
 
     int err = buf_getline(&s->mem, f, 32);
-    fclose(f);
 
     if (err < 0) {
         err_no("[%s] failed to read version file", pkg);
     }
 
+    fclose(f);
     return err;
 }
 
@@ -90,7 +90,7 @@ int action_list(struct state *s) {
     for (size_t i = 0; i < arr_len(s->pkgs); i++) {
         buf_set_len(s->mem, 0);
 
-        if (read_version(s, db->fd, s->pkgs[i]->name) < 0) {
+        if ((err = read_version(s, db->fd, s->pkgs[i]->name)) < 0) {
             goto error;
         }
 
