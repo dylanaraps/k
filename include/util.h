@@ -18,4 +18,9 @@ char *human_readable(uint64_t n, char out[6]);
  */
 int run_cmd(char *const argv[]);
 
+/**
+ * Basic qsort callback to sort lists of strings.
+ */
+int qsort_cb_str(void const *a, void const *b);
+
 #endif

@@ -3,6 +3,7 @@
 
 #include "arr.h"
 #include "test.h"
+#include "util.h"
 
 static const char *fruit[] = {
     "apple",
@@ -12,10 +13,6 @@ static const char *fruit[] = {
     "peach",
     "lime"
 };
-
-static int compare(void const *a, void const *b) {
-    return strcmp(*(const char **) a, *(const char **) b);
-}
 
 int main(int argc, char *argv[]) {
     (void) argc;
@@ -41,7 +38,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    arr_sort(list, compare); {
+    arr_sort(list, qsort_cb_str); {
         test(arr_cap(list) == 6);
         test(arr_len(list) == 6);
         test(strcmp(list[0], "apple") == 0);

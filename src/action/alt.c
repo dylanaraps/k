@@ -13,13 +13,7 @@
 #include "file.h"
 #include "pkg.h"
 #include "sha256.h"
-
-static int compare(void const *a, void const *b) {
-    char const *p1 = *(char const **) a;
-    char const *p2 = *(char const **) b;
-
-    return strcmp(p1, p2);
-}
+#include "util.h"
 
 static void print_alt(const char *n) {
     for (size_t i = 0, l = strlen(n), f = 0; i < l; i++) {
@@ -54,7 +48,7 @@ static int list_alts(struct state *s, const char *db) {
 
         arr_push_b(s->argv, dp->d_name);
     }
-    arr_sort(s->argv, compare);
+    arr_sort(s->argv, qsort_cb_str);
 
     for (size_t i = 0; i < arr_len(s->argv); i++) {
         print_alt(s->argv[i]);

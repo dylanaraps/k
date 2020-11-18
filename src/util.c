@@ -73,3 +73,10 @@ int run_cmd(char *const argv[]) {
     return 0;
 }
 
+int qsort_cb_str(void const *a, void const *b) {
+    char const *p1 = *(char const **) a;
+    char const *p2 = *(char const **) b;
+
+    return strcmp(p1, p2);
+}
+

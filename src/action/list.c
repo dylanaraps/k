@@ -16,13 +16,7 @@
 #include "file.h"
 #include "pkg.h"
 #include "repo.h"
-
-static int compare(void const *a, void const *b) {
-    pkg const *p1 = *(pkg const **) a;
-    pkg const *p2 = *(pkg const **) b;
-
-    return strcmp(p1->name, p2->name);
-}
+#include "util.h"
 
 static int db_to_list(struct state *s, const char *db) {
     DIR *d = opendir(db);
@@ -45,7 +39,7 @@ static int db_to_list(struct state *s, const char *db) {
     }
 
     closedir(d);
-    arr_sort(s->pkgs, compare);
+    arr_sort(s->pkgs, qsort_cb_str);
     return 0;
 }
 
