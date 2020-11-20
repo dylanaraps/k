@@ -100,12 +100,14 @@ struct state *state_init(int argc, char *argv[], int opt) {
             goto error;
         }
 
-        if (argc == 2 && state_init_repo_pwd(s) < 0) {
-            goto error;
-        }
+        if (opt & STATE_KISS_PATH) {
+            if (argc == 2 && state_init_repo_pwd(s) < 0) {
+                goto error;
+            }
 
-        if (repo_open_PATH(s->repos, getenv("KISS_PATH")) < 0) {
-            goto error;
+            if (repo_open_PATH(s->repos, getenv("KISS_PATH")) < 0) {
+                goto error;
+            }
         }
     }
 

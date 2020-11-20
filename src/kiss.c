@@ -56,7 +56,7 @@ int main (int argc, char *argv[]) {
 #define ARG(a, b) ((*(a)) == (*(b)) && ((!(a)[1]) || strcmp(a, b) == 0))
 
     } else if (ARG(argv[1], "alt")) {
-        s = state_init(argc, argv, STATE_ARGV | STATE_MEM);
+        s = state_init(argc, argv, STATE_ARGV | STATE_MEM | STATE_REPO);
         err = s ? action_alt(s) : -1;
 
     } else if (ARG(argv[1], "build")) {
@@ -76,7 +76,7 @@ int main (int argc, char *argv[]) {
         err = s ? action_list(s) : -1;
 
     } else if (ARG(argv[1], "search")) {
-        s = state_init(argc, argv, STATE_PKG | STATE_MEM | STATE_REPO);
+        s = state_init(argc, argv, STATE_SEARCH);
         err = s ? action_search(s) : -1;
 
     } else if (ARG(argv[1], "version")) {

@@ -26,7 +26,7 @@ static int parse_source_file(struct state *s, pkg *p, FILE *f, FILE *d) {
 
         switch (pkg_source_type(p, s->mem)) {
             case SRC_ABS:
-                src = fopen(s->mem, O_RDONLY);
+                src = fopen(s->mem, "r");
                 break;
 
             case SRC_REL:

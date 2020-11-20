@@ -171,6 +171,21 @@ size_t buf_scan_rev(buf **s, int c) {
     return i;
 }
 
+int buf_fr_c(buf **s, size_t l, char f, char r) {
+    for (char *t = *s + l; *t; t++) {
+        if (*t == f) {
+            *t = r;
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+void buf_fr_cg(buf **s, size_t l, char f, char r) {
+    while (buf_fr_c(s, l, f, r));
+}
+
 void buf_free(buf **s) {
     free(buf_raw(s));
 }

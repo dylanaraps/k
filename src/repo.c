@@ -53,6 +53,17 @@ struct repo *repo_open_db(const char *type) {
     return n;
 }
 
+int repo_open_db_push(struct repo **r, const char *type) {
+    struct repo *n = repo_open_db(type);
+
+    if (!n) {
+        return -1;
+    }
+
+    arr_push_b(r, n);
+    return 0;
+}
+
 int repo_open_PATH(struct repo **r, const char *PATH) {
     if (!PATH || !PATH[0]) {
         goto open_db;
@@ -88,9 +99,13 @@ open_db:;
     return 0;
 }
 
+int repo_has_pkg(struct repo *r, const char *pkg) {
+    return faccessat(r->fd, pkg, F_OK, 0) == 0 ? 1 : 0;
+}
+
 int repo_find_pkg(struct repo **r, const char *pkg) {
     for (size_t i = 0; i < arr_len(r); i++) {
-        if (faccessat(r[i]->fd, pkg, F_OK, 0) == 0) {
+        if (repo_has_pkg(r[i], pkg)) {
             return r[i]->fd;
         }
     }

@@ -96,6 +96,17 @@ size_t buf_scan(buf **s, size_t l, int c);
 size_t buf_scan_rev(buf **s, int c);
 
 /**
+ * Find first occurance of f and replace it with r starting search from l.
+ * Returns 1 if find/replace was done, else 0.
+ */
+int buf_fr_c(buf **s, size_t l, char f, char r);
+
+/**
+ * Find all occurances of f and replace them with r starting search from l.
+ */
+void buf_fr_cg(buf **s, size_t l, char f, char r);
+
+/**
  * Get pointer to beginning of memory allocation.
  */
 #define buf_raw(s) ((s) ? (*s) ? ((size_t *) (*s) - 2) : 0 : 0)

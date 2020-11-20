@@ -28,8 +28,10 @@ enum state_options {
     STATE_PKG_PWD   = (1L << 5),
     STATE_MEM       = (1L << 6),
     STATE_ARGV      = (1L << 7),
+    STATE_KISS_PATH = (1L << 8),
 };
-#define STATE_ALL (~0L)
+#define STATE_ALL    (~0L)
+#define STATE_SEARCH (STATE_PKG | STATE_MEM | STATE_REPO | STATE_KISS_PATH)
 
 /**
  * initialize state

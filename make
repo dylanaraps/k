@@ -108,11 +108,7 @@ EOF
     printf ']\n'
 } > compile_commands.json
 
-main() {
-    "${1:-build}" || {
-        printf 'error during %s\n' "${1:-build}" >&2
-        exit 1
-    }
+"${1:-build}" || {
+    printf 'error during %s\n' "$action" >&2
+    exit 1
 }
-
-main "$@"

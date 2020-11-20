@@ -26,6 +26,17 @@ int repo_open_PATH(struct repo **r, const char *PATH);
 struct repo *repo_open_db(const char *type);
 
 /**
+ * Open the installed database of type and push it to the array. Returns -1
+ * on error;
+ */
+int repo_open_db_push(struct repo **r, const char *type);
+
+/**
+ * Check if package exists in repository. Returns 1 for success and 0 for
+ * error.
+ */
+int repo_has_pkg(struct repo *r, const char *pkg);
+/**
  * Find the first occurrence of pkg in a repository list;
  */
 int repo_find_pkg(struct repo **r, const char *pkg);
