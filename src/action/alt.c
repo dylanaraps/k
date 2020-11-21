@@ -89,33 +89,30 @@ int action_alt(struct state *s) {
         return -1;
     }
 
-    int ret = 0;
-
     if (arr_len(s->argv) == 0) {
-        ret = list_alts(s, s->repos[0]->path);
+        return list_alts(s, s->repos[0]->path);
+    }
 
-    } else if (arr_len(s->argv) == 1 &&
-              (s->argv[0][0] == '-' && !s->argv[0][1])) {
+    if (arr_len(s->argv) == 1 && (s->argv[0][0] == '-' && !s->argv[0][1])) {
         // swap stdin
+        return 0;
+    }
 
-    } else if (arr_len(s->argv) == 2) {
+    if (arr_len(s->argv) == 2) {
         if (s->argv[1][0] != '/' || !strstr(s->argv[1], "/")) {
             err("second argument ('%s') is invalid", s->argv[1]);
             return -1;
         }
 
-        if ((ret = repo_open_db_push(s->repos, "installed")) == -1) {
+        if (repo_open_db_push(s->repos, "installed") == -1) {
             err_no("failed to open pkg database");
             return -1;
         }
 
-        ret = swap_alt(s, s->argv[0], s->argv[1]);
-
-    } else {
-        err_no("invalid arguments");
-        ret = -1;
+        return swap_alt(s, s->argv[0], s->argv[1]);
     }
 
-    return ret;
+    err_no("invalid arguments");
+    return -1;
 }
 
