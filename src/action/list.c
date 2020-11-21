@@ -69,7 +69,7 @@ static int read_version(struct state *s, int fd, const char *pkg) {
     }
 
     fclose(f);
-    return err;
+    return err < 0 ? -1 : 0;
 }
 
 int action_list(struct state *s) {
